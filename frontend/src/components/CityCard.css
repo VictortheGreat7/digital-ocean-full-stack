@@ -1,0 +1,146 @@
+.city-card {
+  background: rgba(30, 41, 59, 0.6);
+  border-radius: 20px;
+  padding: 1.5rem;
+  border: 2px solid rgba(99, 102, 241, 0.2);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  animation: fadeInUp 0.6s ease forwards;
+  opacity: 0;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+.city-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    var(--primary-color, #6366f1) 0%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.city-card:hover {
+  transform: translateY(-10px);
+  border-color: var(--primary-color, #6366f1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4),
+              0 0 30px var(--primary-color, rgba(99, 102, 241, 0.3));
+}
+
+.city-card:hover::before {
+  opacity: 0.1;
+}
+
+.city-card.night {
+  background: rgba(20, 25, 45, 0.8);
+}
+
+.city-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.city-name {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.day-night-indicator {
+  font-size: 1.5rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.city-info {
+  text-align: center;
+  margin-top: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.time-display {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ffffff;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 2px;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 0 10px var(--primary-color, rgba(99, 102, 241, 0.5));
+}
+
+.date-display {
+  font-size: 1rem;
+  color: #94a3b8;
+  margin-bottom: 0.75rem;
+}
+
+.timezone-info {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.timezone-offset {
+  padding: 0.25rem 0.75rem;
+  background: rgba(99, 102, 241, 0.2);
+  border: 1px solid var(--primary-color, rgba(99, 102, 241, 0.4));
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: var(--secondary-color, #818cf8);
+  font-weight: 600;
+}
+
+.dst-indicator {
+  padding: 0.25rem 0.75rem;
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  border-radius: 20px;
+  font-size: 0.75rem;
+  color: #fbbf24;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .city-card {
+    padding: 1rem;
+  }
+
+  .city-name {
+    font-size: 1.25rem;
+  }
+
+  .time-display {
+    font-size: 1.75rem;
+  }
+}

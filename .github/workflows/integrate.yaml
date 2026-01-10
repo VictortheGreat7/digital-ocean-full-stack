@@ -1,0 +1,342 @@
+name: Subsequent Builds and Deployments
+
+on:
+  # push:
+  #   branches:
+  #     - main
+  workflow_dispatch:
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    # Record file state
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      terraform: ${{ steps.filter.outputs.terraform }}
+    steps:
+      - name: Checkout current Github repository
+        uses: actions/checkout@v4
+      - name: Detect changed paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+            frontend:
+              - 'frontend/**'
+            terraform:
+              - 'terraform/**'
+
+  # Runs ONLY if backend/ folder changed
+  build-backend:
+    needs: changes
+    if: ${{ needs.changes.outputs.backend == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current Github repository
+        uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build and load backend Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          load: true
+          tags: kronos-backend:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Test backend container
+        run: |
+          docker run -d -p 5000:5000 --name backend-test kronos-backend:${{ github.sha }}
+
+          sleep 5
+
+          echo "Checking Health endpoint"
+          curl --fail http://localhost:5000/health || (docker logs backend-test && exit 1)
+
+          echo "Checking API endpoint"
+          curl --fail http://localhost:5000/api/world-clocks || (docker logs backend-test && exit 1)
+
+          docker stop backend-test
+          docker rm backend-test
+      - name: Push to Docker Hub
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            victorthegreat7/kronos-backend:${{ github.sha }}
+            victorthegreat7/kronos-backend:latest
+          cache-from: type=gha
+
+  # Runs ONLY if frontend/ folder changed
+  build-frontend:
+    needs: changes
+    if: ${{ needs.changes.outputs.frontend == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current Github repository
+        uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build and load backend Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          load: true
+          tags: kronos-frontend:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Test frontend container
+        run: |
+          docker run -d -p 8080:80 --name frontend-test kronos-frontend:${{ github.sha }}
+
+          sleep 5
+
+          echo "Checking Health endpoint"
+          curl --fail http://localhost:8080/health || (docker logs frontend-test && exit 1)
+
+          docker stop frontend-test
+          docker rm frontend-test
+      - name: Push to Docker Hub
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          tags: |
+            victorthegreat7/kronos-frontend:${{ github.sha }}
+            victorthegreat7/kronos-frontend:latest
+          cache-from: type=gha
+
+  # Runs ONLY if terraform/ folder changed
+  modify-infra:
+    needs: [changes]
+    if: ${{ needs.changes.outputs.terraform == 'true' }}
+    runs-on: self-hosted
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout current Github repository
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+      - name: Move /deploy contents to /terraform
+        run: |
+          mv deploy/* .
+        working-directory: ./terraform
+      - name: Login to doctl
+        env:
+          DIGITALOCEAN_API_TOKEN: ${{ secrets.DO_API_TOKEN }}
+        run: |
+          wget https://github.com/digitalocean/doctl/releases/download/v1.146.0/doctl-1.146.0-linux-amd64.tar.gz
+          tar xf ~/doctl-1.146.0-linux-amd64.tar.gz
+          mv ~/doctl /usr/local/bin
+
+          sudo apt install expect -y
+
+          expect -c '
+          spawn doctl auth init --context gh_runner
+          expect {
+              \"❯ Enter your access token:\" { send \"${DIGITALOCEAN_API_TOKEN}\r\"; exp_continue }
+              timeout { puts \"Timeout: Unexpected prompt encountered\"; exit 1 }
+          }
+          catch {expect eof}
+          '
+
+          doctl auth list
+      - name: Cache Terraform Plugin Dir
+        uses: actions/cache@v3
+        with:
+          path: ~/.terraform.d/plugin-cache
+          key: terraform-plugin-cache-${{ runner.os }}-${{ hashFiles('terraform/.terraform.lock.hcl') }}
+          restore-keys: |
+            terraform-plugin-cache-${{ runner.os }}-
+      - name: Apply Terraform configuration
+        env:
+          DIGITALOCEAN_API_TOKEN: ${{ secrets.DO_API_TOKEN }}
+          RUNNER_TOKEN: ${{ secrets.RUNNER_TOKEN }}
+          CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
+          CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+        run: |
+          mkdir -p ~/.terraform.d/plugin-cache
+          echo 'plugin_cache_dir   = "$HOME/.terraform.d/plugin-cache"' > ~/.terraformrc
+
+          terraform init
+          terraform providers
+          terraform validate
+
+          cat <<EOF > terraform.tfvars.json
+          {
+            "github_runner_token": "$RUNNER_TOKEN",
+            "do_token": "$DIGITALOCEAN_API_TOKEN",
+            "cloudflare_api_token": "$CLOUDFLARE_TOKEN",
+            "cloudflare_zone_id": "$CLOUDFLARE_ZONE_ID"
+          }
+          EOF
+          
+          terraform apply --auto-approve
+        working-directory: ./terraform
+      - name: Commit Terraform Lock File
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update terraform.lock.hcl"
+          file_pattern: "terraform/.terraform.lock.hcl"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
+
+  # Runs if either terraform/ did not change and backend/ or frontend/ changed
+  update-doks-backend-images:
+    needs: [changes, build-backend, modify-infra]
+    if: ${{ always() && (needs.modify-infra.result == 'skipped' || needs.modify-infra.result == 'success') && (needs.build-backend.result == 'success') }}
+    runs-on: self-hosted
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout current Github repository
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+      - name: Login to doctl
+        env:
+          DIGITALOCEAN_API_TOKEN: ${{ secrets.DO_API_TOKEN }}
+        run: |
+          wget https://github.com/digitalocean/doctl/releases/download/v1.146.0/doctl-1.146.0-linux-amd64.tar.gz
+          tar xf ~/doctl-1.146.0-linux-amd64.tar.gz
+          mv ~/doctl /usr/local/bin
+
+          sudo apt install expect -y
+
+          expect -c '
+          spawn doctl auth init --context gh_runner
+          expect {
+              \"❯ Enter your access token:\" { send \"${DIGITALOCEAN_API_TOKEN}\r\"; exp_continue }
+              timeout { puts \"Timeout: Unexpected prompt encountered\"; exit 1 }
+          }
+          catch {expect eof}
+          '
+
+          doctl auth list
+      - name: Move /deploy contents to /terraform
+        run: |
+          mv deploy/* .
+        working-directory: ./terraform
+      - name: Cache Terraform Plugin Dir
+        uses: actions/cache@v3
+        with:
+          path: ~/.terraform.d/plugin-cache
+          key: terraform-plugin-cache-${{ runner.os }}-${{ hashFiles('terraform/.terraform.lock.hcl') }}
+          restore-keys: |
+            terraform-plugin-cache-${{ runner.os }}-
+      - name: Initialize Terraform (to load state)
+        run: |
+          mkdir -p ~/.terraform.d/plugin-cache
+          echo 'plugin_cache_dir   = "$HOME/.terraform.d/plugin-cache"' > ~/.terraformrc
+
+          terraform init
+        working-directory: ./terraform
+      - name: Commit Terraform Lock File
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update terraform.lock.hcl"
+          file_pattern: "terraform/.terraform.lock.hcl"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
+      - name: Get DOKS Credentials from Terraform Output
+        id: doks-info
+        working-directory: ./terraform
+        run: |
+          # Extract values from Terraform state
+          DOKS_NAME=$(terraform output -raw docks_cluster_name)
+          
+          echo "Found Cluster: $DOKS_NAME"
+
+          doctl kubernetes cluster kubeconfig save $DOKS_NAME
+      - name: Update Image in DOKS
+        run: |
+          kubectl set image deployment/kronos-backend backend=victorthegreat7/kronos-backend:latest -n time-api
+
+  update-doks-frontend-image:
+    needs: [changes, build-frontend, modify-infra]
+    if: ${{ always() && (needs.modify-infra.result == 'skipped' || needs.modify-infra.result == 'success') && (needs.build-frontend.result == 'success') }}
+    runs-on: self-hosted
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout current Github repository
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+      - name: Login to doctl
+        env:
+          DIGITALOCEAN_API_TOKEN: ${{ secrets.DO_API_TOKEN }}
+        run: |
+          wget https://github.com/digitalocean/doctl/releases/download/v1.146.0/doctl-1.146.0-linux-amd64.tar.gz
+          tar xf ~/doctl-1.146.0-linux-amd64.tar.gz
+          mv ~/doctl /usr/local/bin
+
+          sudo apt install expect -y
+
+          expect -c '
+          spawn doctl auth init --context gh_runner
+          expect {
+              \"❯ Enter your access token:\" { send \"${DIGITALOCEAN_API_TOKEN}\r\"; exp_continue }
+              timeout { puts \"Timeout: Unexpected prompt encountered\"; exit 1 }
+          }
+          catch {expect eof}
+          '
+
+          doctl auth list
+      - name: Move /deploy contents to /terraform
+        run: |
+          mv deploy/* .
+        working-directory: ./terraform
+      - name: Cache Terraform Plugin Dir
+        uses: actions/cache@v3
+        with:
+          path: ~/.terraform.d/plugin-cache
+          key: terraform-plugin-cache-${{ runner.os }}-${{ hashFiles('terraform/.terraform.lock.hcl') }}
+          restore-keys: |
+            terraform-plugin-cache-${{ runner.os }}-
+      - name: Initialize Terraform (to load state)
+        run: |
+          mkdir -p ~/.terraform.d/plugin-cache
+          echo 'plugin_cache_dir   = "$HOME/.terraform.d/plugin-cache"' > ~/.terraformrc
+
+          terraform init
+        working-directory: ./terraform
+      - name: Commit Terraform Lock File
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update terraform.lock.hcl"
+          file_pattern: "terraform/.terraform.lock.hcl"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
+      - name: Get DOKS Credentials from Terraform Output
+        id: doks-info
+        working-directory: ./terraform
+        run: |
+          # Extract values from Terraform state
+          DOKS_NAME=$(terraform output -raw docks_cluster_name)
+          
+          echo "Found Cluster: $DOKS_NAME"
+
+          doctl kubernetes cluster kubeconfig save $DOKS_NAME
+      - name: Update Image in DOKS
+        run: |
+          kubectl set image deployment/kronos-frontend frontend=victorthegreat7/kronos-frontend:latest -n time-api
