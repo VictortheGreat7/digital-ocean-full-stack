@@ -15,6 +15,7 @@ jobs:
       env:
         DIGITALOCEAN_API_TOKEN: ${{ secrets.DO_API_TOKEN }}
       run: |
+        cd ~
         wget https://github.com/digitalocean/doctl/releases/download/v1.146.0/doctl-1.146.0-linux-amd64.tar.gz
         tar xf ~/doctl-1.146.0-linux-amd64.tar.gz
         mv ~/doctl /usr/local/bin
@@ -112,6 +113,7 @@ jobs:
       env:
         DIGITALOCEAN_API_TOKEN: ${{ secrets.DO_API_TOKEN }}
       run: |
+        cd ~
         wget https://github.com/digitalocean/doctl/releases/download/v1.146.0/doctl-1.146.0-linux-amd64.tar.gz
         tar xf ~/doctl-1.146.0-linux-amd64.tar.gz
         mv ~/doctl /usr/local/bin
