@@ -41,9 +41,6 @@ runcmd:
   - echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
   - apt update && apt install -y terraform
 
-  # --- Install Azure CLI ---
-  - curl -sL https://aka.ms/InstallAzureCLIDeb | bash
-
   # --- Set up GitHub Actions Runner ---
   - mkdir -p /home/githubrunner/actions-runner
   - cd /home/githubrunner/actions-runner
@@ -72,9 +69,6 @@ runcmd:
   - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
   - echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
   - install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-
-  # --- Install kubelogin ---
-  - az aks install-cli
 
   - curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
   - sudo apt install -y nodejs
