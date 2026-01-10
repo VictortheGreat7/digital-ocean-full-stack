@@ -11,27 +11,10 @@ jobs:
     steps:
     - name: Checkout this Github repository
       uses: actions/checkout@v4
-    - name: Login to doctl
-      env:
-        DIGITALOCEAN_API_TOKEN: ${{ secrets.DO_API_TOKEN }}
-      run: |
-        cd ~
-        wget https://github.com/digitalocean/doctl/releases/download/v1.146.0/doctl-1.146.0-linux-amd64.tar.gz
-        tar xf ~/doctl-1.146.0-linux-amd64.tar.gz
-        mv ~/doctl /usr/local/bin
-
-        sudo apt install expect -y
-
-        expect -c '
-        spawn doctl auth init --context gh_runner
-        expect {
-            \"❯ Enter your access token:\" { send \"${DIGITALOCEAN_API_TOKEN}\r\"; exp_continue }
-            timeout { puts \"Timeout: Unexpected prompt encountered\"; exit 1 }
-        }
-        catch {expect eof}
-        '
-
-        doctl auth list
+    - name: Install doctl
+      uses: digitalocean/action-doctl@v2
+      with:
+        token: ${{ secrets.DO_API_TOKEN }}
     - name: Move /deploy contents to /terraform
       run: |
         mv deploy/* .
@@ -66,9 +49,6 @@ jobs:
           "cloudflare_zone_id": "$CLOUDFLARE_ZONE_ID"
         }
         EOF
-
-        echo "Verifying kubectl access"
-        kubectl get ns -A
 
         echo "Configuring Terraform to use plugin cache"
         mkdir -p ~/.terraform.d/plugin-cache
@@ -109,27 +89,10 @@ jobs:
       run: |
         mv deploy/* .
       working-directory: ./terraform
-    - name: Login to doctl
-      env:
-        DIGITALOCEAN_API_TOKEN: ${{ secrets.DO_API_TOKEN }}
-      run: |
-        cd ~
-        wget https://github.com/digitalocean/doctl/releases/download/v1.146.0/doctl-1.146.0-linux-amd64.tar.gz
-        tar xf ~/doctl-1.146.0-linux-amd64.tar.gz
-        mv ~/doctl /usr/local/bin
-
-        sudo apt install expect -y
-
-        expect -c '
-        spawn doctl auth init --context gh_runner
-        expect {
-            \"❯ Enter your access token:\" { send \"${DIGITALOCEAN_API_TOKEN}\r\"; exp_continue }
-            timeout { puts \"Timeout: Unexpected prompt encountered\"; exit 1 }
-        }
-        catch {expect eof}
-        '
-
-        doctl auth list
+    - name: Install doctl
+      uses: digitalocean/action-doctl@v2
+      with:
+        token: ${{ secrets.DO_API_TOKEN }}
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
     - name: Cache Terraform Plugin Dir

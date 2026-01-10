@@ -103,27 +103,10 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
-      - name: Login to doctl
-        env:
-          DIGITALOCEAN_API_TOKEN: ${{ secrets.DO_API_TOKEN }}
-        run: |
-          cd ~
-          wget https://github.com/digitalocean/doctl/releases/download/v1.146.0/doctl-1.146.0-linux-amd64.tar.gz
-          tar xf ~/doctl-1.146.0-linux-amd64.tar.gz
-          mv ~/doctl /usr/local/bin
-
-          sudo apt install expect -y
-
-          expect -c '
-          spawn doctl auth init --context gh_runner
-          expect {
-              \"❯ Enter your access token:\" { send \"${DIGITALOCEAN_API_TOKEN}\r\"; exp_continue }
-              timeout { puts \"Timeout: Unexpected prompt encountered\"; exit 1 }
-          }
-          catch {expect eof}
-          '
-
-          doctl auth list
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DO_API_TOKEN }}
       - name: Cache Terraform Plugin Dir
         uses: actions/cache@v3
         with:
@@ -181,27 +164,10 @@ jobs:
       working-directory: ./terraform
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
-    - name: Login to doctl
-      env:
-        DIGITALOCEAN_API_TOKEN: ${{ secrets.DO_API_TOKEN }}
-      run: |
-        cd ~
-        wget https://github.com/digitalocean/doctl/releases/download/v1.146.0/doctl-1.146.0-linux-amd64.tar.gz
-        tar xf ~/doctl-1.146.0-linux-amd64.tar.gz
-        mv ~/doctl /usr/local/bin
-
-        sudo apt install expect -y
-
-        expect -c '
-        spawn doctl auth init --context gh_runner
-        expect {
-            \"❯ Enter your access token:\" { send \"${DIGITALOCEAN_API_TOKEN}\r\"; exp_continue }
-            timeout { puts \"Timeout: Unexpected prompt encountered\"; exit 1 }
-        }
-        catch {expect eof}
-        '
-
-        doctl auth list
+    - name: Install doctl
+      uses: digitalocean/action-doctl@v2
+      with:
+        token: ${{ secrets.DO_API_TOKEN }}
     - name: Cache Terraform Plugin Dir
       uses: actions/cache@v3
       with:
