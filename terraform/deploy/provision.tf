@@ -39,12 +39,10 @@ resource "digitalocean_kubernetes_cluster" "kronos" {
     tags       = [digitalocean_tag.kronos.name]
   }
 
-  control_plane_firewall {
-    enabled = true
-    allowed_addresses = [
-      digitalocean_droplet.kronos.ipv4_address
-    ]
-  }
+  # control_plane_firewall {
+  #   enabled = true
+  #   allowed_addresses = [digitalocean_droplet.kronos.ipv4_address]
+  # }
 
   auto_upgrade                     = true
   destroy_all_associated_resources = true
