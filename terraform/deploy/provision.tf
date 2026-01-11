@@ -3,25 +3,6 @@ resource "digitalocean_project" "kronos" {
   description = "Kronos World Clock Project"
   purpose     = "Class project / Educational purposes"
   environment = "Development"
-  resources = [
-    digitalocean_tag.kronos.id,
-    digitalocean_vpc.kronos.id,
-    digitalocean_firewall.kronos.id,
-    digitalocean_vpc_nat_gateway.kronos.id,
-    digitalocean_firewall.kronos_bastion.id,
-    digitalocean_droplet.kronos.id,
-    digitalocean_kubernetes_cluster.kronos.id
-  ]
-
-  depends_on = [
-    digitalocean_tag.kronos,
-    digitalocean_vpc.kronos,
-    digitalocean_firewall.kronos,
-    digitalocean_vpc_nat_gateway.kronos,
-    digitalocean_firewall.kronos_bastion,
-    digitalocean_droplet.kronos,
-    digitalocean_kubernetes_cluster.kronos
-  ]
 }
 
 resource "digitalocean_kubernetes_cluster" "kronos" {
