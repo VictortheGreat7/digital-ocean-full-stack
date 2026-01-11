@@ -3,6 +3,15 @@ resource "digitalocean_project" "kronos" {
   description = "Kronos World Clock Project"
   purpose     = "Class project / Educational purposes"
   environment = "Development"
+  resources = [
+    digitalocean_droplet.kronos.urn,
+    digitalocean_kubernetes_cluster.kronos.urn,
+  ]
+
+  depends_on = [
+    digitalocean_droplet.kronos,
+    digitalocean_kubernetes_cluster.kronos
+  ]
 }
 
 resource "digitalocean_kubernetes_cluster" "kronos" {
