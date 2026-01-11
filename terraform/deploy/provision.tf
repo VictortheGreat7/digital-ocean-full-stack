@@ -4,13 +4,13 @@ resource "digitalocean_project" "kronos" {
   purpose     = "Class project / Educational purposes"
   environment = "Development"
   resources = [
-    digitalocean_tag.kronos.urn,
-    digitalocean_vpc.kronos.urn,
-    digitalocean_firewall.kronos.urn,
-    digitalocean_vpc_nat_gateway.kronos.urn,
-    digitalocean_firewall.kronos_bastion.urn,
-    digitalocean_droplet.kronos.urn,
-    digitalocean_kubernetes_cluster.kronos.urn
+    digitalocean_tag.kronos.id,
+    digitalocean_vpc.kronos.id,
+    digitalocean_firewall.kronos.id,
+    digitalocean_vpc_nat_gateway.kronos.id,
+    digitalocean_firewall.kronos_bastion.id,
+    digitalocean_droplet.kronos.id,
+    digitalocean_kubernetes_cluster.kronos.id
   ]
 
   depends_on = [
