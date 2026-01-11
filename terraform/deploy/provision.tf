@@ -16,7 +16,7 @@ resource "digitalocean_kubernetes_cluster" "kronos" {
     size       = "s-4vcpu-8gb"
     auto_scale = true
     min_nodes  = 1
-    max_nodes  = 3
+    max_nodes  = 1
     tags       = [digitalocean_tag.kronos.name]
   }
 
