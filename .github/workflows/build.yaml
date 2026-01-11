@@ -148,10 +148,10 @@ jobs:
           file_pattern: "terraform/.terraform.lock.hcl"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
-      - name: Wait for VM to be ready
-        run: |
-          echo "Waiting for runner VM to be ready..."
-          sleep 280
+      # - name: Wait for VM to be ready
+      #   run: |
+      #     echo "Waiting for runner VM to be ready..."
+      #     sleep 280
 
   build:
     needs: provision-runner

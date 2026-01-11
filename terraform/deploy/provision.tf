@@ -16,7 +16,7 @@ resource "digitalocean_kubernetes_cluster" "kronos" {
   control_plane_firewall {
     enabled = true
     allowed_addresses = [
-      digitalocean_vpc.kronos.ip_range
+      digitalocean_droplet.kronos.ipv4_address
     ]
   }
 
