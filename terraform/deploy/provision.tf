@@ -8,7 +8,7 @@ resource "digitalocean_project" "kronos" {
 resource "digitalocean_kubernetes_cluster" "kronos" {
   name     = "${random_pet.kronos.id}-cluster"
   region   = var.region
-  version  = "latest"
+  version  = data.digitalocean_kubernetes_versions.kronos.latest_version
   vpc_uuid = digitalocean_vpc.kronos.id
 
   node_pool {
