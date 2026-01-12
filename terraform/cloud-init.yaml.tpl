@@ -28,7 +28,6 @@ runcmd:
 
   # Force group membership immediately without login
   - gpasswd -a githubrunner docker
-  - sg docker -c "id githubrunner"   # just to force the group update in the current session
 
   # Make sure Docker is fully up
   - systemctl enable docker
@@ -51,8 +50,7 @@ runcmd:
 
   # --- Configure the runner (Token will need to be injected securely using Terraform) ---
   - |
-    su - githubrunner -c "cd ~/actions-runner && \
-    ./config.sh --url https://github.com/VictortheGreat7/digital-ocean-full-stack --token ${github_runner_token} --unattended
+    su - githubrunner -c "cd ~/actions-runner && ./config.sh --url https://github.com/VictortheGreat7/digital-ocean-full-stack --token ${github_runner_token} --unattended"  
 
   # --- Install kubectl ---
   - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
@@ -69,34 +67,8 @@ runcmd:
 
   # --- Create a systemd service to keep the runner running ---
   - |
-    cat << 'EOF' > /etc/systemd/system/github-runner.service
-    [Unit]
-    Description=GitHub Actions Self-Hosted Runner
-    After=network-online.target docker.service
-    Requires=docker.service
-    Wants=network-online.target
-
-    [Service]
-    ExecStart=/home/githubrunner/actions-runner/run.sh
-    WorkingDirectory=/home/githubrunner/actions-runner
-    User=githubrunner
-    Restart=always
-    RestartSec=5
-    # Give Docker a chance to start
-    TimeoutStartSec=300
-    KillMode=process
-
-    [Install]
-    WantedBy=multi-user.target
-    EOF
-
-  - systemctl daemon-reload
-  - systemctl enable github-runner.service
-
-power_state:
-  mode: reboot
-  message: Rebooting to apply docker group membership
-  timeout: 30
-  condition: true
+    cd /home/githubrunner/actions-runner && \
+    ./svc.sh install githubrunner && \
+    ./svc.sh start
 
 final_message: "🎉 GitHub Runner VM setup complete!"
