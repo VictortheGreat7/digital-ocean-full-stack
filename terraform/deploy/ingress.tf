@@ -3,11 +3,9 @@ resource "null_resource" "wait_for_ingress_webhook" {
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command     = <<-EOT
+      export PATH=$PATH:/usr/local/bin
       set -e
 
-      wget https://github.com/digitalocean/doctl/releases/download/v1.146.0/doctl-1.146.0-linux-amd64.tar.gz
-      tar xf ~/doctl-1.146.0-linux-amd64.tar.gz
-      mv ~/doctl /usr/local/bin
       doctl auth init -t ${var.do_token}
 
       doctl kubernetes cluster kubeconfig save ${digitalocean_kubernetes_cluster.kronos.name} --access-token ${var.do_token}
