@@ -4,6 +4,10 @@ resource "digitalocean_vpc" "kronos" {
   name     = "${random_pet.kronos.id}-vnet"
   region   = var.region
   ip_range = "10.240.0.0/16"
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "digitalocean_vpc_nat_gateway" "kronos" {
