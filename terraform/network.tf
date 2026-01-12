@@ -7,11 +7,7 @@ resource "digitalocean_vpc" "kronos" {
 
   lifecycle {
     create_before_destroy = true
-    ignore_changes = [
-      name,
-      ip_range,
-      region,
-    ]
+    ignore_changes = all
   }
 }
 
