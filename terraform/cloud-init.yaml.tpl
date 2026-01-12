@@ -60,10 +60,6 @@ runcmd:
 
   - curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
   - apt install -y nodejs
-  - node -v
-  - npm -v
-  - docker --version
-  - kubectl version --client --output=yaml
 
   # --- Create a systemd service to keep the runner running ---
   - |

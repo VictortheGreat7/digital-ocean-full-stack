@@ -5,14 +5,7 @@ resource "null_resource" "wait_for_ingress_webhook" {
     command     = <<-EOT
       set -e
 
-      echo "Getting AKS credentials..."
-      az aks get-credentials --resource-group "${azurerm_kubernetes_cluster.kronos_cluster.resource_group_name}" --name "${azurerm_kubernetes_cluster.kronos_cluster.name}" --overwrite-existing
-
-      echo "Installing kubelogin..."
-      sudo az aks install-cli
-
-      echo "Converting kubeconfig with kubelogin..."
-      kubelogin convert-kubeconfig -l azurecli
+      doctl kubernetes cluster kubeconfig save ${digitalocean_kubernetes_cluster.kronos.name} --access-token ${var.do_api_token}
 
       echo "Waiting for ingress-nginx-controller DaemonSet pods to be ready..."
       for i in {1..100}; do
