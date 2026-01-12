@@ -5,12 +5,15 @@ resource "null_resource" "wait_for_ingress_webhook" {
     command     = <<-EOT
       set -e
 
-      ls -ls /usr/local/bin
-      
-      /usr/local/bin/doctl auth init -t ${var.do_token}
+      wget https://github.com/digitalocean/doctl/releases/download/v1.146.0/doctl-1.146.0-linux-amd64.tar.gz -O doctl.tar.gz
+      tar xf doctl.tar.gz
 
-      /usr/local/bin/doctl kubernetes cluster kubeconfig save ${digitalocean_kubernetes_cluster.kronos.name} --access-token ${var.do_token}
+      # Install locally (no root)
+      mkdir -p $HOME/bin
+      mv doctl $HOME/bin/
+      export PATH=$HOME/bin:$PATH
 
+      doctl auth init -t ${var.do_token}
 
       echo "Waiting for ingress-nginx-controller DaemonSet pods to be ready..."
       for i in {1..100}; do
