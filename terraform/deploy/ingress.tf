@@ -5,6 +5,9 @@ resource "null_resource" "wait_for_ingress_webhook" {
     command     = <<-EOT
       set -e
 
+      sudo snap install doctl
+      doctl auth init -t ${var.do_token}
+
       doctl kubernetes cluster kubeconfig save ${digitalocean_kubernetes_cluster.kronos.name} --access-token ${var.do_token}
 
       echo "Waiting for ingress-nginx-controller DaemonSet pods to be ready..."
