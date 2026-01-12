@@ -33,6 +33,7 @@ jobs:
               - '!terraform/deploy/**'
             terraform_deploy:
               - 'terraform/deploy/**'
+          predicate-quantifier: 'every'
   build-backend:
     needs: changes
     if: ${{ needs.changes.outputs.backend == 'true' }}
@@ -124,7 +125,7 @@ jobs:
 
   provision-runner:
     needs: [build-backend, build-frontend, changes]
-    if: ${{ (needs.build-backend.result == 'skipped' || needs.build-backend.result == 'success') && (needs.build-frontend.result == 'skipped' || needs.build-frontend.result == 'success') && (needs.changes.outputs.terraform_base == 'true') }}
+    if: ${{ always() && (needs.build-backend.result == 'skipped' || needs.build-backend.result == 'success') && (needs.build-frontend.result == 'skipped' || needs.build-frontend.result == 'success') && (needs.changes.outputs.terraform_base == 'true') }}
     runs-on: ubuntu-latest
     permissions:
       contents: write

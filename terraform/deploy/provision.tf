@@ -1,5 +1,5 @@
 resource "digitalocean_project" "kronos" {
-  name        = "kronos-project"
+  name        = "kronos-new"
   description = "Kronos World Clock Project"
   purpose     = "Class project / Educational purposes"
   environment = "Development"

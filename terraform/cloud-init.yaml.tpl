@@ -11,7 +11,6 @@ packages:
   - gnupg
   - lsb-release
   - software-properties-common
-  - expect
 
 runcmd:
   # --- Create githubrunner user ---
@@ -19,8 +18,8 @@ runcmd:
   - echo "githubrunner ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/githubrunner
   
   # --- Install Docker ---
-  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-  - echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+  - echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
   - apt-get update
   - apt-get install -y docker-ce docker-ce-cli containerd.io
 
@@ -42,27 +41,18 @@ runcmd:
   - apt update && apt install -y terraform
 
   # --- Set up GitHub Actions Runner ---
-  - mkdir -p /home/githubrunner/actions-runner
-  - cd /home/githubrunner/actions-runner
-  - curl -o actions-runner-linux-x64-2.330.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.330.0/actions-runner-linux-x64-2.330.0.tar.gz
-  - echo "af5c33fa94f3cc33b8e97937939136a6b04197e6dadfcfb3b6e33ae1bf41e79a  actions-runner-linux-x64-2.330.0.tar.gz" | shasum -a 256 -c
-  - tar xzf ./actions-runner-linux-x64-2.330.0.tar.gz
-  - chown -R githubrunner:githubrunner /home/githubrunner/actions-runner
+  - |
+    mkdir -p /home/githubrunner/actions-runner && \
+    cd /home/githubrunner/actions-runner && \
+    curl -o actions-runner-linux-x64-2.330.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.330.0/actions-runner-linux-x64-2.330.0.tar.gz && \
+    echo "af5c33fa94f3cc33b8e97937939136a6b04197e6dadfcfb3b6e33ae1bf41e79a  actions-runner-linux-x64-2.330.0.tar.gz" | shasum -a 256 -c && \
+    tar xzf ./actions-runner-linux-x64-2.330.0.tar.gz && \
+    chown -R githubrunner:githubrunner /home/githubrunner/actions-runner
 
   # --- Configure the runner (Token will need to be injected securely using Terraform) ---
   - |
     su - githubrunner -c "cd ~/actions-runner && \
-      expect -c '
-      spawn ./config.sh --url https://github.com/VictortheGreat7/self-hosted-full-stack --token ${github_runner_token}
-      expect {
-          \"Enter the name of the runner group to add this runner to:\" { send \"\r\"; exp_continue }
-          \"Enter the name of runner:\" { send \"\r\"; exp_continue }
-          \"Enter any additional labels (ex. label-1,label-2):\" { send \"\r\"; exp_continue }
-          \"Enter name of work folder:\" { send \"\r\"; exp_continue }
-          timeout { puts \"Timeout: Unexpected prompt encountered\"; exit 1 }
-      }
-      catch {expect eof}
-      '"
+    ./config.sh --url https://github.com/VictortheGreat7/self-hosted-full-stack --token ${github_runner_token} --unattended
 
   # --- Install kubectl ---
   - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
@@ -70,8 +60,8 @@ runcmd:
   - echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
   - install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 
-  - curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-  - sudo apt install -y nodejs
+  - curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
+  - apt install -y nodejs
   - node -v
   - npm -v
   - docker --version
