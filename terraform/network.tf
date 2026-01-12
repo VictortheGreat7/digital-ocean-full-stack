@@ -6,7 +6,12 @@ resource "digitalocean_vpc" "kronos" {
   ip_range = "10.240.0.0/16"
 
   lifecycle {
-    prevent_destroy = true
+    create_before_destroy = true
+    ignore_changes = [
+      name,
+      ip_range,
+      region,
+    ]
   }
 }
 
