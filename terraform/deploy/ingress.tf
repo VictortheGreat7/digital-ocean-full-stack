@@ -161,7 +161,10 @@ resource "helm_release" "cert_manager" {
 
   timeout = 600
 
-  depends_on = [module.nginx-controller, kubernetes_job_v1.wait_for_ingress_webhook]
+  depends_on = [
+    module.nginx-controller,
+    kubernetes_job_v1.wait_for_ingress_webhook
+  ]
 }
 
 resource "kubernetes_secret_v1" "cloudflare_api" {

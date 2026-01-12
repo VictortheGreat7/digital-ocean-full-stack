@@ -1,6 +1,7 @@
 # This file contains the main Terraform configuration for creating an Azure Kubernetes Service (AKS) cluster for the Time API application.
 
-resource "random_pet" "kronos" {}
+resource "random_pet" "kronos" {
+}
 
 resource "digitalocean_tag" "kronos" {
   name = "kronos"
