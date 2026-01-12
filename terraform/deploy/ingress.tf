@@ -48,7 +48,7 @@ resource "null_resource" "wait_for_ingress_webhook" {
         if kubectl get endpoints ingress-nginx-controller-admission -n kube-system -o jsonpath='{.subsets[*].addresses[*].ip}' | grep -q .; then
           echo "Webhook server is ready"
           exit 0
-#       fi
+        fi
         sleep 10
       done
 
