@@ -67,4 +67,4 @@ runcmd:
     ./svc.sh install githubrunner && \
     ./svc.sh start
 
-final_message: "🎉 GitHub Runner VM setup complete!"
+final_message: " GitHub Runner VM setup complete!"
