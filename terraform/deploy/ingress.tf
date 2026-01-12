@@ -20,6 +20,8 @@ resource "null_resource" "wait_for_ingress_webhook" {
 
       doctl auth init -t ${var.do_token}
 
+      doctl kubernetes cluster kubeconfig save ${digitalocean_kubernetes_cluster.kronos.name} --access-token ${var.do_token}
+
       echo "Waiting for ingress-nginx-controller DaemonSet pods to be ready..."
       for i in {1..100}; do
         READY=$(kubectl get daemonset ingress-nginx-controller -n kube-system -o jsonpath='{.status.numberReady}')
