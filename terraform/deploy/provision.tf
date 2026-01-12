@@ -37,12 +37,6 @@ resource "digitalocean_kubernetes_cluster" "kronos" {
   auto_upgrade                     = true
   destroy_all_associated_resources = true
 
-  # taint {
-  #   key    = "workloadKind"
-  #   value  = "database"
-  #   effect = "NoSchedule"
-  # }
-
   tags = [digitalocean_tag.kronos.name]
 }
 
