@@ -67,4 +67,10 @@ runcmd:
     ./svc.sh install githubrunner && \
     ./svc.sh start
 
+power_state:
+  mode: reboot
+  message: Rebooting for kernel upgrade
+  timeout: 30
+  condition: true
+
 final_message: " GitHub Runner VM setup complete!"
