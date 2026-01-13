@@ -16,7 +16,7 @@ resource "digitalocean_vpc_nat_gateway" "kronos" {
   region = var.region
   size   = "1"
   vpcs {
-    vpc_uuid        = data.digitalocean_vpc.kronos.id
+    vpc_uuid        = data.digitalocean_vpc.default.id
     default_gateway = true
   }
   tcp_timeout_seconds  = 30

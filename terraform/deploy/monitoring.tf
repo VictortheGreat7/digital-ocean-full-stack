@@ -79,9 +79,7 @@ resource "helm_release" "kube_prometheus_stack" {
 #     }
 #   ]
 
-#   depends_on = [
-#     helm_release.kube_prometheus_stack
-#   ]
+#   depends_on = [helm_release.kube_prometheus_stack]
 # }
 
 # # Configure Grafana to use Tempo as a data source
