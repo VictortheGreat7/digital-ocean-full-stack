@@ -243,7 +243,7 @@ jobs:
         working-directory: ./terraform
       - name: Update Image in DOKS
         run: |
-          kubectl set image deployment/kronos-backend backend=victorthegreat7/kronos-backend:latest -n time-api
+          kubectl set image deployment/kronos-backend backend=victorthegreat7/kronos-backend:latest -n kronos
 
   update-doks-frontend-image:
     needs: [changes, build-frontend, modify-infra]
@@ -304,4 +304,4 @@ jobs:
         working-directory: ./terraform
       - name: Update Image in DOKS
         run: |
-          kubectl set image deployment/kronos-frontend frontend=victorthegreat7/kronos-frontend:latest -n time-api
+          kubectl set image deployment/kronos-frontend frontend=victorthegreat7/kronos-frontend:latest -n kronos
