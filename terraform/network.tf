@@ -4,16 +4,6 @@ resource "digitalocean_vpc" "kronos" {
   name     = "${random_pet.kronos.id}-vnet"
   region   = var.region
   ip_range = "10.240.0.0/16"
-
-  lifecycle {
-    create_before_destroy = true
-    prevent_destroy = true
-    ignore_changes = [
-      name
-    ]
-  }
-
-  depends_on = [digitalocean_vpc.default]
 }
 
 data "digitalocean_vpc" "default" {
