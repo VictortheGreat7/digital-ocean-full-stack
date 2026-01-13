@@ -224,7 +224,10 @@ clusterIssuers:
 EOT
   ]
 
-  depends_on = [helm_release.cert_manager, kubernetes_secret_v1.cloudflare_api]
+  depends_on = [
+    helm_release.cert_manager,
+    kubernetes_secret_v1.cloudflare_api
+  ]
 }
 
 # resource "helm_release" "cert_manager_stag_issuer" {
