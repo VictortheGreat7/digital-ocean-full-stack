@@ -39,7 +39,7 @@ resource "kubernetes_deployment_v1" "kronos_backend" {
 
       spec {
         container {
-          name  = "kronos-backend"
+          name  = "backend"
           image = "victorthegreat7/kronos-backend:latest"
           env {
             name  = "TEMPO_ENDPOINT"
