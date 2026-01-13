@@ -130,11 +130,7 @@ jobs:
         }
         EOF
 
-        terraform destroy -target=digitalocean_droplet.kronos --auto-approve
-        terraform destroy -target=digitalocean_firewall.kronos --auto-approve
-        terraform destroy -target=digitalocean_firewall.kronos_bastion --auto-approve
-        terraform destroy -target=digitalocean_tag.kronos --auto-approve
-        terraform destroy -target=digitalocean_vpc_nat_gateway.kronos --auto-approve
+        terraform destroy --auto-approve
       working-directory: ./terraform
     - name: Commit Terraform Lock File
       uses: stefanzweifel/git-auto-commit-action@v5
