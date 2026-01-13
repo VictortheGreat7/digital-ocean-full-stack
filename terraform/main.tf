@@ -3,10 +3,6 @@
 resource "random_pet" "kronos" {
 }
 
-resource "digitalocean_tag" "kronos" {
-  name = "kronos"
-}
-
 # Create a new Web Droplet in the nyc2 region
 resource "digitalocean_droplet" "kronos" {
   image    = "ubuntu-24-04-x64"

@@ -1,5 +1,5 @@
 resource "digitalocean_project" "kronos" {
-  name        = "kronos-new"
+  name        = "kronos"
   description = "Kronos World Clock Project"
   purpose     = "Class project / Educational purposes"
   environment = "Development"
@@ -116,11 +116,6 @@ module "nginx-controller" {
 
 output "doks_cluster_name" {
   value = digitalocean_kubernetes_cluster.kronos.name
-}
-
-output "kube_config" {
-  value     = digitalocean_kubernetes_cluster.kronos.kube_config[0].raw_config
-  sensitive = true
 }
 
 output "ingress_ip" {

@@ -1,16 +1,9 @@
-resource "kubernetes_namespace_v1" "monitoring" {
-  metadata {
-    name = "monitoring"
-  }
-  depends_on = [digitalocean_kubernetes_cluster.kronos]
-}
-
 resource "helm_release" "kube_prometheus_stack" {
   name             = "kube-prometheus-stack"
   repository       = "https://prometheus-community.github.io/helm-charts"
   chart            = "kube-prometheus-stack"
-  namespace        = kubernetes_namespace_v1.monitoring.metadata[0].name
-  create_namespace = false
+  create_namespace = true
+  namespace        = "monitoring"
   version          = "80.9.2"
 
   set = [
@@ -44,17 +37,14 @@ resource "helm_release" "kube_prometheus_stack" {
     }
   ]
 
-  depends_on = [
-    kubernetes_namespace_v1.monitoring,
-    module.nginx-controller
-  ]
+  depends_on = [module.nginx-controller]
 }
 
 # resource "helm_release" "tempo" {
 #   name             = "tempo"
 #   repository       = "https://grafana.github.io/helm-charts"
 #   chart            = "tempo"
-#   namespace        = kubernetes_namespace_v1.monitoring.metadata[0].name
+#   namespace        = helm_release.kube_prometheus_stack.namespace
 #   create_namespace = false
 #   version          = "1.10.1"
 
@@ -90,7 +80,6 @@ resource "helm_release" "kube_prometheus_stack" {
 #   ]
 
 #   depends_on = [
-#     kubernetes_namespace_v1.monitoring,
 #     helm_release.kube_prometheus_stack
 #   ]
 # }
@@ -99,7 +88,7 @@ resource "helm_release" "kube_prometheus_stack" {
 # resource "kubernetes_config_map_v1" "grafana_datasources" {
 #   metadata {
 #     name      = "grafana-tempo-datasource"
-#     namespace = kubernetes_namespace_v1.monitoring.metadata[0].name
+#     namespace = helm_release.kube_prometheus_stack.namespace
 #     labels = {
 #       grafana_datasource = "1"
 #     }

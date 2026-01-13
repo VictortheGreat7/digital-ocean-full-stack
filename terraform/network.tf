@@ -1,14 +1,9 @@
 # This file contains the network resources for the Time API Azure Kubernetes cluster.
 
-resource "digitalocean_vpc" "kronos" {
-  name     = "${random_pet.kronos.id}-vnet"
+resource "digitalocean_vpc" "default" {
+  name     = "default-vnet"
   region   = var.region
   ip_range = "10.240.0.0/16"
-
-  lifecycle {
-    create_before_destroy = true
-    ignore_changes = all
-  }
 }
 
 resource "digitalocean_vpc_nat_gateway" "kronos" {
@@ -52,6 +47,10 @@ resource "digitalocean_firewall" "kronos_bastion" {
     protocol              = "icmp"
     destination_addresses = ["0.0.0.0/0"]
   }
+}
+
+resource "digitalocean_tag" "kronos" {
+  name = "kronos"
 }
 
 resource "digitalocean_firewall" "kronos" {

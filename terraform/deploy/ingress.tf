@@ -277,19 +277,19 @@ resource "kubernetes_ingress_v1" "kronos_frontend" {
     namespace = "kronos"
     annotations = {
       "cert-manager.io/cluster-issuer"                 = "letsencrypt-prod"
-      "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
+      # "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
     }
   }
 
   spec {
     ingress_class_name = "nginx"
-    tls {
-      hosts       = ["${var.subdomains[0]}.${var.domain}"]
-      secret_name = "kronos-tls"
-    }
+    # tls {
+    #   hosts       = ["${var.subdomains[0]}.${var.domain}"]
+    #   secret_name = "kronos-tls"
+    # }
 
     rule {
-      host = "${var.subdomains[0]}.${var.domain}"
+      # host = "${var.subdomains[0]}.${var.domain}"
       http {
         path {
           path      = "/"
@@ -309,8 +309,8 @@ resource "kubernetes_ingress_v1" "kronos_frontend" {
 
   depends_on = [
     kubernetes_service_v1.kronos_frontend,
-    # null_resource.wait_for_ingress_webhook,
-    # kubernetes_job_v1.wait_for_ingress_webhook,
+    null_resource.wait_for_ingress_webhook,
+    kubernetes_job_v1.wait_for_ingress_webhook,
     helm_release.cert_manager_prod_issuer
   ]
 }
@@ -349,8 +349,8 @@ resource "kubernetes_ingress_v1" "kronos_backend" {
 
   depends_on = [
     kubernetes_service_v1.kronos_backend,
-    # null_resource.wait_for_ingress_webhook,
-    # kubernetes_job_v1.wait_for_ingress_webhook,
+    null_resource.wait_for_ingress_webhook,
+    kubernetes_job_v1.wait_for_ingress_webhook,
     helm_release.cert_manager_prod_issuer
   ]
 }
