@@ -1,9 +1,13 @@
 # This file contains the network resources for the Time API Azure Kubernetes cluster.
 
-resource "digitalocean_vpc" "kronos" {
-  name     = "${random_pet.kronos.id}-vnet"
+resource "digitalocean_vpc" "default" {
+  name     = "default-vnet"
   region   = var.region
   ip_range = "10.240.0.0/16"
+}
+
+data "digitalocean_vpc" "default" {
+  name = digitalocean_vpc.default.name
 }
 
 resource "digitalocean_vpc_nat_gateway" "kronos" {
@@ -12,7 +16,7 @@ resource "digitalocean_vpc_nat_gateway" "kronos" {
   region = var.region
   size   = "1"
   vpcs {
-    vpc_uuid        = digitalocean_vpc.kronos.id
+    vpc_uuid        = data.digitalocean_vpc.kronos.id
     default_gateway = true
   }
   tcp_timeout_seconds  = 30

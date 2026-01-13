@@ -9,7 +9,7 @@ resource "digitalocean_droplet" "kronos" {
   name     = "${random_pet.kronos.id}-bastion"
   region   = var.region
   size     = "s-1vcpu-1gb-intel"
-  vpc_uuid = digitalocean_vpc.kronos.id
+  vpc_uuid = data.digitalocean_vpc.default.id
   user_data = templatefile(
     "${path.module}/cloud-init.yaml.tpl",
     {
