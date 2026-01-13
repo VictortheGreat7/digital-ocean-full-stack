@@ -70,7 +70,6 @@ def receive_metrics():
         span.set_attribute("metric.value", value)
         span.set_attribute("metric.endpoint", endpoint)
 
-        # Process metrics
         if metric == 'api_request_duration_ms':
             frontend_api_latency.labels(endpoint=endpoint).observe(value / 1000.0)
         elif metric == 'api_request_errors':

@@ -230,6 +230,8 @@ jobs:
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
       - name: Get DOKS Credentials from Terraform Output
+        env:
+          TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
         id: doks-info
         run: |
           # Extract values from Terraform state
@@ -289,6 +291,8 @@ jobs:
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
       - name: Get DOKS Credentials from Terraform Output
+        env:
+          TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
         id: doks-info
         run: |
           # Extract values from Terraform state
