@@ -16,14 +16,8 @@ resource "digitalocean_vpc" "kronos" {
   depends_on = [digitalocean_vpc.default]
 }
 
-resource "digitalocean_vpc" "default" {
-  name     = "default-vnet"
-  region   = var.region
-  ip_range = "10.0.0.0/16"
-}
-
 data "digitalocean_vpc" "default" {
-  name = digitalocean_vpc.default.name
+  name = "default-vnet"
 }
 
 resource "digitalocean_vpc_nat_gateway" "kronos" {
