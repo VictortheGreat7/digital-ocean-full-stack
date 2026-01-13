@@ -56,7 +56,7 @@ frontend_api_latency = Histogram(
     ['endpoint']
 )
 
-@app.route('/api/metrics', methods=['POST'])
+@app.route('/frontend-metrics', methods=['POST'])
 def receive_metrics():
     """Receive custom metrics from frontend"""
     with tracer.start_as_current_span("receive_metrics") as span:
@@ -96,7 +96,7 @@ MAJOR_CITIES = {
     "Berlin": "Europe/Berlin"
 }
 
-@app.route('/api/time', methods=['GET'])
+@app.route('/time', methods=['GET'])
 def get_time():
     """Get current time for a specific timezone"""
     timezone = request.args.get('timezone', 'UTC')
@@ -118,7 +118,7 @@ def get_time():
     except pytz.exceptions.UnknownTimeZoneError:
         return jsonify({"error": "Unknown timezone"}), 400
 
-@app.route('/api/timezones', methods=['GET'])
+@app.route('/timezones', methods=['GET'])
 def get_timezones():
     """List all available timezones by region"""
     all_timezones = pytz.all_timezones
@@ -138,7 +138,7 @@ def get_timezones():
         "common_timezones": pytz.common_timezones
     })
 
-@app.route('/api/world-clocks', methods=['GET'])
+@app.route('/world-clocks', methods=['GET'])
 def get_world_clocks():
     """Get time for multiple major cities simultaneously"""
     cities_data = []
@@ -177,7 +177,7 @@ def get_world_clocks():
     })
 
 # Keep backward compatibility with the old /time endpoint
-@app.route('/time', methods=['GET'])
+@app.route('/legacy/time', methods=['GET'])
 def get_current_time():
     """Legacy endpoint for backward compatibility"""
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

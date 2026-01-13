@@ -33,7 +33,6 @@ variable "subdomains" {
   type        = list(string)
   default = [
     "kronos",
-    "api",
     "grafana",
     "prometheus",
     "alertmanager",

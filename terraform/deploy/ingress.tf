@@ -286,13 +286,13 @@ resource "kubernetes_ingress_v1" "kronos_frontend" {
 
   spec {
     ingress_class_name = "nginx"
-    # tls {
-    #   hosts       = ["${var.subdomains[0]}.${var.domain}"]
-    #   secret_name = "kronos-tls"
-    # }
+    tls {
+      hosts       = ["${var.subdomains[0]}.${var.domain}"]
+      secret_name = "kronos-tls"
+    }
 
     rule {
-      # host = "${var.subdomains[0]}.${var.domain}"
+      host = "${var.subdomains[0]}.${var.domain}"
       http {
         path {
           path      = "/"
@@ -330,12 +330,17 @@ resource "kubernetes_ingress_v1" "kronos_backend" {
 
   spec {
     ingress_class_name = "nginx"
+    tls {
+      hosts       = ["${var.subdomains[0]}.${var.domain}"]
+      secret_name = "kronos-tls"
+    }
 
     rule {
+      host = "${var.subdomains[0]}.${var.domain}"
       http {
-        # Route /api/* to backend
+        # Route /api/* to backend and exclude /api/metrics
         path {
-          path      = "/api(/|$)(.*)"
+          path      = "/api(/|$)(?!metrics)(.*)"
           path_type = "ImplementationSpecific"
           backend {
             service {

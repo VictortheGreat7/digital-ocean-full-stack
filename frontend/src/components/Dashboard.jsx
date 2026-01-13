@@ -27,7 +27,7 @@ function Dashboard() {
     setError(null);
     
     try {
-      const response = await fetch(`${API_URL}/api/world-clocks`);
+      const response = await fetch(`${API_URL}/world-clocks`);
       if (!response.ok) {
         throw new Error(`Failed to fetch world clocks: ${response.status} ${response.statusText}`);
       }

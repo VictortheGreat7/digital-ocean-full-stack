@@ -118,3 +118,21 @@
 
 #   depends_on = [kubernetes_network_policy_v1.default_deny]
 # }
+
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: metrics-internal
+#   namespace: kronos
+# spec:
+#   podSelector:
+#     matchLabels:
+#       app: kronos-app
+#       component: backend
+#   ingress:
+#     - from:
+#         - podSelector:
+#             matchLabels:
+#               app: prometheus
+#   policyTypes:
+#     - Ingress
