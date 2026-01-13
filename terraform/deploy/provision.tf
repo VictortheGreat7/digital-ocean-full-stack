@@ -18,7 +18,7 @@ resource "digitalocean_kubernetes_cluster" "kronos" {
   name     = "${random_pet.kronos.id}-cluster"
   region   = var.region
   version  = data.digitalocean_kubernetes_versions.kronos.latest_version
-  vpc_uuid = data.digitalocean_vpc.default.id
+  vpc_uuid = digitalocean_vpc.kronos.id
 
   node_pool {
     name       = "worker-pool"
