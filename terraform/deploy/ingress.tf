@@ -268,7 +268,7 @@ resource "cloudflare_dns_record" "kronos" {
   type    = "A"
   ttl     = 1
   content = data.kubernetes_service_v1.nginx_ingress.status[0].load_balancer[0].ingress[0].ip
-  proxied = true
+  proxied = false
 
   depends_on = [module.nginx-controller]
 }
@@ -280,7 +280,7 @@ resource "kubernetes_ingress_v1" "kronos_frontend" {
     namespace = "kronos"
     annotations = {
       "cert-manager.io/cluster-issuer"                 = "letsencrypt-prod"
-      # "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
+      "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
     }
   }
 
