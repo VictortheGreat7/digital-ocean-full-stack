@@ -235,7 +235,7 @@ jobs:
         id: doks-info
         run: |
           # Extract values from Terraform state
-          DOKS_NAME=$(terraform output -raw docks_cluster_name)
+          DOKS_NAME=$(terraform output -raw doks_cluster_name)
           
           echo "Found Cluster: $DOKS_NAME"
 
@@ -296,7 +296,7 @@ jobs:
         id: doks-info
         run: |
           # Extract values from Terraform state
-          DOKS_NAME=$(terraform output -raw docks_cluster_name)
+          DOKS_NAME=$(terraform output -raw doks_cluster_name)
           
           echo "Found Cluster: $DOKS_NAME"
 
