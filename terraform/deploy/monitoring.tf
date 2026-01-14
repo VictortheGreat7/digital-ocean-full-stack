@@ -69,7 +69,7 @@ resource "helm_release" "tempo" {
     },
     {
       name  = "persistence.storageClassName"
-      value = "default"
+      value = "do-block-storage"
     },
     {
       name  = "persistence.size"

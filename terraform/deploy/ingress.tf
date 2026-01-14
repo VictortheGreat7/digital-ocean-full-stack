@@ -283,7 +283,7 @@ resource "kubernetes_ingress_v1" "kronos_frontend" {
     name      = "kronos-frontend-ingress"
     namespace = "kronos"
     annotations = {
-      # "nginx.ingress.kubernetes.io/use-regex" = "true"
+      "nginx.ingress.kubernetes.io/use-regex" = "true"
       "cert-manager.io/cluster-issuer"                 = "letsencrypt-prod"
       "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
     }
@@ -328,7 +328,7 @@ resource "kubernetes_ingress_v1" "kronos_backend" {
     name      = "kronos-backend-ingress"
     namespace = "kronos"
     annotations = {
-      # "nginx.ingress.kubernetes.io/use-regex" = "true"
+      "nginx.ingress.kubernetes.io/use-regex" = "true"
       "nginx.ingress.kubernetes.io/rewrite-target" = "/$2"
       "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
     }
@@ -374,7 +374,7 @@ resource "kubernetes_ingress_v1" "grafana" {
     name      = "grafana-ingress"
     namespace = "monitoring"
     annotations = {
-      # "nginx.ingress.kubernetes.io/use-regex" = "true"
+      "nginx.ingress.kubernetes.io/use-regex" = "true"
       "nginx.ingress.kubernetes.io/rewrite-target" = "/$2"
       "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
     }
@@ -414,7 +414,7 @@ resource "kubernetes_ingress_v1" "prometheus" {
     name      = "prometheus-ingress"
     namespace = "monitoring"
     annotations = {
-      # "nginx.ingress.kubernetes.io/use-regex" = "true"
+      "nginx.ingress.kubernetes.io/use-regex" = "true"
       "nginx.ingress.kubernetes.io/rewrite-target" = "/$2"
       "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
     }
@@ -454,7 +454,7 @@ resource "kubernetes_ingress_v1" "alertmanager" {
     name      = "alertmanager-ingress"
     namespace = "monitoring"
     annotations = {
-      # "nginx.ingress.kubernetes.io/use-regex" = "true"
+      "nginx.ingress.kubernetes.io/use-regex" = "true"
       "nginx.ingress.kubernetes.io/rewrite-target" = "/$2"
       "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
     }
@@ -494,7 +494,7 @@ resource "kubernetes_ingress_v1" "tempo" {
     name      = "tempo-ingress"
     namespace = "monitoring"
     annotations = {
-      # "nginx.ingress.kubernetes.io/use-regex" = "true"
+      "nginx.ingress.kubernetes.io/use-regex" = "true"
       "nginx.ingress.kubernetes.io/rewrite-target" = "/$2"
       "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
     }
