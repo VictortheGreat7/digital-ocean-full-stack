@@ -1,12 +1,13 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, g
 from flask_cors import CORS
 from datetime import datetime
+from time import monotonic
 import pytz
 from prometheus_flask_exporter import PrometheusMetrics
-from prometheus_client import Counter, Gauge, Histogram
+from prometheus_client import Counter, Histogram
 from opentelemetry import trace
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
-import requests
+# import requests
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.trace import TracerProvider
@@ -48,38 +49,59 @@ RequestsInstrumentor().instrument()
 metrics = PrometheusMetrics(app)
 metrics.info('app_info', 'World Clock Backend Application', version='1.0.0')
 
-frontend_api_errors = Counter('frontend_api_request_errors_total', 'Frontend API request errors')
-
-frontend_api_latency = Histogram(
-    'frontend_api_request_latency_seconds',
-    'Frontend API request latency in seconds',
-    ['endpoint']
+frontend_http_errors = Counter(
+    'frontend_http_request_errors_total',
+    'Total frontend HTTP request errors',
+    ['method', 'path', 'status']
 )
 
-@app.route('/frontend-metrics', methods=['POST'])
-def receive_metrics():
-    """Receive custom metrics from frontend"""
-    with tracer.start_as_current_span("receive_metrics") as span:
-        data = request.get_json()
-        metric = data.get('metric')
-        value = data.get('value')
-        endpoint = data.get('endpoint', 'unknown')
-        
-        # Add attributes to span
-        span.set_attribute("metric.type", metric)
-        span.set_attribute("metric.value", value)
-        span.set_attribute("metric.endpoint", endpoint)
+frontend_http_latency = Histogram(
+    'frontend_http_request_duration_seconds',
+    'Latency of frontend HTTP requests',
+    ['method', 'path', 'status']
+)
 
-        # Process metrics
-        if metric == 'api_request_duration_ms':
-            frontend_api_latency.labels(endpoint=endpoint).observe(value / 1000.0)
-        elif metric == 'api_request_errors':
-            frontend_api_errors.inc()
-        else:
-            span.set_attribute("error", True)
-            return jsonify({'error': 'Unknown metric'}), 400
+EXCLUDED_PATHS = [
+    '/metrics',
+    '/health',
+    # '/favicon.ico',
+    '/ready'
+]
 
-        return jsonify({'status': 'ok'})
+@app.before_request
+def start_timer():
+    g.start_time = monotonic()
+
+@app.after_request
+def record_metrics(response):
+    
+    if request.path in EXCLUDED_PATHS:
+        return response
+    
+    path = request.url_rule.rule if request.url_rule else request.path
+    duration = monotonic() - g.start_time
+    status = response.status_code
+
+    frontend_http_latency.labels(
+        method=request.method,
+        path=path,
+        status=status
+    ).observe(duration)
+
+    if status >= 400:
+        frontend_http_errors.labels(
+            method=request.method,
+            path=path,
+            status=status
+        ).inc()
+    
+    span = trace.get_current_span()
+    if span:
+        span.set_attribute("http.route", path)
+        span.set_attribute("http.method", request.method)
+        span.set_attribute("http.status_code", response.status_code)
+
+    return response
 
 # Major cities with their timezones
 MAJOR_CITIES = {
@@ -185,7 +207,6 @@ def get_current_time():
     return jsonify({"current_time": current_time})
 
 # Provide better health and readiness checks later. Currently simple but insufficient.
-
 @app.route('/health', methods=['GET'])
 def health():
     """Health check endpoint"""

@@ -6,10 +6,6 @@ resource "digitalocean_vpc" "kronos" {
   ip_range = "10.240.0.0/16"
 }
 
-data "digitalocean_vpc" "default" {
-  name = "default-vnet"
-}
-
 resource "digitalocean_vpc_nat_gateway" "kronos" {
   name   = "${random_pet.kronos.id}-natgw"
   type   = "PUBLIC"

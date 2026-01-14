@@ -31,13 +31,7 @@ variable "cloudflare_zone_id" {
 variable "subdomains" {
   description = "List of subdomains to create"
   type        = list(string)
-  default = [
-    "kronos",
-    "grafana",
-    "prometheus",
-    "alertmanager",
-    "tempo"
-  ]
+  default = ["kronos"]
 }
 
 variable "domain" {
