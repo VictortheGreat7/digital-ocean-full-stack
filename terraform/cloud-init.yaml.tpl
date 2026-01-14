@@ -50,7 +50,7 @@ runcmd:
 
   # --- Configure the runner (Token will need to be injected securely using Terraform) ---
   - |
-    su - githubrunner -c "cd ~/actions-runner && ./config.sh --url https://github.com/VictortheGreat7/digital-ocean-full-stack --token ${github_runner_token} --unattended"  
+    su - githubrunner -c "cd ~/actions-runner && ./config.sh --url https://github.com/VictortheGreat7/digital-ocean-full-stack --token ${github_runner_token} --unattended"
 
   # --- Install kubectl ---
   - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
@@ -63,6 +63,10 @@ runcmd:
 
   # --- Create a systemd service to keep the runner running ---
   - |
+    cd /home/githubrunner && \
+    wget https://github.com/digitalocean/doctl/releases/download/v1.146.0/doctl-1.146.0-linux-amd64.tar.gz && \
+    tar xf /home/githubrunner/doctl-1.146.0-linux-amd64.tar.gz && \
+    mv /home/githubrunner/doctl /usr/local/bin && \
     cd /home/githubrunner/actions-runner && \
     ./svc.sh install githubrunner && \
     ./svc.sh start
