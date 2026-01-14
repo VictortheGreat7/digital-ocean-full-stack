@@ -131,6 +131,10 @@ resource "helm_release" "tempo" {
       name = "tempoQuery.enabled"
       value = "true"
     },
+    {
+    name  = "tempoQuery.service.port"
+    value = "7777"
+    },
     # Tempo ingress
     {
       name  = "tempoQuery.ingress.enabled"
