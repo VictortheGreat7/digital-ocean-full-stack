@@ -28,14 +28,6 @@ resource "helm_release" "kube_prometheus_stack" {
       name  = "prometheus.ingress.hosts[0]"
       value = "prometheus.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
     },
-    # {
-    #   name  = "prometheus.prometheusSpec.ingress.tls[0].hosts[0]"
-    #   value = "prometheus.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
-    # },
-    # {
-    #   name  = "prometheus.prometheusSpec.ingress.tls[0].secretName"
-    #   value = "kronos-tls"
-    # },
 
     # Alertmanager settings
     {
@@ -63,14 +55,6 @@ resource "helm_release" "kube_prometheus_stack" {
       name  = "alertmanager.ingress.hosts[0]"
       value = "alertmanager.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
     },
-    # {
-    #   name  = "alertmanager.ingress.tls[0].hosts[0]"
-    #   value = "alertmanager.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
-    # },
-    # {
-    #   name  = "alertmanager.ingress.tls[0].secretName"
-    #   value = "kronos-tls"
-    # },
 
     # Grafana settings
     {
@@ -94,14 +78,6 @@ resource "helm_release" "kube_prometheus_stack" {
     name  = "grafana.ingress.enabled"
     value = "true"
     },
-    # {
-    # name  = "grafana.ingress.tls[0].hosts[0]"
-    # value = "grafana.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
-    # },
-    # {
-    #   name  = "grafana.ingress.tls[0].secretName"
-    #   value = "kronos-tls"
-    # },
     {
       name  = "grafana.ingress.ingressClassName"
       value = "nginx"
@@ -151,31 +127,15 @@ resource "helm_release" "tempo" {
       name  = "persistence.size"
       value = "5Gi"
     },
+    {
+      name = "tempoQuery.enabled"
+      value = "true"
+    },
     # Tempo ingress
     {
       name  = "tempoQuery.ingress.enabled"
       value = "true"
     },
-    # {
-    #   name  = "ingress.tls[0].secretName"
-    #   value = "kronos-tls"
-    # },
-    # {
-    #   name  = "ingress.tls[0].hosts[0]"
-    #   value = "tempo.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
-    # },
-    # {
-    #   name  = "ingress.annotations.nginx\\.ingress\\.kubernetes\\.io/force-ssl-redirect"
-    #   value = "true"
-    # },
-    # {
-    #   name  = "ingress.hosts[0].paths[0]"
-    #   value = "/"
-    # },
-    # {
-    #   name  = "ingress.hosts[0].paths[0].pathType"
-    #   value = "Prefix"
-    # },
     {
       name = "tempoQuery.ingress.ingressClassName"
       value = "nginx"
