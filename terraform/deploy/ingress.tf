@@ -283,6 +283,7 @@ resource "kubernetes_ingress_v1" "kronos_frontend" {
     name      = "kronos-frontend-ingress"
     namespace = "kronos"
     annotations = {
+      # "nginx.ingress.kubernetes.io/use-regex" = "true"
       "cert-manager.io/cluster-issuer"                 = "letsencrypt-prod"
       "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
     }
@@ -299,8 +300,8 @@ resource "kubernetes_ingress_v1" "kronos_frontend" {
       host = "${var.subdomains[0]}.${var.domain}"
       http {
         path {
-          path      = "/"
-          path_type = "Prefix"
+          path      = "/(.*)"
+          path_type = "ImplementationSpecific"
           backend {
             service {
               name = kubernetes_service_v1.kronos_frontend.metadata[0].name
@@ -327,6 +328,7 @@ resource "kubernetes_ingress_v1" "kronos_backend" {
     name      = "kronos-backend-ingress"
     namespace = "kronos"
     annotations = {
+      # "nginx.ingress.kubernetes.io/use-regex" = "true"
       "nginx.ingress.kubernetes.io/rewrite-target" = "/$2"
       "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
     }
@@ -372,6 +374,7 @@ resource "kubernetes_ingress_v1" "grafana" {
     name      = "grafana-ingress"
     namespace = "monitoring"
     annotations = {
+      # "nginx.ingress.kubernetes.io/use-regex" = "true"
       "nginx.ingress.kubernetes.io/rewrite-target" = "/$2"
       "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
     }
@@ -387,8 +390,8 @@ resource "kubernetes_ingress_v1" "grafana" {
       host = "${var.subdomains[0]}.${var.domain}"
       http {
         path {
-          path      = "/grafana"
-          path_type = "Prefix"
+          path      = "/grafana(/|$)(.*)"
+          path_type = "ImplementationSpecific"
           backend {
             service {
               name = "kube-prometheus-stack-grafana"
@@ -411,6 +414,7 @@ resource "kubernetes_ingress_v1" "prometheus" {
     name      = "prometheus-ingress"
     namespace = "monitoring"
     annotations = {
+      # "nginx.ingress.kubernetes.io/use-regex" = "true"
       "nginx.ingress.kubernetes.io/rewrite-target" = "/$2"
       "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
     }
@@ -426,8 +430,8 @@ resource "kubernetes_ingress_v1" "prometheus" {
       host = "${var.subdomains[0]}.${var.domain}"
       http {
         path {
-          path      = "/prometheus"
-          path_type = "Prefix"
+          path      = "/prometheus(/|$)(.*)"
+          path_type = "ImplementationSpecific"
           backend {
             service {
               name = "kube-prometheus-stack-prometheus"
@@ -450,6 +454,7 @@ resource "kubernetes_ingress_v1" "alertmanager" {
     name      = "alertmanager-ingress"
     namespace = "monitoring"
     annotations = {
+      # "nginx.ingress.kubernetes.io/use-regex" = "true"
       "nginx.ingress.kubernetes.io/rewrite-target" = "/$2"
       "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
     }
@@ -465,8 +470,8 @@ resource "kubernetes_ingress_v1" "alertmanager" {
       host = "${var.subdomains[0]}.${var.domain}"
       http {
         path {
-          path      = "/alertmanager"
-          path_type = "Prefix"
+          path      = "/alertmanager(/|$)(.*)"
+          path_type = "ImplementationSpecific"
           backend {
             service {
               name = "kube-prometheus-stack-alertmanager"
@@ -489,6 +494,7 @@ resource "kubernetes_ingress_v1" "tempo" {
     name      = "tempo-ingress"
     namespace = "monitoring"
     annotations = {
+      # "nginx.ingress.kubernetes.io/use-regex" = "true"
       "nginx.ingress.kubernetes.io/rewrite-target" = "/$2"
       "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
     }
@@ -504,8 +510,8 @@ resource "kubernetes_ingress_v1" "tempo" {
       host = "${var.subdomains[0]}.${var.domain}"
       http {
         path {
-          path      = "/tempo"
-          path_type = "Prefix"
+          path      = "/tempo(/|$)(.*)"
+          path_type = "ImplementationSpecific"
           backend {
             service {
               name = "tempo"
