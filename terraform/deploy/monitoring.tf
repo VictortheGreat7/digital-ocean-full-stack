@@ -98,7 +98,7 @@ resource "kubernetes_config_map_v1" "grafana_datasources" {
           name      = "Tempo"
           type      = "tempo"
           access    = "proxy"
-          url       = "http://tempo.monitoring:3100"
+          url       = "http://tempo.monitoring:3200"
           isDefault = false
           jsonData = {
             tracesToLogsV2 = {

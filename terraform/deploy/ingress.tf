@@ -395,6 +395,9 @@ resource "kubernetes_ingress_v1" "prometheus" {
   metadata {
     name      = "prometheus-ingress"
     namespace = "monitoring"
+    annotations = {
+      "nginx.ingress.kubernetes.io/rewrite-target" = "/"
+    }
   }
   spec {
     ingress_class_name = "nginx"
@@ -403,8 +406,8 @@ resource "kubernetes_ingress_v1" "prometheus" {
       host = "prometheus.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
       http {
         path {
-          path      = "/"
-          path_type = "Prefix"
+          path = "/monitoring(/|$)(.*)"
+          path_type = "ImplementationSpecific"
           backend {
             service {
               name = "kube-prometheus-stack-prometheus"
@@ -426,6 +429,9 @@ resource "kubernetes_ingress_v1" "alertmanager" {
   metadata {
     name      = "alertmanager-ingress"
     namespace = "monitoring"
+    annotations = {
+      "nginx.ingress.kubernetes.io/rewrite-target" = "/"
+    }
   }
   spec {
     ingress_class_name = "nginx"
@@ -434,8 +440,8 @@ resource "kubernetes_ingress_v1" "alertmanager" {
       host = "alertmanager.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
       http {
         path {
-          path      = "/"
-          path_type = "Prefix"
+          path = "/monitoring(/|$)(.*)"
+          path_type = "ImplementationSpecific"
           backend {
             service {
               name = "kube-prometheus-stack-alertmanager"
@@ -457,6 +463,9 @@ resource "kubernetes_ingress_v1" "tempo" {
   metadata {
     name      = "tempo-ingress"
     namespace = "monitoring"
+    # annotations = {
+    #   "nginx.ingress.kubernetes.io/rewrite-target" = "/"
+    # }
   }
   spec {
     ingress_class_name = "nginx"
@@ -467,10 +476,12 @@ resource "kubernetes_ingress_v1" "tempo" {
         path {
           path      = "/"
           path_type = "Prefix"
+          # path = "/monitoring(/|$)(.*)"
+          # path_type = "ImplementationSpecific"
           backend {
             service {
               name = "tempo"
-              port { number = 3100 }
+              port { number = 3200 }
             }
           }
         }
