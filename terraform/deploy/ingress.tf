@@ -453,37 +453,37 @@ resource "kubernetes_ingress_v1" "kronos_backend" {
 #   ]
 # }
 
-# resource "kubernetes_ingress_v1" "tempo" {
-#   metadata {
-#     name      = "tempo-ingress"
-#     namespace = "monitoring"
-#   }
-#   spec {
-#     ingress_class_name = "nginx"
+resource "kubernetes_ingress_v1" "tempo" {
+  metadata {
+    name      = "tempo-ingress"
+    namespace = "monitoring"
+  }
+  spec {
+    ingress_class_name = "nginx"
 
-#     rule {
-#       host = "tempo.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
-#       http {
-#         path {
-#           path      = "/"
-#           path_type = "Prefix"
-#           backend {
-#             service {
-#               name = "tempo"
-#               port { number = 3200 }
-#             }
-#           }
-#         }
-#       }
-#     }
-#   }
+    rule {
+      host = "tempo.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
+      http {
+        path {
+          path      = "/"
+          path_type = "Prefix"
+          backend {
+            service {
+              name = "tempo"
+              port { number = 3200 }
+            }
+          }
+        }
+      }
+    }
+  }
 
-#   depends_on = [
-#     helm_release.cert_manager_prod_issuer,
-#     kubernetes_job_v1.wait_for_ingress_webhook,
-#     helm_release.tempo
-#   ]
-# }
+  depends_on = [
+    helm_release.cert_manager_prod_issuer,
+    kubernetes_job_v1.wait_for_ingress_webhook,
+    helm_release.tempo
+  ]
+}
 
 # output "grafana_ingress" {
 #   value = kubernetes_ingress_v1.grafana.spec[0].rule[0].host
