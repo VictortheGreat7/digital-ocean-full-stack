@@ -151,10 +151,7 @@ resource "kubernetes_job_v1" "wait_for_ingress_webhook" {
     active_deadline_seconds = 1000
   }
 
-  depends_on = [
-    kubernetes_role_binding_v1.check_ingress_binding,
-    null_resource.wait_for_ingress_webhook
-  ]
+  depends_on = [null_resource.wait_for_ingress_webhook]
 }
 
 provider "cloudflare" {
@@ -234,7 +231,6 @@ EOT
 # resource "helm_release" "cert_manager_stag_issuer" {
 #   chart      = "cert-manager-issuers"
 #   name       = "cert-manager-stag-issuer"
-#   version    = "0.3.0"
 #   repository = "https://charts.adfinis.com"
 #   namespace  = "cert-manager"
 
@@ -258,10 +254,7 @@ EOT
 # EOT
 #   ]
 
-#   depends_on = [
-#     helm_release.cert_manager,
-#     kubernetes_secret_v1.cloudflare_api
-#   ]
+#   depends_on = [helm_release.cert_manager, kubernetes_secret_v1.cloudflare_api]
 # }
 
 resource "cloudflare_dns_record" "kronos" {
@@ -283,7 +276,6 @@ resource "kubernetes_ingress_v1" "kronos_frontend" {
     name      = "kronos-frontend-ingress"
     namespace = "kronos"
     annotations = {
-      "nginx.ingress.kubernetes.io/use-regex" = "true"
       "cert-manager.io/cluster-issuer"                 = "letsencrypt-prod"
       "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
     }
@@ -300,8 +292,8 @@ resource "kubernetes_ingress_v1" "kronos_frontend" {
       host = "${var.subdomains[0]}.${var.domain}"
       http {
         path {
-          path      = "/(.*)"
-          path_type = "ImplementationSpecific"
+          path      = "/"
+          path_type = "Prefix"
           backend {
             service {
               name = kubernetes_service_v1.kronos_frontend.metadata[0].name
@@ -328,7 +320,6 @@ resource "kubernetes_ingress_v1" "kronos_backend" {
     name      = "kronos-backend-ingress"
     namespace = "kronos"
     annotations = {
-      "nginx.ingress.kubernetes.io/use-regex" = "true"
       "nginx.ingress.kubernetes.io/rewrite-target" = "/$2"
       "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
     }
@@ -373,25 +364,16 @@ resource "kubernetes_ingress_v1" "grafana" {
   metadata {
     name      = "grafana-ingress"
     namespace = "monitoring"
-    annotations = {
-      "nginx.ingress.kubernetes.io/use-regex" = "true"
-      "nginx.ingress.kubernetes.io/rewrite-target" = "/$2"
-      "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
-    }
   }
   spec {
     ingress_class_name = "nginx"
-    tls {
-      hosts       = ["${var.subdomains[0]}.${var.domain}"]
-      secret_name = "kronos-tls"
-    }
 
     rule {
-      host = "${var.subdomains[0]}.${var.domain}"
+      host = "grafana.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
       http {
         path {
-          path      = "/grafana(/|$)(.*)"
-          path_type = "ImplementationSpecific"
+          path      = "/"
+          path_type = "Prefix"
           backend {
             service {
               name = "kube-prometheus-stack-grafana"
@@ -413,25 +395,16 @@ resource "kubernetes_ingress_v1" "prometheus" {
   metadata {
     name      = "prometheus-ingress"
     namespace = "monitoring"
-    annotations = {
-      "nginx.ingress.kubernetes.io/use-regex" = "true"
-      "nginx.ingress.kubernetes.io/rewrite-target" = "/$2"
-      "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
-    }
   }
   spec {
     ingress_class_name = "nginx"
-    tls {
-      hosts       = ["${var.subdomains[0]}.${var.domain}"]
-      secret_name = "kronos-tls"
-    }
 
     rule {
-      host = "${var.subdomains[0]}.${var.domain}"
+      host = "prometheus.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
       http {
         path {
-          path      = "/prometheus(/|$)(.*)"
-          path_type = "ImplementationSpecific"
+          path      = "/"
+          path_type = "Prefix"
           backend {
             service {
               name = "kube-prometheus-stack-prometheus"
@@ -453,25 +426,16 @@ resource "kubernetes_ingress_v1" "alertmanager" {
   metadata {
     name      = "alertmanager-ingress"
     namespace = "monitoring"
-    annotations = {
-      "nginx.ingress.kubernetes.io/use-regex" = "true"
-      "nginx.ingress.kubernetes.io/rewrite-target" = "/$2"
-      "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
-    }
   }
   spec {
     ingress_class_name = "nginx"
-    tls {
-      hosts       = ["${var.subdomains[0]}.${var.domain}"]
-      secret_name = "kronos-tls"
-    }
 
     rule {
-      host = "${var.subdomains[0]}.${var.domain}"
+      host = "alertmanager.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
       http {
         path {
-          path      = "/alertmanager(/|$)(.*)"
-          path_type = "ImplementationSpecific"
+          path      = "/"
+          path_type = "Prefix"
           backend {
             service {
               name = "kube-prometheus-stack-alertmanager"
@@ -493,25 +457,16 @@ resource "kubernetes_ingress_v1" "tempo" {
   metadata {
     name      = "tempo-ingress"
     namespace = "monitoring"
-    annotations = {
-      "nginx.ingress.kubernetes.io/use-regex" = "true"
-      "nginx.ingress.kubernetes.io/rewrite-target" = "/$2"
-      "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
-    }
   }
   spec {
     ingress_class_name = "nginx"
-    tls {
-      hosts       = ["${var.subdomains[0]}.${var.domain}"]
-      secret_name = "kronos-tls"
-    }
 
     rule {
-      host = "${var.subdomains[0]}.${var.domain}"
+      host = "tempo.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
       http {
         path {
-          path      = "/tempo(/|$)(.*)"
-          path_type = "ImplementationSpecific"
+          path      = "/"
+          path_type = "Prefix"
           backend {
             service {
               name = "tempo"
