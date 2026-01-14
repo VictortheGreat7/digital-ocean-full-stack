@@ -74,7 +74,6 @@ def start_timer():
 
 @app.after_request
 def record_metrics(response):
-    
     if request.path in EXCLUDED_PATHS:
         return response
     

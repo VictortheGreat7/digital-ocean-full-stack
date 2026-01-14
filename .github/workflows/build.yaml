@@ -65,7 +65,7 @@ jobs:
           curl --fail http://localhost:5000/health || (docker logs backend-test && exit 1)
 
           echo "Checking API endpoint"
-          curl --fail http://localhost:5000/api/world-clocks || (docker logs backend-test && exit 1)
+          curl --fail http://localhost:5000/world-clocks || (docker logs backend-test && exit 1)
 
           docker stop backend-test
           docker rm backend-test
