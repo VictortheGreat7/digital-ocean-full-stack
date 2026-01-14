@@ -70,7 +70,7 @@ resource "helm_release" "kube_prometheus_stack" {
     {
       name  = "alertmanager.alertmanagerSpec.ingress.tls[0].secretName"
       value = "kronos-tls"
-    }
+    },
 
     # Grafana settings
     {
@@ -102,7 +102,7 @@ resource "helm_release" "kube_prometheus_stack" {
       name  = "grafana.ingress.hosts[0]"
       value = "grafana.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
     },
-        {
+    {
     name  = "grafana.ingress.tls[0].hosts[0]"
     value = "grafana.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
     },
