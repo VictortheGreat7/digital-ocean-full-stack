@@ -6,6 +6,7 @@ resource "helm_release" "kube_prometheus_stack" {
   namespace        = "monitoring"
 
   set = [
+    # Prometheus settings
     {
       name  = "prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.storageClassName"
       value = "default"
@@ -14,6 +15,33 @@ resource "helm_release" "kube_prometheus_stack" {
       name  = "prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage"
       value = "5Gi"
     },
+    # Prometheus ingress
+    {
+      name  = "prometheus.prometheusSpec.ingress.enabled"
+      value = "true"
+    },
+    {
+      name  = "prometheus.prometheusSpec.ingress.ingressClassName"
+      value = "nginx"
+    },
+    {
+      name  = "prometheus.prometheusSpec.ingress.hosts[0]"
+      value = "prometheus.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
+    },
+    {
+      name  = "prometheus.prometheusSpec.ingress.tls[0].hosts[0]"
+      value = "prometheus.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
+    },
+    {
+      name  = "prometheus.prometheusSpec.ingress.tls[0].secretName"
+      value = "kronos-tls"
+    },
+
+    # Alertmanager settings
+    {
+      name  = "alertmanager.enabled"
+      value = "true"
+    },
     {
       name  = "alertmanager.alertmanagerSpec.storage.volumeClaimTemplate.spec.storageClassName"
       value = "default"
@@ -21,6 +49,33 @@ resource "helm_release" "kube_prometheus_stack" {
     {
       name  = "alertmanager.alertmanagerSpec.storage.volumeClaimTemplate.spec.resources.requests.storage"
       value = "5Gi"
+    },
+    # Alertmanager ingress
+    {
+      name  = "alertmanager.alertmanagerSpec.ingress.enabled"
+      value = "true"
+    },
+    {
+      name  = "alertmanager.alertmanagerSpec.ingress.ingressClassName"
+      value = "nginx"
+    },
+    {
+      name  = "alertmanager.alertmanagerSpec.ingress.hosts[0]"
+      value = "alertmanager.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
+    },
+    {
+      name  = "alertmanager.alertmanagerSpec.ingress.tls[0].hosts[0]"
+      value = "alertmanager.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
+    },
+    {
+      name  = "alertmanager.alertmanagerSpec.ingress.tls[0].secretName"
+      value = "kronos-tls"
+    }
+
+    # Grafana settings
+    {
+      name  = "grafana.persistence.enabled"
+      value = "true"
     },
     {
       name  = "grafana.persistence.storageClassName"
@@ -33,6 +88,27 @@ resource "helm_release" "kube_prometheus_stack" {
     {
       name  = "grafana.adminPassword"
       value = "admin"
+    },
+    # Grafana ingress
+    {
+    name  = "grafana.ingress.enabled"
+    value = "true"
+    },
+    {
+      name  = "grafana.ingress.ingressClassName"
+      value = "nginx"
+    },
+    {
+      name  = "grafana.ingress.hosts[0]"
+      value = "grafana.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
+    },
+        {
+    name  = "grafana.ingress.tls[0].hosts[0]"
+    value = "grafana.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
+    },
+    {
+      name  = "grafana.ingress.tls[0].secretName"
+      value = "kronos-tls"
     }
   ]
 
