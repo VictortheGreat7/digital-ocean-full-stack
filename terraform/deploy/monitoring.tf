@@ -177,7 +177,7 @@ resource "helm_release" "tempo" {
     #   value = "Prefix"
     # },
     {
-      name = "tempoQuery.ingress.annotations.kubernetes\\.io/ingress\\.class"
+      name = "tempoQuery.ingress.ingressClassName"
       value = "nginx"
     },
     {
