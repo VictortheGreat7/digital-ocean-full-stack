@@ -28,14 +28,14 @@ resource "helm_release" "kube_prometheus_stack" {
       name  = "prometheus.prometheusSpec.ingress.hosts[0]"
       value = "prometheus.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
     },
-    {
-      name  = "prometheus.prometheusSpec.ingress.tls[0].hosts[0]"
-      value = "prometheus.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
-    },
-    {
-      name  = "prometheus.prometheusSpec.ingress.tls[0].secretName"
-      value = "kronos-tls"
-    },
+    # {
+    #   name  = "prometheus.prometheusSpec.ingress.tls[0].hosts[0]"
+    #   value = "prometheus.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
+    # },
+    # {
+    #   name  = "prometheus.prometheusSpec.ingress.tls[0].secretName"
+    #   value = "kronos-tls"
+    # },
 
     # Alertmanager settings
     {
@@ -63,14 +63,14 @@ resource "helm_release" "kube_prometheus_stack" {
       name  = "alertmanager.alertmanagerSpec.ingress.hosts[0]"
       value = "alertmanager.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
     },
-    {
-      name  = "alertmanager.alertmanagerSpec.ingress.tls[0].hosts[0]"
-      value = "alertmanager.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
-    },
-    {
-      name  = "alertmanager.alertmanagerSpec.ingress.tls[0].secretName"
-      value = "kronos-tls"
-    },
+    # {
+    #   name  = "alertmanager.alertmanagerSpec.ingress.tls[0].hosts[0]"
+    #   value = "alertmanager.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
+    # },
+    # {
+    #   name  = "alertmanager.alertmanagerSpec.ingress.tls[0].secretName"
+    #   value = "kronos-tls"
+    # },
 
     # Grafana settings
     {
@@ -94,6 +94,14 @@ resource "helm_release" "kube_prometheus_stack" {
     name  = "grafana.ingress.enabled"
     value = "true"
     },
+    # {
+    # name  = "grafana.ingress.tls[0].hosts[0]"
+    # value = "grafana.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
+    # },
+    # {
+    #   name  = "grafana.ingress.tls[0].secretName"
+    #   value = "kronos-tls"
+    # },
     {
       name  = "grafana.ingress.ingressClassName"
       value = "nginx"
@@ -101,18 +109,10 @@ resource "helm_release" "kube_prometheus_stack" {
     {
       name  = "grafana.ingress.hosts[0]"
       value = "grafana.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
-    },
-    {
-    name  = "grafana.ingress.tls[0].hosts[0]"
-    value = "grafana.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
-    },
-    {
-      name  = "grafana.ingress.tls[0].secretName"
-      value = "kronos-tls"
     }
   ]
 
-  depends_on = [module.nginx-controller]
+  depends_on = [module.nginx-controller, helm_release.cert_manager_prod_issuer]
 }
 
 resource "helm_release" "tempo" {
@@ -150,10 +150,39 @@ resource "helm_release" "tempo" {
     {
       name  = "persistence.size"
       value = "5Gi"
+    },
+    # Tempo ingress
+    {
+      name  = "ingress.enabled"
+      value = "true"
+    },
+    # {
+    #   name  = "ingress.tls[0].secretName"
+    #   value = "kronos-tls"
+    # },
+    # {
+    #   name  = "ingress.tls[0].hosts[0]"
+    #   value = "tempo.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
+    # },
+    {
+      name  = "ingress.annotations.nginx\\.ingress\\.kubernetes\\.io/force-ssl-redirect"
+      value = "true"
+    },
+    {
+      name  = "ingress.hosts[0].host"
+      value = "tempo.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
+    },
+    {
+      name  = "ingress.hosts[0].paths[0]"
+      value = "/"
+    },
+    {
+      name  = "ingress.hosts[0].paths[0].pathType"
+      value = "Prefix"
     }
   ]
 
-  depends_on = [helm_release.kube_prometheus_stack]
+  depends_on = [helm_release.kube_prometheus_stack, helm_release.cert_manager_prod_issuer]
 }
 
 # Configure Grafana to use Tempo as a data source
