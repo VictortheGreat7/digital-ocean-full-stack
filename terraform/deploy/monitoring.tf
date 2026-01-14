@@ -164,10 +164,10 @@ resource "helm_release" "tempo" {
     #   name  = "ingress.tls[0].hosts[0]"
     #   value = "tempo.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
     # },
-    {
-      name  = "ingress.annotations.nginx\\.ingress\\.kubernetes\\.io/force-ssl-redirect"
-      value = "true"
-    },
+    # {
+    #   name  = "ingress.annotations.nginx\\.ingress\\.kubernetes\\.io/force-ssl-redirect"
+    #   value = "true"
+    # },
     {
       name  = "ingress.hosts[0].host"
       value = "tempo.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
