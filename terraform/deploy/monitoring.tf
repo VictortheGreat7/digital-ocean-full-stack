@@ -9,7 +9,7 @@ resource "helm_release" "kube_prometheus_stack" {
     # Prometheus settings
     {
       name  = "prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.storageClassName"
-      value = "default"
+      value = data.kubernetes_storage_class.default.metadata[0].name
     },
     {
       name  = "prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage"
@@ -44,7 +44,7 @@ resource "helm_release" "kube_prometheus_stack" {
     },
     {
       name  = "alertmanager.alertmanagerSpec.storage.volumeClaimTemplate.spec.storageClassName"
-      value = "default"
+      value = data.kubernetes_storage_class.default.metadata[0].name
     },
     {
       name  = "alertmanager.alertmanagerSpec.storage.volumeClaimTemplate.spec.resources.requests.storage"
@@ -79,7 +79,7 @@ resource "helm_release" "kube_prometheus_stack" {
     },
     {
       name  = "grafana.persistence.storageClassName"
-      value = "default"
+      value = data.kubernetes_storage_class.default.metadata[0].name
     },
     {
       name  = "grafana.persistence.size"
@@ -145,7 +145,7 @@ resource "helm_release" "tempo" {
     },
     {
       name  = "persistence.storageClassName"
-      value = "do-block-storage"
+      value = data.kubernetes_storage_class.default.metadata[0].name
     },
     {
       name  = "persistence.size"

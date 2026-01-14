@@ -15,3 +15,13 @@ data "kubernetes_service_v1" "nginx_ingress" {
 
   depends_on = [module.nginx-controller]
 }
+
+data "kubernetes_storage_class" "default" {
+  metadata {
+    annotations = {
+      "storageclass.kubernetes.io/is-default-class" = "true"
+    }
+  }
+
+  depends_on = [digitalocean_kubernetes_cluster.kronos]
+}
