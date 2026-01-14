@@ -181,7 +181,7 @@ resource "helm_release" "tempo" {
       value = "nginx"
     },
     {
-      name  = "tempoQuery.ingress.hosts[0].host"
+      name  = "tempoQuery.ingress.hosts[0]"
       value = "tempo.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
     }
   ]
