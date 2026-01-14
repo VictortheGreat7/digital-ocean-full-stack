@@ -17,15 +17,15 @@ resource "helm_release" "kube_prometheus_stack" {
     },
     # Prometheus ingress
     {
-      name  = "prometheus.prometheusSpec.ingress.enabled"
+      name  = "prometheus.ingress.enabled"
       value = "true"
     },
     {
-      name  = "prometheus.prometheusSpec.ingress.ingressClassName"
+      name  = "prometheus.ingress.ingressClassName"
       value = "nginx"
     },
     {
-      name  = "prometheus.prometheusSpec.ingress.hosts[0]"
+      name  = "prometheus.ingress.hosts[0]"
       value = "prometheus.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
     },
     # {
@@ -52,23 +52,23 @@ resource "helm_release" "kube_prometheus_stack" {
     },
     # Alertmanager ingress
     {
-      name  = "alertmanager.alertmanagerSpec.ingress.enabled"
+      name  = "alertmanager.ingress.enabled"
       value = "true"
     },
     {
-      name  = "alertmanager.alertmanagerSpec.ingress.ingressClassName"
+      name  = "alertmanager.ingress.ingressClassName"
       value = "nginx"
     },
     {
-      name  = "alertmanager.alertmanagerSpec.ingress.hosts[0]"
+      name  = "alertmanager.ingress.hosts[0]"
       value = "alertmanager.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
     },
     # {
-    #   name  = "alertmanager.alertmanagerSpec.ingress.tls[0].hosts[0]"
+    #   name  = "alertmanager.ingress.tls[0].hosts[0]"
     #   value = "alertmanager.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
     # },
     # {
-    #   name  = "alertmanager.alertmanagerSpec.ingress.tls[0].secretName"
+    #   name  = "alertmanager.ingress.tls[0].secretName"
     #   value = "kronos-tls"
     # },
 
@@ -153,7 +153,7 @@ resource "helm_release" "tempo" {
     },
     # Tempo ingress
     {
-      name  = "ingress.enabled"
+      name  = "tempoQuery.ingress.enabled"
       value = "true"
     },
     # {
@@ -168,17 +168,21 @@ resource "helm_release" "tempo" {
     #   name  = "ingress.annotations.nginx\\.ingress\\.kubernetes\\.io/force-ssl-redirect"
     #   value = "true"
     # },
+    # {
+    #   name  = "ingress.hosts[0].paths[0]"
+    #   value = "/"
+    # },
+    # {
+    #   name  = "ingress.hosts[0].paths[0].pathType"
+    #   value = "Prefix"
+    # },
     {
-      name  = "ingress.hosts[0].host"
+      name = "tempoQuery.ingress.annotations.kubernetes\\.io/ingress\\.class"
+      value = "nginx"
+    },
+    {
+      name  = "tempoQuery.ingress.hosts[0].host"
       value = "tempo.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
-    },
-    {
-      name  = "ingress.hosts[0].paths[0]"
-      value = "/"
-    },
-    {
-      name  = "ingress.hosts[0].paths[0].pathType"
-      value = "Prefix"
     }
   ]
 
