@@ -26,7 +26,7 @@ resource "kubernetes_config_map_v1" "psql_config" {
   }
 
   data = {
-    init.sql = <<-EOF
+    "init.sql" = <<-EOF
       CREATE TABLE IF NOT EXISTS requests (
         id SERIAL PRIMARY KEY,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -92,7 +92,7 @@ resource "kubernetes_stateful_set_v1" "postgres" {
           }
           env {
             name  = "POSTGRES_PASSWORD"
-            valueFrom {
+            value_from {
               secret_key_ref {
                 name = "postgres-secret"
                 key  = "password"
