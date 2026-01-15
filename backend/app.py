@@ -72,7 +72,7 @@ EXCLUDED_PATHS = [
 
 # Database connection setup
 DB_CONFIG = {
-    "host": os.getenv("DB_HOST", "postgres.world-clock-application.svc.cluster.local"),
+    "host": os.getenv("DB_HOST", "kronos-postgres-svc.svc.cluster.local"),
     "port": os.getenv("DB_PORT", "5432"),
     "database": os.getenv("DB_NAME", "kronos"),
     "user": os.getenv("DB_USER", "app"),

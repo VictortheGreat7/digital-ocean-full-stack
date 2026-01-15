@@ -239,6 +239,31 @@ resource "kubernetes_deployment_v1" "kronos_backend" {
             name  = "TEMPO_ENDPOINT"
             value = "tempo.monitoring.svc.cluster.local:4317"
           }
+          env {
+            name  = "DB_HOST"
+            value = "kronos-postgres-svc.kronos.svc.cluster.local"
+          }
+          env {
+            name  = "DB_PORT"
+            value = "5432"
+          }
+          env {
+            name  = "DB_NAME"
+            value = "kronos"
+          }
+          env {
+            name  = "DB_USER"
+            value = "app"
+          }
+          env {
+            name = "DB_PASSWORD"
+            value_from {
+              secret_key_ref {
+                name = "postgres-secret"
+                key  = "password"
+              }
+            }
+          }
 
           port {
             container_port = 5000
