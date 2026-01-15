@@ -16,7 +16,7 @@ const provider = new WebTracerProvider({
 
 // Configure OTLP exporter - use 
 const exporter = new OTLPTraceExporter({
-  url:  `${import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000' : '')}/frontend-traces`,
+  url:  `${import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000' : '')}/frontend-traces`
 });
 
 // Add span processor
