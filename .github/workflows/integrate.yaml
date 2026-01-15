@@ -54,7 +54,23 @@ jobs:
           cache-to: type=gha,mode=max
       - name: Test backend container
         run: |
-          docker run -d -p 5000:5000 --name backend-test kronos-backend:${{ github.sha }}
+          # Create a user-defined network (once)
+          docker network create kronos-net 2>/dev/null || true
+
+          # Start Postgres on that network
+          docker run -d --name kronos-pg --network kronos-net \
+            -e POSTGRES_DB=kronos \
+            -e POSTGRES_USER=app \
+            -e POSTGRES_PASSWORD=dev-password \
+            -p 5432:5432 \
+            postgres:15-alpine
+
+          # Start backend on the same network; use container DNS name
+          docker run -d --name backend-test --network kronos-net \
+            -e DB_HOST=kronos-pg \
+            -e DB_PASSWORD=dev-password \
+            -p 5000:5000 \
+            kronos-backend:${{ github.sha }}
 
           sleep 5
 
