@@ -50,12 +50,15 @@ jobs:
           cache-to: type=gha,mode=max
       - name: Test backend container
         run: |
-          docker run -d -p 5000:5000 --name backend-test kronos-backend:${{ github.sha }}
+          docker run -d --name kronos-pg -e POSTGRES_DB=kronos -e POSTGRES_USER=app -e POSTGRES_PASSWORD=dev-password -p 5432:5432 postgres:15-alpine
 
+          docker run -d --name backend-test -p 5000:5000 -e DB_HOST=host.docker.internal -e DB_PASSWORD=dev-password kronos-backend:${{ github.sha }}
+          
           sleep 5
 
           echo "Checking Health endpoint"
           curl --fail http://localhost:5000/health || (docker logs backend-test && exit 1)
+
 
           echo "Checking API endpoint"
           curl --fail http://localhost:5000/world-clocks || (docker logs backend-test && exit 1)
@@ -174,7 +177,7 @@ jobs:
 
   build:
     needs: provision-runner
-    if: ${{ always() && (needs.provision-runner.result == 'skipped' || needs.provision-runner.result == 'success') }}
+    if: ${{ always() && needs.provision-runner.result == 'success' }}
     runs-on: self-hosted
     permissions:
       contents: write
