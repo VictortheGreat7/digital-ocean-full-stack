@@ -1,7 +1,6 @@
 # This file contains the main Terraform configuration for creating an Azure Kubernetes Service (AKS) cluster for the Time API application.
 
-resource "random_pet" "kronos" {
-}
+resource "random_pet" "kronos" {}
 
 # Create a new Web Droplet in the nyc2 region
 resource "digitalocean_droplet" "kronos" {
@@ -24,4 +23,8 @@ resource "digitalocean_droplet" "kronos" {
     weekday = "TUE"
     hour    = 8
   }
+}
+
+output "ssh_command" {
+  value = "ssh -i ssh_keys/id_rsa root@${digitalocean_droplet.kronos.ipv4_address}"
 }

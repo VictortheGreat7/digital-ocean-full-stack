@@ -14,9 +14,9 @@ const provider = new WebTracerProvider({
   }),
 });
 
-// Configure OTLP exporter - use HTTP endpoint (4318) for browser
+// Configure OTLP exporter - use 
 const exporter = new OTLPTraceExporter({
-  url:  `${window.location.protocol}//tempo.${window.location.hostname.split('. ').slice(1).join('.')}/v1/traces`,
+  url:  `${import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000' : '')}/frontend-traces`,
 });
 
 // Add span processor

@@ -1,19 +1,21 @@
-from flask import Flask, jsonify, request, g
-from flask_cors import CORS
-from datetime import datetime
-from time import monotonic
+import os
 import pytz
-from prometheus_flask_exporter import PrometheusMetrics
-from prometheus_client import Counter, Histogram
+import psycopg2
+from queue import Queue
+from time import monotonic
+from flask_cors import CORS
+from threading import Thread
+from datetime import datetime
 from opentelemetry import trace
+from flask import Flask, jsonify, request, g
+from opentelemetry.sdk.resources import Resource
+from prometheus_client import Counter, Histogram
+from opentelemetry.sdk.trace import TracerProvider
+from prometheus_flask_exporter import PrometheusMetrics
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
-# import requests
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.sdk.resources import Resource
-import os
 
 # Configure OpenTelemetry
 resource = Resource(attributes={
@@ -30,7 +32,7 @@ trace.set_tracer_provider(tracer_provider)
 tempo_endpoint = os.getenv("TEMPO_ENDPOINT", "tempo.monitoring.svc.cluster.local:4317")
 otlp_exporter = OTLPSpanExporter(
     endpoint=tempo_endpoint,
-    insecure=True  # Use True for internal cluster communication
+    insecure=True  # True for internal cluster communication
 )
 
 # Add span processor to tracer provider
@@ -68,6 +70,50 @@ EXCLUDED_PATHS = [
     '/ready'
 ]
 
+# Database connection setup
+DB_CONFIG = {
+    "host": os.getenv("DB_HOST", "postgres.world-clock-application.svc.cluster.local"),
+    "port": os.getenv("DB_PORT", "5432"),
+    "database": os.getenv("DB_NAME", "kronos"),
+    "user": os.getenv("DB_USER", "app"),
+    "password": os.getenv("DB_PASSWORD", "dev-password-change-in-prod")
+}
+
+# Queue for async logging (non-blocking)
+log_queue = Queue()
+
+def db_worker():
+    """Background thread that writes logs to DB"""
+    conn = None
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+    except Exception as e:
+        app.logger.error(f"DB connection failed: {e}")
+        return
+    
+    while True:
+        try:
+            record = log_queue.get()
+            if record is None:  # Poison pill to stop
+                break
+            
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO requests (path, method, status, latency_ms, timezone, city, trace_id)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """, record)
+                conn.commit()
+        except Exception as e:
+            app.logger.error(f"DB write error: {e}")
+            if conn:
+                conn.rollback()
+    
+    conn.close()
+
+# Start background worker thread
+db_thread = Thread(target=db_worker, daemon=True)
+db_thread.start()
+
 @app.before_request
 def start_timer():
     g.start_time = monotonic()
@@ -99,8 +145,43 @@ def record_metrics(response):
         span.set_attribute("http.route", path)
         span.set_attribute("http.method", request.method)
         span.set_attribute("http.status_code", response.status_code)
+    
+    trace_id = span.get_span_context().trace_id if span else None
+    
+    #Queue the log record (non-blocking)
+    log_queue.put((
+        path,
+        request.method,
+        status,
+        int(duration * 1000),  # latency in ms
+        request.args.get('timezone', 'unknown'),
+        request.args.get('city', 'unknown'),
+        str(trace_id) if trace_id else None
+    ))
 
     return response
+
+@app.route('/frontend-traces', methods=['POST'])
+def frontend_traces():
+    """Proxy endpoint for frontend to send traces"""
+    try:
+        trace_data = request.get_data()
+        headers = {
+            'Content-Type': 'application/json'
+        }
+    
+        import requests
+        response = requests.post(
+            url=f"http://{tempo_endpoint.replace('4317', '4318')}/v1/traces",
+            data=trace_data,
+            headers=headers,
+            timeout=5
+        )
+
+        return jsonify({"status": "traces forwarded"}), response.status_code
+    except Exception as e:
+        app.logger.error(f"Error forwarding traces: {e}")
+        return jsonify({"error": "Failed to forward traces"}), 500
 
 # Major cities with their timezones
 MAJOR_CITIES = {
@@ -208,8 +289,17 @@ def get_current_time():
 # Provide better health and readiness checks later. Currently simple but insufficient.
 @app.route('/health', methods=['GET'])
 def health():
-    """Health check endpoint"""
-    return jsonify({"status": "healthy"})
+    try:
+        conn = psycopg2.connect(**DB_CONFIG, connect_timeout=2)
+        conn.close()
+        db_status = "up"
+    except Exception as e:
+        db_status = f"unhealthy: {str(e)}"
+    
+    return jsonify({
+        "status": "healthy",
+        "database": db_status
+    }), 200 if db_status == "up" else 500
 
 @app.route('/ready', methods=['GET'])
 def ready():

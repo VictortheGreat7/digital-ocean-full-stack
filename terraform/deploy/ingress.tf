@@ -1,3 +1,16 @@
+module "nginx-controller" {
+  source  = "terraform-iaac/nginx-controller/helm"
+  version = ">=2.3.0"
+
+  timeout = 900
+
+  depends_on = [digitalocean_kubernetes_cluster.kronos]
+}
+
+output "ingress_ip" {
+  value = data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip
+}
+
 # Ingress Webhook Check: This makes sure the ingress controller's admission webhook is ready before creating ingress resources.
 resource "null_resource" "wait_for_ingress_webhook" {
   provisioner "local-exec" {
@@ -184,7 +197,7 @@ resource "helm_release" "cert_manager" {
 resource "kubernetes_secret_v1" "cloudflare_api" {
   metadata {
     name      = "cloudflare-api"
-    namespace = "cert-manager"
+    namespace = helm_release.cert_manager.namespace
   }
 
   data = {
@@ -200,7 +213,7 @@ resource "helm_release" "cert_manager_prod_issuer" {
   chart      = "cert-manager-issuers"
   name       = "cert-manager-prod-issuer"
   repository = "https://charts.adfinis.com"
-  namespace  = "cert-manager"
+  namespace  = helm_release.cert_manager.namespace
 
   values = [
     <<-EOT
@@ -274,7 +287,7 @@ resource "cloudflare_dns_record" "kronos" {
 resource "kubernetes_ingress_v1" "kronos_frontend" {
   metadata {
     name      = "kronos-frontend-ingress"
-    namespace = "kronos"
+    namespace = kubernetes_service_v1.kronos_frontend.metadata[0].namespace
     annotations = {
       "cert-manager.io/cluster-issuer"                 = "letsencrypt-prod"
       "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
@@ -318,7 +331,7 @@ resource "kubernetes_ingress_v1" "kronos_frontend" {
 resource "kubernetes_ingress_v1" "kronos_backend" {
   metadata {
     name      = "kronos-backend-ingress"
-    namespace = "kronos"
+    namespace = kubernetes_service_v1.kronos_backend.metadata[0].namespace
     annotations = {
       "nginx.ingress.kubernetes.io/rewrite-target" = "/$2"
       "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"

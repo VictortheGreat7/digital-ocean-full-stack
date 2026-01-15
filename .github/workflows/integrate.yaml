@@ -1,9 +1,9 @@
 name: Subsequent Builds and Deployments
 
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
   workflow_dispatch:
 
 jobs:
@@ -160,10 +160,6 @@ jobs:
           mkdir -p ~/.terraform.d/plugin-cache
           echo 'plugin_cache_dir   = "$HOME/.terraform.d/plugin-cache"' > ~/.terraformrc
 
-          terraform init
-          terraform providers
-          terraform validate
-
           cat <<EOF > terraform.tfvars.json
           {
             "github_runner_token": "$RUNNER_TOKEN",
@@ -172,6 +168,10 @@ jobs:
             "cloudflare_zone_id": "$CLOUDFLARE_ZONE_ID"
           }
           EOF
+
+          terraform init
+          terraform providers
+          terraform validate
           
           terraform apply --auto-approve
         working-directory: ./terraform

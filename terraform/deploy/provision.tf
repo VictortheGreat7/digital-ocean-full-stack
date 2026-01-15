@@ -38,6 +38,12 @@ resource "digitalocean_kubernetes_cluster" "kronos" {
   destroy_all_associated_resources = true
 
   tags = [digitalocean_tag.kronos.name]
+
+  depends_on = [digitalocean_droplet.kronos]
+}
+
+output "doks_cluster_name" {
+  value = digitalocean_kubernetes_cluster.kronos.name
 }
 
 provider "kubernetes" {
@@ -82,42 +88,4 @@ provider "kubectl" {
   cluster_ca_certificate = base64decode(
     digitalocean_kubernetes_cluster.kronos.kube_config[0].cluster_ca_certificate
   )
-}
-
-resource "kubernetes_namespace_v1" "kronos" {
-  metadata {
-    name = "kronos"
-  }
-
-  depends_on = [digitalocean_kubernetes_cluster.kronos]
-}
-
-resource "kubernetes_config_map_v1" "kronos_config" {
-  metadata {
-    name      = "kronos-config"
-    namespace = "kronos"
-  }
-
-  data = {
-    TIME_ZONE = "UTC"
-  }
-
-  depends_on = [kubernetes_namespace_v1.kronos]
-}
-
-module "nginx-controller" {
-  source  = "terraform-iaac/nginx-controller/helm"
-  version = ">=2.3.0"
-
-  timeout = 900
-
-  depends_on = [digitalocean_kubernetes_cluster.kronos]
-}
-
-output "doks_cluster_name" {
-  value = digitalocean_kubernetes_cluster.kronos.name
-}
-
-output "ingress_ip" {
-  value = data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip
 }

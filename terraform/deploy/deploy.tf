@@ -1,10 +1,204 @@
+resource "kubernetes_namespace_v1" "kronos" {
+  metadata {
+    name = "kronos"
+  }
+
+  depends_on = [digitalocean_kubernetes_cluster.kronos]
+}
+
+resource "kubernetes_config_map_v1" "kronos_config" {
+  metadata {
+    name      = "${kubernetes_namespace_v1.kronos.metadata[0].name}-config"
+    namespace = kubernetes_namespace_v1.kronos.metadata[0].name
+  }
+
+  data = {
+    TIME_ZONE = "UTC"
+  }
+
+  depends_on = [kubernetes_namespace_v1.kronos]
+}
+
+resource "kubernetes_config_map_v1" "psql_config" {
+  metadata {
+    name      = "postgres-init"
+    namespace = kubernetes_namespace_v1.kronos.metadata[0].name
+  }
+
+  data = {
+    init.sql = <<-EOF
+      CREATE TABLE IF NOT EXISTS requests (
+        id SERIAL PRIMARY KEY,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        path VARCHAR(255),
+        method VARCHAR(10),
+        status INT,
+        latency_ms FLOAT,
+        timezone VARCHAR(100),
+        city VARCHAR(100),
+        trace_id VARCHAR(255)
+      );
+
+      CREATE INDEX idx_created_at ON requests(created_at DESC);
+      CREATE INDEX idx_status ON requests(status);
+      CREATE INDEX idx_path ON requests(path);
+    EOF
+  }
+
+  depends_on = [kubernetes_namespace_v1.kronos]
+}
+
+resource "kubernetes_stateful_set_v1" "postgres" {
+  metadata {
+    name = "postgres"
+    namespace = kubernetes_namespace_v1.kronos.metadata[0].name
+  }
+
+  spec {
+    service_name = "postgres"
+    replicas     = 1
+
+    selector {
+      match_labels = {
+        app = "postgres"
+      }
+    }
+
+    template {
+      metadata {
+        labels = {
+          app = "postgres"
+        }
+      }
+
+      spec {
+        container {
+          name              = "postgres"
+          image             = "postgres:15-alpine"
+          image_pull_policy = "IfNotPresent"
+
+          port {
+            container_port = 5432
+            name          = "postgres"
+          }
+
+          env {
+            name  = "POSTGRES_DB"
+            value = "kronos"
+          }
+          env {
+            name  = "POSTGRES_USER"
+            value = "app"
+          }
+          env {
+            name  = "POSTGRES_PASSWORD"
+            valueFrom {
+              secret_key_ref {
+                name = "postgres-secret"
+                key  = "password"
+              }
+            }
+          }
+
+          volume_mount {
+            name       = "postgres-storage"
+            mount_path = "/var/lib/postgresql/data"
+            sub_path   = "postgres"
+          }
+          volume_mount {
+            name       = "init-script"
+            mount_path = "/docker-entrypoint-initdb.d"
+          }
+
+          liveness_probe {
+            exec {
+              command = ["/bin/sh", "-c", "pg_isready -U app -d kronos"]
+            }
+            initial_delay_seconds = 30
+            period_seconds        = 10
+          }
+        }
+
+        termination_grace_period_seconds = 300
+
+        volume {
+          name = "init-script"
+          config_map {
+            name = "postgres-init"
+          }
+        }
+      }
+    }
+
+    volume_claim_template {
+      metadata {
+        name = "postgres-storage"
+      }
+
+      spec {
+        access_modes       = ["ReadWriteOnce"]
+        storage_class_name = "do-block-storage"
+
+        resources {
+          requests = {
+            storage = "5Gi"
+          }
+        }
+      }
+    }
+
+    persistent_volume_claim_retention_policy {
+      when_deleted = "Delete"
+      when_scaled  = "Delete"
+    }
+  }
+}
+
+resource "kubernetes_service_v1" "kronos_postgres" {
+  metadata {
+    name      = "${kubernetes_namespace_v1.kronos.metadata[0].name}-postgres-svc"
+    namespace = kubernetes_namespace_v1.kronos.metadata[0].name
+  }
+
+  spec {
+    cluster_ip = "None"
+    selector = {
+      app         = "postgres"
+    }
+
+    port {
+      port        = 5432
+      target_port = 5432
+    }
+
+    type = "ClusterIP"
+  }
+
+  depends_on = [kubernetes_deployment_v1.kronos_backend]
+}
+
+resource "kubernetes_secret_v1" "postgres_secret" {
+  metadata {
+    name      = "postgres-secret"
+    namespace = kubernetes_namespace_v1.kronos.metadata[0].name
+  }
+
+  data = {
+    password = "dev-password-change-in-prod"
+  }
+
+  type = "Opaque"
+
+  depends_on = [helm_release.cert_manager]
+}
+
 # Backend Deployment
 resource "kubernetes_deployment_v1" "kronos_backend" {
   metadata {
-    name      = "kronos-backend"
-    namespace = "kronos"
+    name      = "${kubernetes_namespace_v1.kronos.metadata[0].name}-backend"
+    namespace = kubernetes_namespace_v1.kronos.metadata[0].name
     labels = {
-      app         = "kronos-app"
+      app         = "${kubernetes_namespace_v1.kronos.metadata[0].name}-app"
       component   = "backend"
       environment = "development"
     }
@@ -22,7 +216,7 @@ resource "kubernetes_deployment_v1" "kronos_backend" {
 
     selector {
       match_labels = {
-        app         = "kronos-app"
+        app         = "${kubernetes_namespace_v1.kronos.metadata[0].name}-app"
         component   = "backend"
         environment = "development"
       }
@@ -31,7 +225,7 @@ resource "kubernetes_deployment_v1" "kronos_backend" {
     template {
       metadata {
         labels = {
-          app         = "kronos-app"
+          app         = "${kubernetes_namespace_v1.kronos.metadata[0].name}-app"
           component   = "backend"
           environment = "development"
         }
@@ -96,13 +290,13 @@ resource "kubernetes_deployment_v1" "kronos_backend" {
 # Backend Service
 resource "kubernetes_service_v1" "kronos_backend" {
   metadata {
-    name      = "kronos-backend-svc"
-    namespace = "kronos"
+    name      = "${kubernetes_namespace_v1.kronos.metadata[0].name}-backend-svc"
+    namespace = kubernetes_namespace_v1.kronos.metadata[0].name
   }
 
   spec {
     selector = {
-      app         = "kronos-app"
+      app         = "${kubernetes_namespace_v1.kronos.metadata[0].name}-app"
       component   = "backend"
       environment = "development"
     }
@@ -161,10 +355,10 @@ resource "kubernetes_service_v1" "kronos_backend" {
 # Frontend Deployment
 resource "kubernetes_deployment_v1" "kronos_frontend" {
   metadata {
-    name      = "kronos-frontend"
-    namespace = "kronos"
+    name      = "${kubernetes_namespace_v1.kronos.metadata[0].name}-frontend"
+    namespace = kubernetes_namespace_v1.kronos.metadata[0].name
     labels = {
-      app         = "kronos-app"
+      app         = "${kubernetes_namespace_v1.kronos.metadata[0].name}-app"
       component   = "frontend"
       environment = "development"
     }
@@ -182,7 +376,7 @@ resource "kubernetes_deployment_v1" "kronos_frontend" {
 
     selector {
       match_labels = {
-        app         = "kronos-app"
+        app         = "${kubernetes_namespace_v1.kronos.metadata[0].name}-app"
         component   = "frontend"
         environment = "development"
       }
@@ -191,7 +385,7 @@ resource "kubernetes_deployment_v1" "kronos_frontend" {
     template {
       metadata {
         labels = {
-          app         = "kronos-app"
+          app         = "${kubernetes_namespace_v1.kronos.metadata[0].name}-app"
           component   = "frontend"
           environment = "development"
         }
@@ -252,13 +446,13 @@ resource "kubernetes_deployment_v1" "kronos_frontend" {
 # Frontend Service
 resource "kubernetes_service_v1" "kronos_frontend" {
   metadata {
-    name      = "kronos-frontend-svc"
-    namespace = "kronos"
+    name      = "${kubernetes_namespace_v1.kronos.metadata[0].name}-frontend-svc"
+    namespace = kubernetes_namespace_v1.kronos.metadata[0].name
   }
 
   spec {
     selector = {
-      app         = "kronos-app"
+      app         = "${kubernetes_namespace_v1.kronos.metadata[0].name}-app"
       component   = "frontend"
       environment = "development"
     }

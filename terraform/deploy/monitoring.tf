@@ -126,24 +126,7 @@ resource "helm_release" "tempo" {
     {
       name  = "persistence.size"
       value = "5Gi"
-    },
-    # {
-    #   name = "tempoQuery.enabled"
-    #   value = "true"
-    # },
-    # # Tempo ingress
-    # {
-    #   name  = "tempoQuery.ingress.enabled"
-    #   value = "true"
-    # },
-    # {
-    #   name = "tempoQuery.ingress.ingressClassName"
-    #   value = "nginx"
-    # },
-    # {
-    #   name  = "tempoQuery.ingress.hosts[0]"
-    #   value = "tempo.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
-    # }
+    }
   ]
 
   depends_on = [helm_release.kube_prometheus_stack, helm_release.cert_manager_prod_issuer]
