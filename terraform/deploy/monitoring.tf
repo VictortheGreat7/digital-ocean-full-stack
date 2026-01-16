@@ -180,26 +180,40 @@ resource "helm_release" "loki" {
 
   values = [
     yamlencode({
-      deploymentMode = "SingleBinary"
+      deploymentMode = "SimpleScalable"
+
+      minio = {
+        enabled = true
+      }
 
       loki = {
         auth_enabled = false
+        
         commonConfig = {
           replication_factor = 1
-          ring = {
-            kvstore = {
-              store = "inmemory"
-            }
+        }
+
+        storage = {
+          type = "s3"
+          bucketNames = {
+            chunks = "chunks"
+            ruler  = "ruler"
+            admin  = "admin"
+          }
+          s3 = {
+            endpoint = "http://loki-minio.monitoring.svc.cluster.local:9000"
+            secretAccessKey = "loki12345"
+            accessKeyId     = "loki"
+            s3ForcePathStyle = true
+            insecure         = true
           }
         }
-        storage = {
-          type = "filesystem"
-        }
+
         schemaConfig = {
           configs = [{
-            from         = "2026-01-16"
+            from         = "2024-04-01"
             store        = "tsdb"
-            object_store = "filesystem"
+            object_store = "s3"
             schema       = "v13"
             index = {
               prefix = "index_"
@@ -207,51 +221,29 @@ resource "helm_release" "loki" {
             }
           }]
         }
-        limits_config = {
-          allow_structured_metadata = true
-        }
       }
 
-      singleBinary = {
-        replicas = 1
-        persistence = {
-          enabled          = true
-          storageClassName = "do-block-storage"
-          size             = "5Gi"
-        }
-        readinessProbe = {
-          httpGet = {
-            path = "/loki/api/v1/status/buildinfo"
-          }
-          initialDelaySeconds = 20
-        }
-        memberlist = {
-          enabled = false
-        }
-      }
-
-      # Explicitly disable microservices components to ensure SingleBinary works
-      read = {
-        replicas = 0
-      }
       write = {
-        replicas = 0
+        replicas = 2
+        persistence = {
+          size = "10Gi"
+          storageClass = "do-block-storage"
+        }
+      }
+      read = {
+        replicas = 2
       }
       backend = {
-        replicas = 0
-      }
-
-      monitoring = {
-        selfMonitoring = {
-          grafanaAgent = {
-            installOperator = false
-          }
+        replicas = 2
+        persistence = {
+          size = "10Gi"
+          storageClass = "do-block-storage"
         }
       }
     })
   ]
 
-  depends_on = [helm_release.kube_prometheus_stack, helm_release.cert_manager_prod_issuer]
+  depends_on = [helm_release.kube_prometheus_stack]
 }
 
 resource "helm_release" "alloy" {
