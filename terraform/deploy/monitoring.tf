@@ -239,6 +239,14 @@ resource "helm_release" "loki" {
       name = "loki.limits_config.allow_structured_metadata"
       value = "true"
     },
+    # {
+    #   name  = "singleBinary.memberlist.enabled"
+    #   value = "false"
+    # },
+    {
+      name  = "singleBinary.memberlist.joinMembers"
+      value = "loki-0.loki.monitoring.svc.cluster.local"
+    },
     {
       name  = "read.replicas"
       value = "0"
