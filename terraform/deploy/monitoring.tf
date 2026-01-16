@@ -216,6 +216,14 @@ resource "helm_release" "loki" {
       value = "5Gi"
     },
     {
+      name  = "singleBinary.readinessProbe.httpGet.path"
+      value = "/loki/api/v1/status/buildinfo"
+    }, 
+    {
+      name  = "singleBinary.readinessProbe.initialDelaySeconds"
+      value = "20"
+    },
+    {
       name  = "loki.schemaConfig.configs[0].from"
       value = "2026-01-16"
     },
