@@ -75,8 +75,8 @@ resource "helm_release" "kube_prometheus_stack" {
     },
     # Grafana ingress
     {
-    name  = "grafana.ingress.enabled"
-    value = "true"
+      name  = "grafana.ingress.enabled"
+      value = "true"
     },
     {
       name  = "grafana.ingress.ingressClassName"
@@ -177,31 +177,31 @@ resource "helm_release" "loki" {
 
   set = [
     {
-      name = "loki.auth_enabled"
+      name  = "loki.auth_enabled"
       value = "false"
     },
     {
-      name = "loki.commonConfig.replication_factor"
+      name  = "loki.commonConfig.replication_factor"
       value = "1"
     },
     {
-      name = "loki.storage.type"
+      name  = "loki.storage.type"
       value = "filesystem"
     },
     {
-      name = "singleBinary.replicas"
+      name  = "singleBinary.replicas"
       value = "1"
     },
     {
-      name = "singleBinary.persistence.enabled"
+      name  = "singleBinary.persistence.enabled"
       value = "true"
     },
     {
-      name = "singleBinary.persistence.storageClassName"
+      name  = "singleBinary.persistence.storageClassName"
       value = "do-block-storage"
     },
     {
-      name = "singleBinary.persistence.size"
+      name  = "singleBinary.persistence.size"
       value = "5Gi"
     },
     # {
@@ -209,7 +209,7 @@ resource "helm_release" "loki" {
     #   value = "false"
     # },
     {
-      name = "monitoring.selfMonitoring.grafanaAgent.installOperator"
+      name  = "monitoring.selfMonitoring.grafanaAgent.installOperator"
       value = "false"
     },
     # {
@@ -234,10 +234,10 @@ resource "helm_release" "loki" {
 }
 
 resource "helm_release" "alloy" {
-  name = "alloy"
-  repository = "https://grafana.github.io/helm-charts"
-  chart = "alloy"
-  namespace = helm_release.kube_prometheus_stack.namespace
+  name             = "alloy"
+  repository       = "https://grafana.github.io/helm-charts"
+  chart            = "alloy"
+  namespace        = helm_release.kube_prometheus_stack.namespace
   create_namespace = false
 
   values = [
@@ -307,18 +307,18 @@ resource "kubernetes_config_map_v1" "grafana_loki_datasource" {
       apiVersion = 1
       datasources = [
         {
-          name      = "Loki"
-          type      = "loki"
-          access    = "proxy"
-          url       = "http://loki.monitoring:3100"
+          name   = "Loki"
+          type   = "loki"
+          access = "proxy"
+          url    = "http://loki.monitoring:3100"
           jsonData = {
             maxLines = 1000
             derivedFields = [
               {
                 datasourceUid = "tempo"
-                matcherRegex = "trace_id=(\\w+)"
-                name = "Trace ID"
-                url = "$${__value.raw}"
+                matcherRegex  = "trace_id=(\\w+)"
+                name          = "Trace ID"
+                url           = "$${__value.raw}"
               }
             ]
           }

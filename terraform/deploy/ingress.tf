@@ -217,7 +217,7 @@ resource "kubernetes_ingress_v1" "kronos_backend" {
     name      = "kronos-backend-ingress"
     namespace = kubernetes_service_v1.kronos_backend.metadata[0].namespace
     annotations = {
-      "nginx.ingress.kubernetes.io/rewrite-target" = "/$2"
+      "nginx.ingress.kubernetes.io/rewrite-target"     = "/$2"
       "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
     }
   }

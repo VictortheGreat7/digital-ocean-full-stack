@@ -13,7 +13,7 @@ resource "helm_release" "k6_operator" {
     }
   ]
 
-  depends_on = [helm_release.kube_prometheus_stack,helm_release.alloy]
+  depends_on = [helm_release.kube_prometheus_stack, helm_release.alloy]
 }
 
 # ConfigMap with K6 test script
@@ -40,7 +40,7 @@ resource "kubernetes_manifest" "k6_loadtest" {
       namespace = helm_release.kube_prometheus_stack.namespace
     }
     spec = {
-      parallelism = 4  # Run test on 4 pods in parallel
+      parallelism = 4 # Run test on 4 pods in parallel
       script = {
         configMap = {
           name = kubernetes_config_map_v1.k6_test_script.metadata[0].name
@@ -84,7 +84,7 @@ resource "kubernetes_manifest" "k6_service_monitor" {
       }
       endpoints = [
         {
-          port   = "metrics"
+          port     = "metrics"
           interval = "30s"
         }
       ]
@@ -109,7 +109,7 @@ resource "kubernetes_manifest" "k6_alert_rules" {
     spec = {
       groups = [
         {
-          name  = "k6.rules"
+          name     = "k6.rules"
           interval = "30s"
           rules = [
             {
@@ -177,11 +177,11 @@ resource "kubernetes_config_map_v1" "grafana_k6_dashboard" {
           title = "Latency p95/p99"
           targets = [
             {
-              expr = "histogram_quantile(0.95, k6_latency_ms)"
+              expr         = "histogram_quantile(0.95, k6_latency_ms)"
               legendFormat = "p95"
             },
             {
-              expr = "histogram_quantile(0.99, k6_latency_ms)"
+              expr         = "histogram_quantile(0.99, k6_latency_ms)"
               legendFormat = "p99"
             }
           ]

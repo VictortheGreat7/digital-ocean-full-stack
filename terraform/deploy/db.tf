@@ -44,7 +44,7 @@ resource "kubernetes_secret_v1" "postgres_secret" {
 
 resource "kubernetes_stateful_set_v1" "kronos_db" {
   metadata {
-    name = "${kubernetes_namespace_v1.kronos.metadata[0].name}-postgres"
+    name      = "${kubernetes_namespace_v1.kronos.metadata[0].name}-postgres"
     namespace = kubernetes_namespace_v1.kronos.metadata[0].name
   }
 
@@ -63,9 +63,9 @@ resource "kubernetes_stateful_set_v1" "kronos_db" {
     template {
       metadata {
         labels = {
-            app         = "${kubernetes_namespace_v1.kronos.metadata[0].name}-app"
-            component   = "db"
-            environment = "development"
+          app         = "${kubernetes_namespace_v1.kronos.metadata[0].name}-app"
+          component   = "db"
+          environment = "development"
         }
       }
 
@@ -77,7 +77,7 @@ resource "kubernetes_stateful_set_v1" "kronos_db" {
 
           port {
             container_port = 5432
-            name          = "postgres"
+            name           = "postgres"
           }
 
           env {
@@ -89,7 +89,7 @@ resource "kubernetes_stateful_set_v1" "kronos_db" {
             value = "app"
           }
           env {
-            name  = "POSTGRES_PASSWORD"
+            name = "POSTGRES_PASSWORD"
             value_from {
               secret_key_ref {
                 name = "postgres-secret"
