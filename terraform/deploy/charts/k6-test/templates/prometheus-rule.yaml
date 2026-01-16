@@ -1,0 +1,26 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: k6-alerts
+  namespace: {{ .Release.Namespace }}
+  labels:
+    prometheus: kube-prometheus
+spec:
+  groups:
+    - name: k6.rules
+      interval: 30s
+      rules:
+        - alert: K6ErrorRateHigh
+          expr: k6_errors > 0.05
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: K6 load test error rate exceeds 5%
+        - alert: K6P99LatencyHigh
+          expr: histogram_quantile(0.99, k6_latency_ms) > 1000
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: K6 p99 latency exceeds 1000ms
