@@ -223,6 +223,13 @@ resource "helm_release" "loki" {
         }
       }
 
+      chunksCache = {
+        enabled = false
+      }
+      resultsCache = {
+        enabled = false
+      }
+
       singleBinary = {
         replicas = 1
         persistence = {
