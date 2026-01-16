@@ -200,10 +200,6 @@ resource "helm_release" "loki" {
       value = "1"
     },
     {
-      name  = "simpleScalable.replicas"
-      value = "0"
-    },
-    {
       name  = "singleBinary.persistence.enabled"
       value = "true"
     },
@@ -215,29 +211,29 @@ resource "helm_release" "loki" {
       name  = "singleBinary.persistence.size"
       value = "5Gi"
     },
+    {
+      name  = "read.replicas"
+      value = "0"
+    },
+    {
+      name  = "write.replicas"
+      value = "0"
+    },
+    {
+      name  = "backend.replicas"
+      value = "0"
+    },
     # {
     #   name = "monitoring.selfMonitoring.enabled"
     #   value = "false"
     # },
-    {
-      name  = "monitoring.selfMonitoring.grafanaAgent.installOperator"
-      value = "false"
-    },
     # {
     #   name = "test.enabled"
     #   value = "false"
     # },
     {
-      name  = "loki.persistence.enabled"
-      value = "true"
-    },
-    {
-      name  = "loki.persistence.storageClassName"
-      value = "do-block-storage"
-    },
-    {
-      name  = "loki.persistence.size"
-      value = "5Gi"
+      name  = "monitoring.selfMonitoring.grafanaAgent.installOperator"
+      value = "false"
     }
   ]
 
