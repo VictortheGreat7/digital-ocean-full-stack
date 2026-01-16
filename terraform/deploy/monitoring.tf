@@ -212,27 +212,27 @@ resource "helm_release" "loki" {
       value = "5Gi"
     },
     {
-      name  = "singleBinary.schemaConfig.configs[0].from"
+      name  = "loki.schemaConfig.configs[0].from"
       value = "2020-10-24"
     },
     {
-      name  = "singleBinary.schemaConfig.configs[0].store"
+      name  = "loki.schemaConfig.configs[0].store"
       value = "boltdb-shipper"
     },
     {
-      name  = "singleBinary.schemaConfig.configs[0].object_store"
+      name  = "loki.schemaConfig.configs[0].object_store"
       value = "filesystem"
     },
     {
-      name  = "singleBinary.schemaConfig.configs[0].schema"
+      name  = "loki.schemaConfig.configs[0].schema"
       value = "v11"
     },
     {
-      name  = "singleBinary.schemaConfig.configs[0].index.prefix"
+      name  = "loki.schemaConfig.configs[0].index.prefix"
       value = "index_"
     },
     {
-      name  = "singleBinary.schemaConfig.configs[0].index.period"
+      name  = "loki.schemaConfig.configs[0].index.period"
       value = "168h"
     },
     {
