@@ -77,15 +77,18 @@ provider "helm" {
 }
 
 provider "kubectl" {
-  host  = digitalocean_kubernetes_cluster.kronos.endpoint
-  token = digitalocean_kubernetes_cluster.kronos.kube_config[0].token
+  host  = data.digitalocean_kubernetes_cluster.kronos.endpoint
+  token = data.digitalocean_kubernetes_cluster.kronos.kube_config[0].token
+
   client_certificate = base64decode(
-    digitalocean_kubernetes_cluster.kronos.kube_config[0].client_certificate
+    data.digitalocean_kubernetes_cluster.kronos.kube_config[0].client_certificate
   )
   client_key = base64decode(
-    digitalocean_kubernetes_cluster.kronos.kube_config[0].client_key
+    data.digitalocean_kubernetes_cluster.kronos.kube_config[0].client_key
   )
   cluster_ca_certificate = base64decode(
-    digitalocean_kubernetes_cluster.kronos.kube_config[0].cluster_ca_certificate
+    data.digitalocean_kubernetes_cluster.kronos.kube_config[0].cluster_ca_certificate
   )
+
+  load_config_file = false
 }

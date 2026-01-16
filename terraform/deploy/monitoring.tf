@@ -192,8 +192,16 @@ resource "helm_release" "loki" {
       value = "filesystem"
     },
     {
+      name  = "deploymentMode"
+      value = "SingleBinary"
+    },
+    {
       name  = "singleBinary.replicas"
       value = "1"
+    },
+    {
+      name  = "simpleScalable.replicas"
+      value = "0"
     },
     {
       name  = "singleBinary.persistence.enabled"

@@ -84,7 +84,7 @@ spec:
     image: grafana/k6:latest
   script:
     configMap:
-      name: k6-test-script
+      name: ${kubernetes_config_map_v1.k6_test_script.metadata[0].name}
       file: loadtest.js
   env:
     - name: BASE_URL
