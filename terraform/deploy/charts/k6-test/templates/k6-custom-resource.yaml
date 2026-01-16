@@ -15,4 +15,4 @@ spec:
       file: loadtest.js
   env:
     - name: BASE_URL
-      value: "{{ .Values.baseUrl }}"
+      value: "http://kronos.mywonderworks.tech/api"
