@@ -212,6 +212,30 @@ resource "helm_release" "loki" {
       value = "5Gi"
     },
     {
+      name  = "singleBinary.schemaConfig.configs[0].from"
+      value = "2020-10-24"
+    },
+    {
+      name  = "singleBinary.schemaConfig.configs[0].store"
+      value = "boltdb-shipper"
+    },
+    {
+      name  = "singleBinary.schemaConfig.configs[0].object_store"
+      value = "filesystem"
+    },
+    {
+      name  = "singleBinary.schemaConfig.configs[0].schema"
+      value = "v11"
+    },
+    {
+      name  = "singleBinary.schemaConfig.configs[0].index.prefix"
+      value = "index_"
+    },
+    {
+      name  = "singleBinary.schemaConfig.configs[0].index.period"
+      value = "168h"
+    },
+    {
       name  = "read.replicas"
       value = "0"
     },
@@ -222,18 +246,6 @@ resource "helm_release" "loki" {
     {
       name  = "backend.replicas"
       value = "0"
-    },
-    {
-      name  = "loki.persistence.enabled"
-      value = "true"
-    },
-    {
-      name  = "loki.persistence.storageClassName"
-      value = "do-block-storage"
-    },
-    {
-      name  = "loki.persistence.size"
-      value = "5Gi"
     },
     # {
     #   name = "monitoring.selfMonitoring.enabled"
