@@ -87,6 +87,9 @@ resource "helm_release" "kube_prometheus_stack" {
       value = "grafana.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
     }
   ]
+  
+  wait = true
+  timeout = 600
 
   depends_on = [module.nginx-controller, helm_release.cert_manager_prod_issuer]
 }

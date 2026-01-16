@@ -46,32 +46,17 @@ output "doks_cluster_name" {
   value = digitalocean_kubernetes_cluster.kronos.name
 }
 
-# provider "kubernetes" {
-#   host  = digitalocean_kubernetes_cluster.kronos.endpoint
-#   token = digitalocean_kubernetes_cluster.kronos.kube_config[0].token
-#   client_certificate = base64decode(
-#     digitalocean_kubernetes_cluster.kronos.kube_config[0].client_certificate
-#   )
-#   client_key = base64decode(
-#     digitalocean_kubernetes_cluster.kronos.kube_config[0].client_key
-#   )
-#   cluster_ca_certificate = base64decode(
-#     digitalocean_kubernetes_cluster.kronos.kube_config[0].cluster_ca_certificate
-#   )
-# }
-
 provider "kubernetes" {
-  host  = data.digitalocean_kubernetes_cluster.kronos.endpoint
-  token = data.digitalocean_kubernetes_cluster.kronos.kube_config[0].token
-
+  host  = digitalocean_kubernetes_cluster.kronos.endpoint
+  token = digitalocean_kubernetes_cluster.kronos.kube_config[0].token
   client_certificate = base64decode(
-    data.digitalocean_kubernetes_cluster.kronos.kube_config[0].client_certificate
+    digitalocean_kubernetes_cluster.kronos.kube_config[0].client_certificate
   )
   client_key = base64decode(
-    data.digitalocean_kubernetes_cluster.kronos.kube_config[0].client_key
+    digitalocean_kubernetes_cluster.kronos.kube_config[0].client_key
   )
   cluster_ca_certificate = base64decode(
-    data.digitalocean_kubernetes_cluster.kronos.kube_config[0].cluster_ca_certificate
+    digitalocean_kubernetes_cluster.kronos.kube_config[0].cluster_ca_certificate
   )
 }
 
