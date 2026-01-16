@@ -213,11 +213,11 @@ resource "helm_release" "loki" {
     },
     {
       name  = "loki.schemaConfig.configs[0].from"
-      value = "2020-10-24"
+      value = "2026-01-16"
     },
     {
       name  = "loki.schemaConfig.configs[0].store"
-      value = "boltdb-shipper"
+      value = "tsdb"
     },
     {
       name  = "loki.schemaConfig.configs[0].object_store"
@@ -225,7 +225,7 @@ resource "helm_release" "loki" {
     },
     {
       name  = "loki.schemaConfig.configs[0].schema"
-      value = "v11"
+      value = "v13"
     },
     {
       name  = "loki.schemaConfig.configs[0].index.prefix"
@@ -234,6 +234,10 @@ resource "helm_release" "loki" {
     {
       name  = "loki.schemaConfig.configs[0].index.period"
       value = "24h"
+    },
+    {
+      name = "loki.limits_config.allow_structured_metadata"
+      value = "true"
     },
     {
       name  = "read.replicas"
