@@ -6,13 +6,6 @@ resource "helm_release" "k6_operator" {
   namespace        = helm_release.kube_prometheus_stack.namespace
   create_namespace = false
 
-  set = [
-    {
-      name  = "serviceAccount.create"
-      value = "true"
-    }
-  ]
-
   wait = true
   timeout = 600
 
