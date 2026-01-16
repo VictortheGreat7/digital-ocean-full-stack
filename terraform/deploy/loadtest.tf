@@ -3,8 +3,8 @@ resource "helm_release" "k6_operator" {
   name             = "k6-operator"
   repository       = "https://grafana.github.io/helm-charts"
   chart            = "k6-operator"
-  namespace        = helm_release.kube_prometheus_stack.namespace
-  create_namespace = false
+#   namespace        = "k6-operator-system"
+  create_namespace = true
 
   wait = true
   timeout = 600
@@ -16,7 +16,7 @@ resource "helm_release" "k6_operator" {
 resource "kubernetes_config_map_v1" "k6_test_script" {
   metadata {
     name      = "k6-test-script"
-    namespace = helm_release.kube_prometheus_stack.namespace
+    namespace = helm_release.k6_operator.namespace
   }
 
   data = {
@@ -29,7 +29,7 @@ resource "kubernetes_config_map_v1" "k6_test_script" {
 resource "helm_release" "k6_test" {
   name       = "k6-test"
   chart      = "./charts/k6-test"
-  namespace  = helm_release.kube_prometheus_stack.namespace
+  namespace  = helm_release.k6_operator.namespace
 
   values = [
     yamlencode({
