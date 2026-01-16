@@ -222,7 +222,7 @@ resource "helm_release" "loki" {
     {
       name  = "singleBinary.readinessProbe.initialDelaySeconds"
       value = "20"
-    }
+    },
     {
       name  = "loki.schemaConfig.configs[0].from"
       value = "2026-01-16"
