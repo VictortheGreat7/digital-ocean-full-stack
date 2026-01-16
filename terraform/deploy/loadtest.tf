@@ -64,7 +64,7 @@ resource "kubernetes_manifest" "k6_loadtest" {
     }
   }
 
-  depends_on = [helm_release.k6_operator, kubernetes_config_map_v1.k6_test_script]
+  depends_on = [digitalocean_kubernetes_cluster.kronos, helm_release.k6_operator, kubernetes_config_map_v1.k6_test_script]
 }
 
 # Service Monitor to scrape K6 metrics into Prometheus
@@ -91,7 +91,7 @@ resource "kubernetes_manifest" "k6_service_monitor" {
     }
   }
 
-  depends_on = [helm_release.kube_prometheus_stack]
+  depends_on = [digitalocean_kubernetes_cluster.kronos, helm_release.kube_prometheus_stack]
 }
 
 # PrometheusRule for K6 alerts
@@ -140,7 +140,7 @@ resource "kubernetes_manifest" "k6_alert_rules" {
     }
   }
 
-  depends_on = [helm_release.kube_prometheus_stack]
+  depends_on = [digitalocean_kubernetes_cluster.kronos, helm_release.kube_prometheus_stack]
 }
 
 # Grafana Dashboard for K6 results
@@ -190,5 +190,5 @@ resource "kubernetes_config_map_v1" "grafana_k6_dashboard" {
     })
   }
 
-  depends_on = [helm_release.kube_prometheus_stack]
+  depends_on = [digitalocean_kubernetes_cluster.kronos, helm_release.kube_prometheus_stack]
 }
