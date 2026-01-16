@@ -223,6 +223,18 @@ resource "helm_release" "loki" {
       name  = "backend.replicas"
       value = "0"
     },
+    {
+      name  = "loki.persistence.enabled"
+      value = "true"
+    },
+    {
+      name  = "loki.persistence.storageClassName"
+      value = "do-block-storage"
+    },
+    {
+      name  = "loki.persistence.size"
+      value = "5Gi"
+    },
     # {
     #   name = "monitoring.selfMonitoring.enabled"
     #   value = "false"
