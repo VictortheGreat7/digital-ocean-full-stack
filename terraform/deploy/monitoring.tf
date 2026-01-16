@@ -178,6 +178,21 @@ resource "helm_release" "loki" {
   namespace        = helm_release.kube_prometheus_stack.namespace
   create_namespace = false
 
+  values = [
+    yamlencode({
+      singleBinary = {
+        readinessProbe = {
+          httpGet = {
+            path = "/loki/api/v1/status/buildinfo"
+            port = "http-metrics"
+          }
+          initialDelaySeconds = 20
+          timeoutSeconds     = 1
+        }
+      }
+    })
+  ]
+
   set = [
     {
       name  = "loki.auth_enabled"
@@ -218,10 +233,6 @@ resource "helm_release" "loki" {
     {
       name  = "singleBinary.readinessProbe.httpGet.path"
       value = "/loki/api/v1/status/buildinfo"
-    }, 
-    {
-      name  = "singleBinary.readinessProbe.initialDelaySeconds"
-      value = "20"
     },
     {
       name  = "loki.schemaConfig.configs[0].from"
