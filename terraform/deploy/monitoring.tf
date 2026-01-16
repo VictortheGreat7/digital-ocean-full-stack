@@ -178,86 +178,86 @@ resource "helm_release" "loki" {
   namespace        = helm_release.kube_prometheus_stack.namespace
   create_namespace = false
 
-values = [
-    yamlencode({
-      deploymentMode = "SingleBinary"
+  values = [
+      yamlencode({
+        deploymentMode = "SingleBinary"
 
-      loki = {
-        auth_enabled = false
-        
-        commonConfig = {
-          replication_factor = 1
-          ring = {
-            kvstore = {
-              store = "inmemory"
+        loki = {
+          auth_enabled = false
+          
+          commonConfig = {
+            replication_factor = 1
+            ring = {
+              kvstore = {
+                store = "inmemory"
+              }
+            }
+          }
+
+          storage = {
+            type = "filesystem"
+          }
+
+          schemaConfig = {
+            configs = [{
+              from         = "2026-01-16"
+              store        = "tsdb"
+              object_store = "filesystem"
+              schema       = "v13"
+              index = {
+                prefix = "index_"
+                period = "24h"
+              }
+            }]
+          }
+
+          limits_config = {
+            allow_structured_metadata = true
+          }
+        }
+
+        singleBinary = {
+          replicas = 1
+          
+          persistence = {
+            enabled          = true
+            storageClassName = "do-block-storage"
+            size             = "5Gi"
+          }
+
+          memberlist = {
+            enabled = false
+          }
+
+          readinessProbe = {
+            httpGet = {
+              path = "/loki/api/v1/status/buildinfo"
+              port = "http-metrics"
+            }
+            initialDelaySeconds = 20
+            timeoutSeconds      = 1
+          }
+        }
+
+        # Explicitly disable microservices
+        read    = {
+          replicas = 0
+        }
+        write   = {
+          replicas = 0
+        }
+        backend = {
+          replicas = 0
+        }
+
+        monitoring = {
+          selfMonitoring = {
+            grafanaAgent = {
+              installOperator = false
             }
           }
         }
-
-        storage = {
-          type = "filesystem"
-        }
-
-        schemaConfig = {
-          configs = [{
-            from         = "2026-01-16"
-            store        = "tsdb"
-            object_store = "filesystem"
-            schema       = "v13"
-            index = {
-              prefix = "index_"
-              period = "24h"
-            }
-          }]
-        }
-
-        limits_config = {
-          allow_structured_metadata = true
-        }
-      }
-
-      singleBinary = {
-        replicas = 1
-        
-        persistence = {
-          enabled          = true
-          storageClassName = "do-block-storage"
-          size             = "5Gi"
-        }
-
-        memberlist = {
-          enabled = false
-        }
-
-        readinessProbe = {
-          httpGet = {
-            path = "/loki/api/v1/status/buildinfo"
-            port = "http-metrics"
-          }
-          initialDelaySeconds = 20
-          timeoutSeconds      = 1
-        }
-      }
-
-      # Explicitly disable microservices
-      read    = {
-        replicas = 0
-      }
-      write   = {
-        replicas = 0
-      }
-      backend = {
-        replicas = 0
-      }
-
-      monitoring = {
-        selfMonitoring = {
-          grafanaAgent = {
-            installOperator = false
-          }
-        }
-      }
-    })
+      })
   ]
 
   depends_on = [helm_release.kube_prometheus_stack, helm_release.cert_manager_prod_issuer]
