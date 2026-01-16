@@ -178,111 +178,77 @@ resource "helm_release" "loki" {
   namespace        = helm_release.kube_prometheus_stack.namespace
   create_namespace = false
 
-  set = [
-    {
-      name  = "loki.auth_enabled"
-      value = "false"
-    },
-    {
-      name  = "loki.commonConfig.replication_factor"
-      value = "1"
-    },
-    {
-      name  = "loki.commonConfig.ring.kvstore.store"
-      value = "inmemory"
-    },
-    {
-      name  = "loki.storage.type"
-      value = "filesystem"
-    },
-    {
-      name  = "deploymentMode"
-      value = "SingleBinary"
-    },
-    {
-      name  = "singleBinary.replicas"
-      value = "1"
-    },
-    {
-      name  = "singleBinary.persistence.enabled"
-      value = "true"
-    },
-    {
-      name  = "singleBinary.persistence.storageClassName"
-      value = "do-block-storage"
-    },
-    { 
-      name  = "singleBinary.persistence.size"
-      value = "5Gi"
-    },
-    {
-      name  = "singleBinary.readinessProbe.httpGet.path"
-      value = "/loki/api/v1/status/buildinfo"
-    }, 
-    {
-      name  = "singleBinary.readinessProbe.initialDelaySeconds"
-      value = "20"
-    },
-    {
-      name  = "loki.schemaConfig.configs[0].from"
-      value = "2026-01-16"
-    },
-    {
-      name  = "loki.schemaConfig.configs[0].store"
-      value = "tsdb"
-    },
-    {
-      name  = "loki.schemaConfig.configs[0].object_store"
-      value = "filesystem"
-    },
-    {
-      name  = "loki.schemaConfig.configs[0].schema"
-      value = "v13"
-    },
-    {
-      name  = "loki.schemaConfig.configs[0].index.prefix"
-      value = "index_"
-    },
-    {
-      name  = "loki.schemaConfig.configs[0].index.period"
-      value = "24h"
-    },
-    {
-      name = "loki.limits_config.allow_structured_metadata"
-      value = "true"
-    },
-    {
-      name  = "singleBinary.memberlist.enabled"
-      value = "false"
-    },
-    # {
-    #   name  = "singleBinary.memberlist.joinMembers"
-    #   value = "loki-0.loki.monitoring.svc.cluster.local"
-    # },
-    {
-      name  = "read.replicas"
-      value = "0"
-    },
-    {
-      name  = "write.replicas"
-      value = "0"
-    },
-    {
-      name  = "backend.replicas"
-      value = "0"
-    },
-    # {
-    #   name = "monitoring.selfMonitoring.enabled"
-    #   value = "false"
-    # },
-    # {
-    #   name = "test.enabled"
-    #   value = "false"
-    # },
-    {
-      name  = "monitoring.selfMonitoring.grafanaAgent.installOperator"
-      value = "false"
-    }
+  values = [
+    yamlencode({
+      deploymentMode = "SingleBinary"
+
+      loki = {
+        auth_enabled = false
+        commonConfig = {
+          replication_factor = 1
+          ring = {
+            kvstore = {
+              store = "inmemory"
+            }
+          }
+        }
+        storage = {
+          type = "filesystem"
+        }
+        schemaConfig = {
+          configs = [{
+            from         = "2026-01-16"
+            store        = "tsdb"
+            object_store = "filesystem"
+            schema       = "v13"
+            index = {
+              prefix = "index_"
+              period = "24h"
+            }
+          }]
+        }
+        limits_config = {
+          allow_structured_metadata = true
+        }
+      }
+
+      singleBinary = {
+        replicas = 1
+        persistence = {
+          enabled          = true
+          storageClassName = "do-block-storage"
+          size             = "5Gi"
+        }
+        readinessProbe = {
+          httpGet = {
+            path = "/loki/api/v1/status/buildinfo"
+          }
+          initialDelaySeconds = 20
+        }
+        memberlist = {
+          enabled = false
+        }
+      }
+
+      # Explicitly disable microservices components to ensure SingleBinary works
+      read = {
+        replicas = 0
+      }
+      write = {
+        replicas = 0
+      }
+      backend = {
+        replicas = 0
+      }
+
+      monitoring = {
+        selfMonitoring = {
+          grafanaAgent = {
+            installOperator = false
+          }
+        }
+      }
+    })
   ]
 
   depends_on = [helm_release.kube_prometheus_stack, helm_release.cert_manager_prod_issuer]
