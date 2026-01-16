@@ -233,7 +233,7 @@ resource "helm_release" "loki" {
     },
     {
       name  = "loki.schemaConfig.configs[0].index.period"
-      value = "168h"
+      value = "24h"
     },
     {
       name  = "read.replicas"
