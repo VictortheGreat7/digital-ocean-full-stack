@@ -302,8 +302,8 @@ resource "helm_release" "alloy" {
 
               // Parse timestamp
               stage.timestamp {
-                source = "timestamp"
-                format = "RFC3339"
+                source = "timestamp",
+                format = "RFC3339",
               }
 
               // Add detected level as a label
