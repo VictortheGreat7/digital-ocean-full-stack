@@ -14,7 +14,6 @@ resource "digitalocean_droplet" "kronos" {
     {
       github_runner_token = var.github_runner_token
       do_api_token        = var.do_token
-      k8s_cluster_name    = digitalocean_kubernetes_cluster.kronos.name
     }
   )
   ssh_keys          = [53204003]

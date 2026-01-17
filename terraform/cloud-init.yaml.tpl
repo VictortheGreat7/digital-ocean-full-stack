@@ -78,7 +78,6 @@ runcmd:
     tar xf /home/githubrunner/doctl-1.146.0-linux-amd64.tar.gz && \
     mv /home/githubrunner/doctl /usr/local/bin && \
     doctl auth init -t ${do_api_token} && \
-    doctl kubernetes cluster kubeconfig save ${k8s_cluster_name}
     cd /home/githubrunner/actions-runner && \
     ./svc.sh install githubrunner && \
     ./svc.sh start
