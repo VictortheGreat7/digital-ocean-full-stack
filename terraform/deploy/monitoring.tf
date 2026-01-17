@@ -279,13 +279,13 @@ resource "helm_release" "alloy" {
           content = <<-EOT
             // Service discovery for pods
             discovery.kubernetes "pods" {
-              role = "pod",
+              role = "pod"
             }
 
             // Collect logs from pods
             loki.source.kubernetes "pods" {
-              targets = discovery.kubernetes.pods.targets,
-              forward_to = [loki.process.pod_logs.receiver],
+              targets = discovery.kubernetes.pods.targets
+              forward_to = [loki.process.pod_logs.receiver]
             }
 
             // Process and add labels to pod logs
@@ -302,8 +302,8 @@ resource "helm_release" "alloy" {
 
               // Parse timestamp
               stage.timestamp {
-                source = "timestamp",
-                format = "RFC3339",
+                source = "timestamp"
+                format = "RFC3339"
               }
 
               // Add detected level as a label
@@ -319,7 +319,7 @@ resource "helm_release" "alloy" {
             // Write logs to Loki
             loki.write "loki" {
               endpoint {
-                url = "http://loki.monitoring:3100/loki/api/v1/push",
+                url = "http://loki.monitoring:3100/loki/api/v1/push"
               }
             }
           EOT
