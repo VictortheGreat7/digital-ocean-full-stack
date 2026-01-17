@@ -72,10 +72,10 @@ export function handleSummary(data) {
   };
 }
 
-function textSummary(data, options) {
-  let summary = 'K6 Test Summary\\n';
-  summary += '===============\\n';
-  summary += 'Total Requests: ' + data.metrics.requests_total.value + '\\n';
-  summary += 'Error Rate: ' + (data.metrics.errors.value * 100).toFixed(2) + '%\\n';
-  return summary;
-}
+// function customtextSummary(data) {
+//   let summary = 'K6 Test Summary\\n';
+//   summary += '===============\\n';
+//   summary += 'Total Requests: ' + data.metrics.requests_total.value + '\\n';
+//   summary += 'Error Rate: ' + (data.metrics.errors.value * 100).toFixed(2) + '%\\n';
+//   return summary;
+// }
