@@ -10,6 +10,8 @@ let requestCount = new Counter('requests_total');
 
 const BASE_URL = __ENV.BASE_URL || 'http://localhost';
 
+console.log(`Using BASE_URL: ${BASE_URL}`);
+
 const TIMEZONES = [
   'America/New_York', 'Europe/London', 'Asia/Tokyo', 'Australia/Sydney',
   'Asia/Dubai', 'Asia/Singapore', 'America/Sao_Paulo', 'Asia/Kolkata',
