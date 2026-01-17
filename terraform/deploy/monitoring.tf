@@ -297,7 +297,6 @@ resource "helm_release" "alloy" {
                   timestamp = "timestamp",
                   message   = "message",
                 }
-                on_error = "keep"
               }
 
               // Parse timestamp
