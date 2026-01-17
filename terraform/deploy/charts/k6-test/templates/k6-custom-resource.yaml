@@ -15,7 +15,7 @@ spec:
       value: experimental-prometheus-rw
     # Prometheus Remote Write endpoint
     - name: K6_PROMETHEUS_RW_SERVER_URL
-      value: http://alloy.{{ .Values.prometheusNamespace }}.svc.cluster.local:12345
+      value: http://alloy.{{ .Values.prometheusNamespace }}.svc.cluster.local:9999/api/v1/write
     # Configure which trend stats to export (p95, p99, max, etc.)
     - name: K6_PROMETHEUS_RW_TREND_STATS
       value: "p(95),p(99),min,max,avg"
