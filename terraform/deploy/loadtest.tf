@@ -35,6 +35,7 @@ resource "helm_release" "k6_test" {
     yamlencode({
       baseUrl       = "${var.subdomains[0]}.${var.domain}/api"
       configMapName = kubernetes_config_map_v1.k6_test_script.metadata[0].name
+      prometheusNamespace  = helm_release.kube_prometheus_stack.namespace
     })
   ]
 
@@ -59,33 +60,95 @@ resource "kubernetes_config_map_v1" "grafana_k6_dashboard" {
   data = {
     "k6-dashboard.json" = jsonencode({
       title = "K6 Load Test Results"
+      uid   = "k6-loadtest"
       panels = [
         {
-          title = "Request Rate"
+          title = "HTTP Request Rate"
+          gridPos = {
+            x = 0
+            y = 0
+            w = 12
+            h = 8
+          }
           targets = [
             {
-              expr = "rate(k6_requests_total[1m])"
+              expr         = "rate(k6_http_reqs_total[1m])"
+              legendFormat = "Requests/sec"
             }
           ]
         },
         {
-          title = "Error Rate"
+          title = "HTTP Request Duration p95"
+          gridPos = {
+            x = 12
+            y = 0
+            w = 12
+            h = 8
+          }
           targets = [
             {
-              expr = "rate(k6_errors[1m])"
+              expr         = "k6_http_req_duration_p95"
+              legendFormat = "p95 latency"
             }
           ]
         },
         {
-          title = "Latency p95/p99"
+          title = "HTTP Request Duration p99"
+          gridPos = {
+            x = 0
+            y = 8
+            w = 12
+            h = 8
+          }
           targets = [
             {
-              expr         = "histogram_quantile(0.95, k6_latency_ms)"
-              legendFormat = "p95"
-            },
+              expr         = "k6_http_req_duration_p99"
+              legendFormat = "p99 latency"
+            }
+          ]
+        },
+        {
+          title = "Virtual Users"
+          gridPos = {
+            x = 12
+            y = 8
+            w = 12
+            h = 8
+          }
+          targets = [
             {
-              expr         = "histogram_quantile(0.99, k6_latency_ms)"
-              legendFormat = "p99"
+              expr         = "k6_vus"
+              legendFormat = "Active VUs"
+            }
+          ]
+        },
+        {
+          title = "HTTP Failures"
+          gridPos = {
+            x = 0
+            y = 16
+            w = 12
+            h = 8
+          }
+          targets = [
+            {
+              expr         = "rate(k6_http_req_failed_total[1m])"
+              legendFormat = "Failed requests/sec"
+            }
+          ]
+        },
+        {
+          title = "Iterations"
+          gridPos = {
+            x = 12
+            y = 16
+            w = 12
+            h = 8
+          }
+          targets = [
+            {
+              expr         = "rate(k6_iterations_total[1m])"
+              legendFormat = "Iterations/sec"
             }
           ]
         }

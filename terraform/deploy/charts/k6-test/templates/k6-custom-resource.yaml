@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   parallelism: 4
-  arguments: "--vus 10 --duration 60s"
+  cleanup: preStop
   runner:
     image: grafana/k6:latest
   script:
@@ -15,4 +15,16 @@ spec:
       file: loadtest.js
   env:
     - name: BASE_URL
-      value: "http://kronos.mywonderworks.tech/api"
+      value: {{ .Values.baseUrl }}
+    # Enable Prometheus Remote Write output
+    - name: K6_OUT
+      value: experimental-prometheus-rw
+    # Prometheus Remote Write endpoint
+    - name: K6_PROMETHEUS_RW_SERVER_URL
+      value: http://kube-prometheus-stack-prometheus.{{ .Values.prometheusNamespace }}:9090/api/v1/write
+    # Configure which trend stats to export (p95, p99, max, etc.)
+    - name: K6_PROMETHEUS_RW_TREND_STATS
+      value: "p(95),p(99),min,max,avg"
+    # Optional: Enable trend as native histograms for better accuracy
+    - name: K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM
+      value: "true"

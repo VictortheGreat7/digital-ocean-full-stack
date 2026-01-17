@@ -9,7 +9,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Update this to your actual endpoint
-BASE_URL = "http://your-app-url.com"  # or http://localhost:5000 for local
+BASE_URL = "https://kronos.mywonderworks.tech/api"  # or http://localhost:5000 for local
 
 TIMEZONES = [
     "America/New_York", "Europe/London", "Asia/Tokyo", "Australia/Sydney",

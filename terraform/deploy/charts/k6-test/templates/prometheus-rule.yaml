@@ -11,16 +11,28 @@ spec:
       interval: 30s
       rules:
         - alert: K6ErrorRateHigh
-          expr: k6_errors > 0.05
-          for: 5m
+          expr: rate(k6_http_req_failed_total[5m]) / rate(k6_http_reqs_total[5m]) > 0.05
+          for: 2m
           labels:
             severity: warning
           annotations:
             summary: K6 load test error rate exceeds 5%
+            description: "Error rate is {{ $value | humanizePercentage }}"
+        
         - alert: K6P99LatencyHigh
-          expr: histogram_quantile(0.99, k6_latency_ms) > 1000
-          for: 5m
+          expr: k6_http_req_duration_p99 > 1000
+          for: 2m
           labels:
             severity: warning
           annotations:
             summary: K6 p99 latency exceeds 1000ms
+            description: "P99 latency is {{ $value }}ms"
+        
+        - alert: K6P95LatencyHigh
+          expr: k6_http_req_duration_p95 > 500
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: K6 p95 latency exceeds 500ms
+            description: "P95 latency is {{ $value }}ms"
