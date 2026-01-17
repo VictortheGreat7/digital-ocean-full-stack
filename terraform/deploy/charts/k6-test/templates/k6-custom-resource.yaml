@@ -7,12 +7,7 @@ spec:
   parallelism: 4
   runner:
     image: grafana/k6:latest
-  script:
-    configMap:
-      # We will pass the ConfigMap name from Terraform
-      name: {{ .Values.configMapName }}
-      file: loadtest.js
-  env:
+    env:
     - name: BASE_URL
       value: "{{ .Values.baseUrl }}"
     # Enable Prometheus Remote Write output
@@ -27,3 +22,8 @@ spec:
     # Optional: Enable trend as native histograms for better accuracy
     - name: K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM
       value: "true"
+  script:
+    configMap:
+      # We will pass the ConfigMap name from Terraform
+      name: {{ .Values.configMapName }}
+      file: loadtest.js
