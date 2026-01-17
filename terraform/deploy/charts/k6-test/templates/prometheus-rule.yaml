@@ -17,7 +17,7 @@ spec:
             severity: warning
           annotations:
             summary: K6 load test error rate exceeds 5%
-            description: "Error rate is {{ $value | humanizePercentage }}"
+            description: "Error rate is {{ `{{ $value | humanizePercentage }}` }}"
         
         - alert: K6P99LatencyHigh
           expr: k6_http_req_duration_p99 > 1000
@@ -26,7 +26,7 @@ spec:
             severity: warning
           annotations:
             summary: K6 p99 latency exceeds 1000ms
-            description: "P99 latency is {{ $value }}ms"
+            description: "P99 latency is {{ `{{ $value }}` }}ms"
         
         - alert: K6P95LatencyHigh
           expr: k6_http_req_duration_p95 > 500
@@ -35,4 +35,4 @@ spec:
             severity: warning
           annotations:
             summary: K6 p95 latency exceeds 500ms
-            description: "P95 latency is {{ $value }}ms"
+            description: "P95 latency is {{ `{{ $value }}` }}ms"
