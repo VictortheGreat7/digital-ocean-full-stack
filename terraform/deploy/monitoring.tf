@@ -279,16 +279,6 @@ resource "helm_release" "alloy" {
   values = [
     yamlencode({
       alloy = {
-
-        extraPorts = [
-          {
-            name       = "k6-metrics"
-            port       = 9999
-            targetPort = 9999
-            protocol   = "TCP"
-          }
-        ],
-
         configMap = {
           content = <<-EOT
             // Service discovery for pods
@@ -333,20 +323,6 @@ resource "helm_release" "alloy" {
             loki.write "loki" {
               endpoint {
                 url = "http://loki.monitoring:3100/loki/api/v1/push"
-              }
-            }
-
-            prometheus.receive_http "k6_metrics" {
-              http {
-                listen_address = "0.0.0.0"
-                listen_port    = 9999 
-              }
-              forward_to = [prometheus.remote_write.default.receiver] 
-            }
-
-            prometheus.remote_write "default" {
-              endpoint {
-                url = "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
               }
             }
           EOT
