@@ -1,12 +1,13 @@
 import os
 import pytz
+import requests
 import psycopg2
 from queue import Queue
-from time import monotonic
 from flask_cors import CORS
 from threading import Thread
 from datetime import datetime
 from opentelemetry import trace
+from time import monotonic, sleep
 from flask import Flask, jsonify, request, g
 from opentelemetry.sdk.resources import Resource
 from prometheus_client import Counter, Histogram
@@ -17,11 +18,16 @@ from opentelemetry.instrumentation.flask import FlaskInstrumentor
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 
-# Configure OpenTelemetry
+# Instantiate a Flask app
+app = Flask(__name__)
+# Allow CrossOriginResourceSharing
+CORS(app)
+
+# Identify service sending OpenTelemetry data
 resource = Resource(attributes={
     "service.name": "kronos-backend",
-    "service.version": "1.0.0",
-    "deployment.environment": "production"
+    "service.namespace": "kronos",
+    "deployment.environment": "development"
 })
 
 # Set up the tracer provider
@@ -34,23 +40,82 @@ otlp_exporter = OTLPSpanExporter(
     endpoint=tempo_endpoint,
     insecure=True  # True for internal cluster communication
 )
-
-# Add span processor to tracer provider
+# Add span processor to process traces in batches
 tracer_provider.add_span_processor(BatchSpanProcessor(otlp_exporter))
-
 # Get tracer
 tracer = trace.get_tracer(__name__)
 
-app = Flask(__name__)
-CORS(app)
-
-# Instrument Flask app with OpenTelemetry
+# Watch incoming requests to Flask app
 FlaskInstrumentor().instrument_app(app)
+# Watch outgoing requests via requests library
 RequestsInstrumentor().instrument()
 
+# Create /metrics endpoint on the Flask app for Prometheus scraping
 metrics = PrometheusMetrics(app)
+# Basic static metrics label
 metrics.info('app_info', 'World Clock Backend Application', version='1.0.0')
 
+# Database connection config
+DB_CONFIG = {
+    "host": os.getenv("DB_HOST", "kronos-postgres-svc.kronos.svc.cluster.local"),
+    "port": os.getenv("DB_PORT", "5432"),
+    "database": os.getenv("DB_NAME", "kronos"),
+    "user": os.getenv("DB_USER", "app"),
+    "password": os.getenv("DB_PASSWORD", "dev-password-change-in-prod")
+}
+
+# Queue for async user request logging (non-blocking)
+log_queue = Queue()
+
+# Background worker thread that writes request logs to DB
+def db_worker():
+    conn = None
+
+    while True:
+        if conn is None:
+            try:
+                conn = psycopg2.connect(**DB_CONFIG)
+                app.logger.info("DB connection established")
+            except Exception as e:
+                app.logger.error(f"DB connection failed, retrying in 5s: {e}")
+                sleep(5)
+                continue
+
+        # Get logged user request record
+        record = log_queue.get()
+        if record is None:
+            if conn:
+                conn.close()
+            break
+
+        try:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO requests (path, method, status, latency_ms, timezone, city, trace_id)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """, record)
+                conn.commit()
+        except Exception as e:
+            app.logger.error(f"DB write error: {e}")
+            # On write failure, reset connection
+            if conn:
+                try:
+                    conn.rollback()
+                    conn.close()
+                except:
+                    pass
+            conn = None  # Force reconnection
+
+# Start background worker thread
+db_thread = Thread(target=db_worker, daemon=True)
+db_thread.start()
+
+# Save user request start time
+@app.before_request
+def start_timer():
+    g.start_time = monotonic()
+
+# Custom app metrics to track frontend HTTP requests
 frontend_http_errors = Counter(
     'frontend_http_request_errors_total',
     'Total frontend HTTP request errors',
@@ -66,58 +131,11 @@ frontend_http_latency = Histogram(
 EXCLUDED_PATHS = [
     '/metrics',
     '/health',
-    # '/favicon.ico',
+    '/favicon.ico',
     '/ready'
 ]
 
-# Database connection setup
-DB_CONFIG = {
-    "host": os.getenv("DB_HOST", "kronos-postgres-svc.kronos.svc.cluster.local"),
-    "port": os.getenv("DB_PORT", "5432"),
-    "database": os.getenv("DB_NAME", "kronos"),
-    "user": os.getenv("DB_USER", "app"),
-    "password": os.getenv("DB_PASSWORD", "dev-password-change-in-prod")
-}
-
-# Queue for async logging (non-blocking)
-log_queue = Queue()
-
-def db_worker():
-    """Background thread that writes logs to DB"""
-    conn = None
-    try:
-        conn = psycopg2.connect(**DB_CONFIG)
-    except Exception as e:
-        app.logger.error(f"DB connection failed: {e}")
-        return
-    
-    while True:
-        try:
-            record = log_queue.get()
-            if record is None:  # Poison pill to stop
-                break
-            
-            with conn.cursor() as cur:
-                cur.execute("""
-                    INSERT INTO requests (path, method, status, latency_ms, timezone, city, trace_id)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)
-                """, record)
-                conn.commit()
-        except Exception as e:
-            app.logger.error(f"DB write error: {e}")
-            if conn:
-                conn.rollback()
-    
-    conn.close()
-
-# Start background worker thread
-db_thread = Thread(target=db_worker, daemon=True)
-db_thread.start()
-
-@app.before_request
-def start_timer():
-    g.start_time = monotonic()
-
+# Record request metrics and log user requests into db thread queue after each request
 @app.after_request
 def record_metrics(response):
     if request.path in EXCLUDED_PATHS:
@@ -140,6 +158,7 @@ def record_metrics(response):
             status=status
         ).inc()
     
+    # Add extra details to current trace span
     span = trace.get_current_span()
     if span:
         span.set_attribute("http.route", path)
@@ -148,7 +167,7 @@ def record_metrics(response):
     
     trace_id = span.get_span_context().trace_id if span else None
     
-    #Queue the log record (non-blocking)
+    # Queue the user request log record (non-blocking)
     log_queue.put((
         path,
         request.method,
@@ -161,16 +180,15 @@ def record_metrics(response):
 
     return response
 
+ # Backend proxy endpoint for frontend to send traces to Tempo
 @app.route('/frontend-traces', methods=['POST'])
 def frontend_traces():
-    """Proxy endpoint for frontend to send traces"""
     try:
         trace_data = request.get_data()
         headers = {
             'Content-Type': 'application/json'
         }
     
-        import requests
         response = requests.post(
             url=f"http://{tempo_endpoint.replace('4317', '4318')}/v1/traces",
             data=trace_data,
@@ -201,7 +219,7 @@ MAJOR_CITIES = {
 
 @app.route('/time', methods=['GET'])
 def get_time():
-    """Get current time for a specific timezone"""
+    """Get current time for a specific timezone or UTC by default"""
     timezone = request.args.get('timezone', 'UTC')
     
     try:

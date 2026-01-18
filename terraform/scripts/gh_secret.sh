@@ -1,18 +1,22 @@
 #!/usr/bin/env bash
 set -eu
 
-# Define repository name for reuse
+# Define name for use in uninitialized directories
 REPO_NAME=""
 
+TF_API_TOKEN=
 GITHUB_RUNNER_TOKEN=""
 DO_API_TOKEN=""
 CLOUDFLARE_TOKEN=""
 CLOUDFLARE_ZONE_ID=""
+DOCKER_USERNAME=
+DOCKER_PASSWORD=
 
 # Declare an associative array to hold secrets and their corresponding values
 declare -A secrets=(
   ["RUNNER_TOKEN"]="${GITHUB_RUNNER_TOKEN}"
   ["DO_API_TOKEN"]="${DO_API_TOKEN}"
+  ["TF_API_TOKEN"]="${TF_API_TOKEN}"
   ["CLOUDFLARE_TOKEN"]="${CLOUDFLARE_TOKEN}"
   ["CLOUDFLARE_ZONE_ID"]="${CLOUDFLARE_ZONE_ID}"
   ["DOCKER_USERNAME"]=""

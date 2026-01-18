@@ -4,6 +4,7 @@
 prev_attempts/
 **microservices/
 /*.sh
+/*.py
 id_rsa
 
 # Node

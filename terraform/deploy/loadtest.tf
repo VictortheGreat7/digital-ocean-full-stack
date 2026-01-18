@@ -20,7 +20,7 @@ resource "kubernetes_config_map_v1" "k6_test_script" {
   }
 
   data = {
-    "loadtest.js" = file("${path.module}/loadtest.js")
+    "loadtest.js" = file("${path.module}/scripts/loadtest.js")
   }
 
   depends_on = [helm_release.k6_operator]
@@ -33,7 +33,8 @@ resource "helm_release" "k6_test" {
 
   values = [
     yamlencode({
-      baseUrl       = "https://${var.subdomains[0]}.${var.domain}/api"
+      baseUrl       = "https://${var.subdomains[0]}.${var.domain}"
+      testType      = "stress"
       configMapName = kubernetes_config_map_v1.k6_test_script.metadata[0].name
       prometheusNamespace  = helm_release.kube_prometheus_stack.namespace
     })

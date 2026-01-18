@@ -7,19 +7,28 @@ spec:
   parallelism: 4
   runner:
     image: grafana/k6:latest
+    resources:
+      requests:
+        cpu: "1000m"
+        memory: "512Mi"
+      limits:
+        cpu: "2000m"
+        memory: "1Gi"
     env:
     - name: BASE_URL
       value: "{{ .Values.baseUrl }}"
+    - name: TEST_TYPE
+      value: "{{ .Values.testType }}"
     # Enable Prometheus Remote Write output
     - name: K6_OUT
       value: experimental-prometheus-rw
     # Prometheus Remote Write endpoint
     - name: K6_PROMETHEUS_RW_SERVER_URL
       value: http://kube-prometheus-stack-prometheus.{{ .Values.prometheusNamespace }}.svc.cluster.local:9090/api/v1/write
-    # Configure which trend stats to export (p95, p99, max, etc.)
+    # Configure which trend stats to export
     - name: K6_PROMETHEUS_RW_TREND_STATS
       value: "p(95),p(99),min,max,avg"
-    # Optional: Enable trend as native histograms for better accuracy
+    # Enable trend as native histograms for better accuracy
     - name: K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM
       value: "true"
   script:
