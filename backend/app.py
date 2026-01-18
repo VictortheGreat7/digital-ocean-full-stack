@@ -1,7 +1,7 @@
 import os
 import pytz
-import requests
 import psycopg2
+import requests
 from queue import Queue
 from flask_cors import CORS
 from threading import Thread

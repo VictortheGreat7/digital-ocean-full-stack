@@ -105,13 +105,13 @@ export default function () {
     // Current Time API Endpoint. Expected moderate frequency
     group('time endpoint', () => {
       let tz = TIMEZONES[Math.floor(rand * TIMEZONES.length)];
-      let res = http.get(`${BASE_URL}/time?timezone=${tz}`);
+      let res = http.get(`${BASE_URL}/api/time?timezone=${tz}`);
       check(res, { 'time status 200': (r) => r.status === 200 });
     });
   } else {
     // Timezones List API Endpoint. Expected least common
     group('timezones endpoint', () => {
-      let res = http.get(`${BASE_URL}/timezones`);
+      let res = http.get(`${BASE_URL}/api/timezones`);
       check(res, { 'timezones status 200': (r) => r.status === 200 });
     });
   }
