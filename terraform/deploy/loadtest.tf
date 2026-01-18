@@ -72,30 +72,30 @@ resource "kubernetes_config_map_v1" "grafana_k6_dashboard" {
           gridPos = { x = 0, y = 0, w = 12, h = 8 }
           targets = [
             {
-              expr         = "rate(k6_http_reqs_total[1m])"
+              expr         = "sum(rate(k6_http_reqs_total[1m]))"
               legendFormat = "req/s"
             }
           ]
         },
         {
           type  = "timeseries"
-          title = "HTTP p95 Latency"
+          title = "HTTP Failure Rate"
           gridPos = { x = 12, y = 0, w = 12, h = 8 }
           targets = [
             {
-              expr         = "histogram_quantile(0.95, sum(rate(k6_http_req_duration_seconds_bucket[5m])) by (le))"
-              legendFormat = "p95 latency"
+              expr         = "sum(rate(k6_http_req_failed_rate[1m]))"
+              legendFormat = "failed req/s"
             }
           ]
         },
         {
           type  = "timeseries"
-          title = "HTTP p99 Latency"
+          title = "Average HTTP Latency (seconds)"
           gridPos = { x = 0, y = 8, w = 12, h = 8 }
           targets = [
             {
-              expr         = "histogram_quantile(0.99, sum(rate(k6_http_req_duration_seconds_bucket[5m])) by (le))"
-              legendFormat = "p99 latency"
+              expr         = "avg(k6_http_req_duration_seconds)"
+              legendFormat = "avg latency"
             }
           ]
         },
@@ -105,19 +105,19 @@ resource "kubernetes_config_map_v1" "grafana_k6_dashboard" {
           gridPos = { x = 12, y = 8, w = 12, h = 8 }
           targets = [
             {
-              expr         = "k6_vus"
+              expr         = "sum(k6_vus)"
               legendFormat = "active VUs"
             }
           ]
         },
         {
           type  = "timeseries"
-          title = "HTTP Failure Rate"
+          title = "HTTP Success Rate (%)"
           gridPos = { x = 0, y = 16, w = 12, h = 8 }
           targets = [
             {
-              expr         = "rate(k6_http_req_failed_total[1m])"
-              legendFormat = "failed req/s"
+              expr         = "100 * (1 - (sum(rate(k6_http_req_failed_rate[1m])) / clamp_min(sum(rate(k6_http_reqs_total[1m])), 1)))"
+              legendFormat = "success %"
             }
           ]
         },
@@ -127,7 +127,7 @@ resource "kubernetes_config_map_v1" "grafana_k6_dashboard" {
           gridPos = { x = 12, y = 16, w = 12, h = 8 }
           targets = [
             {
-              expr         = "rate(k6_iterations_total[1m])"
+              expr         = "sum(rate(k6_iterations_total[1m]))"
               legendFormat = "iterations/s"
             }
           ]
