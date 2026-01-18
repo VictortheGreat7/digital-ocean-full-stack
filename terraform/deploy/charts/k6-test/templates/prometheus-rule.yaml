@@ -162,7 +162,7 @@ spec:
             test_type: "{{ `{{ $labels.test_type }}` }}"
           annotations:
             summary: K6 has no active VUs despite configured max
-            description: "Active VUs are at 0 while max VUs is {{ `{{ k6_vus_max }}` }} for test type: {{ `{{ $labels.test_type }}` }} test"
+            description: "No Active VUs for test type: {{ `{{ $labels.test_type }}` }} test"
             runbook: |
               1. Check the k6 load test configuration for expected VU count.
               2. Ensure that the load test is running as intended.
