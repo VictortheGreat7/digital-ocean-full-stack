@@ -17,7 +17,7 @@ spec:
           for: 2m
           labels:
             severity: critical
-            test_type: "{{ $labels.test_type }}"
+            test_type: "{{ `{{ $labels.test_type }}` }}"
           annotations:
             summary: "K6 load test error rate exceeds 10%"
             description: "Error rate is {{ `{{ $value | humanizePercentage }}` }} for test type: {{ `{{ $labels.test_type }}` }} test"
@@ -35,7 +35,7 @@ spec:
           for: 1m
           labels:
             severity: critical
-            test_type: "{{ $labels.test_type }}"
+            test_type: "{{ `{{ $labels.test_type }}` }}"
           annotations:
             summary: "K6 test showing >90% failure rate - possible outage"
             description: "{{ `{{ $value | humanizePercentage }}` }} of requests are failing for test type: {{ `{{ $labels.test_type }}` }} test"
@@ -57,7 +57,7 @@ spec:
           for: 3m
           labels:
             severity: warning
-            test_type: "{{ $labels.test_type }}"
+            test_type: "{{ `{{ $labels.test_type }}` }}"
           annotations:
             summary: "K6 error rate exceeds 5%"
             description: "Error rate is {{ `{{ $value | humanizePercentage }}` }} for test type: {{ `{{ $labels.test_type }}` }} test"
@@ -75,7 +75,7 @@ spec:
           for: 3m
           labels:
             severity: warning
-            test_type: "{{ $labels.test_type }}"
+            test_type: "{{ `{{ $labels.test_type }}` }}"
           annotations:
             summary: "K6 p99 latency exceeds 1s"
             description: "P99 latency is {{ `{{ $value }}` }}ms for test type: {{ `{{ $labels.test_type }}` }} test"
@@ -93,7 +93,7 @@ spec:
           for: 3m
           labels:
             severity: warning
-            test_type: "{{ $labels.test_type }}"
+            test_type: "{{ `{{ $labels.test_type }}` }}"
           annotations:
             summary: "K6 p95 latency exceeds 500ms"
             description: "P95 latency is {{ `{{ $value }}` }}ms for test type: {{ `{{ $labels.test_type }}` }} test"
@@ -111,7 +111,7 @@ spec:
           for: 5m
           labels:
             severity: info
-            test_type: "{{ $labels.test_type }}"
+            test_type: "{{ `{{ $labels.test_type }}` }}"
           annotations:
             summary: "K6 p50 latency exceeds 200ms"
             description: "Median latency is {{ `{{ $value }}` }}ms for test type: {{ `{{ $labels.test_type }}` }} test"
@@ -133,7 +133,7 @@ spec:
           for: 5m
           labels:
             severity: warning
-            test_type: "{{ $labels.test_type }}"
+            test_type: "{{ `{{ $labels.test_type }}` }}"
           annotations:
             summary: "K6 throughput dropped below 10 req/s"
             description: "Current throughput is {{ `{{ $value }}` }} RPS for test type: {{ `{{ $labels.test_type }}` }} test"
@@ -144,7 +144,7 @@ spec:
           for: 5m
           labels:
             severity: info
-            test_type: "{{ $labels.test_type }}"
+            test_type: "{{ `{{ $labels.test_type }}` }}"
           annotations:
             summary: "K6 iteration rate below 5 it/s"
             description: "Current iteration rate is {{ `{{ $value }}` }} it/s for test type: {{ `{{ $labels.test_type }}` }} test"
@@ -159,7 +159,7 @@ spec:
           for: 2m
           labels:
             severity: warning
-            test_type: "{{ $labels.test_type }}"
+            test_type: "{{ `{{ $labels.test_type }}` }}"
           annotations:
             summary: "K6 load generator not sending requests"
             description: "No requests detected from k6 load generator {{ `{{ $labels.test_type }}` }} test may have stopped"
@@ -177,7 +177,7 @@ spec:
           for: 5m
           labels:
             severity: info
-            test_type: "{{ $labels.test_type }}"
+            test_type: "{{ `{{ $labels.test_type }}` }}"
           annotations:
             summary: "K6 has no active VUs despite configured max"
             description: "Active VUs are at 0 while max VUs is {{ `{{ k6_vus_max }}` }} for test type: {{ `{{ $labels.test_type }}` }} test"
@@ -195,7 +195,7 @@ spec:
           for: 3m
           labels:
             severity: warning
-            test_type: "{{ $labels.test_type }}"
+            test_type: "{{ `{{ $labels.test_type }}` }}"
           annotations:
             summary: "K6 load generator CPU usage is high"
             description: "CPU usage is at {{ `{{ $value | humanizePercentage }}` }} for test type: {{ `{{ $labels.test_type }}` }} test"
@@ -218,7 +218,7 @@ spec:
           labels:
             severity: critical
             slo: availability
-            test_type: "{{ $labels.test_type }}"
+            test_type: "{{ `{{ $labels.test_type }}` }}"
           annotations:
             summary: "Service availability SLO (99.9%) violated in K6 test"
             description: "Current availability is {{ `{{ $value | humanizePercentage }}` }} for test type: {{ `{{ $labels.test_type }}` }} test"
@@ -237,7 +237,7 @@ spec:
           labels:
             severity: critical
             slo: latency
-            test_type: "{{ $labels.test_type }}"
+            test_type: "{{ `{{ $labels.test_type }}` }}"
           annotations:
             summary: "Service latency SLO (p95 < 500ms) violated in K6 test"
             description: "Current p95 latency is {{ `{{ $value }}` }}ms for test type: {{ `{{ $labels.test_type }}` }} test"

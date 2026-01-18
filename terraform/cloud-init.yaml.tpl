@@ -71,13 +71,16 @@ runcmd:
     chown -R githubrunner:githubrunner /home/githubrunner/actions-runner && \
     su - githubrunner -c "cd ~/actions-runner && ./config.sh --url https://github.com/VictortheGreat7/digital-ocean-full-stack --token ${github_runner_token} --unattended"
 
-  # --- Install doctl and start the GitHub Actions Runner service ---
+  # --- Install doctl and initialize it ---
   - |
     cd /home/githubrunner && \
     wget https://github.com/digitalocean/doctl/releases/download/v1.146.0/doctl-1.146.0-linux-amd64.tar.gz && \
     tar xf /home/githubrunner/doctl-1.146.0-linux-amd64.tar.gz && \
     mv /home/githubrunner/doctl /usr/local/bin && \
-    doctl auth init -t ${do_api_token} && \
+    doctl auth init -t ${do_api_token}
+
+  # ---  Start the GitHub Actions Runner service ---
+  - |
     cd /home/githubrunner/actions-runner && \
     ./svc.sh install githubrunner && \
     ./svc.sh start
