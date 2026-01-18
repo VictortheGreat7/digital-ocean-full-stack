@@ -7,205 +7,260 @@ metadata:
     prometheus: kube-prometheus
 spec:
   groups:
+    - name: k6.critical
+      interval: 30s
+      rules:
+        - alert: ChaosErrorRateCritical
+          expr: |
+            rate(k6_http_req_failed_total[5m]) / clamp_min(rate(k6_http_reqs_total[5m]), 1) > 0.10
+          for: 2m
+          labels:
+            severity: critical
+            test_type: "{{ `{{ $labels.test_type }}` }}"
+          annotations:
+            summary: K6 load test error rate exceeds 10%
+            description: "Error rate is {{ `{{ $value | humanizePercentage }}` }} for test type: {{ `{{ $labels.test_type }}` }} test"
+            runbook: |
+              1. Check the k6 load test results for high error rates.
+              2. Investigate the application logs for errors.
+              3. Scale up application resources if necessary.
+              4. Rerun the load test after addressing issues.
 
-  - name: k6.critical
-    interval: 30s
-    rules:
-    - alert: K6ErrorRateCritical
-      expr: |
-        rate(k6_http_req_failed_total[5m])
-        /
-        clamp_min(rate(k6_http_reqs_total[5m]), 1)
-        > 0.10
-      for: 2m
-      labels:
-        severity: critical
-      annotations:
-        summary: "K6 error rate exceeds 10%"
-        description: "Error rate is {{ $value | humanizePercentage }}"
-        runbook: |
-          1. Inspect k6 error metrics
-          2. Check application logs
-          3. Scale or rollback if needed
+        - alert: ChaosCompleteFailure
+          expr: |
+            rate(k6_http_req_failed_total[2m]) / clamp_min(rate(k6_http_reqs_total[2m]), 1) > 0.90
+          for: 1m
+          labels:
+            severity: critical
+            test_type: "{{ `{{ $labels.test_type }}` }}"
+          annotations:
+            summary: K6 test showing >90% failure rate - possible outage
+            description: "{{ `{{ $value | humanizePercentage }}` }} of requests are failing for test type: {{ `{{ $labels.test_type }}` }} test"
+            runbook: |
+              1. Immediately check the application status and logs.
+              2. Identify and resolve any critical issues causing the high failure rate.
+              3. Consider rolling back recent deployments if applicable.
+              4. Notify team and stakeholders about the outage.
 
-    - alert: K6CompleteFailure
-      expr: |
-        rate(k6_http_req_failed_total[2m])
-        /
-        clamp_min(rate(k6_http_reqs_total[2m]), 1)
-        > 0.90
-      for: 1m
-      labels:
-        severity: critical
-      annotations:
-        summary: "K6 test showing >90% failure rate"
-        description: "{{ $value | humanizePercentage }} of requests are failing"
-        runbook: |
-          1. Treat as outage
-          2. Inspect service health immediately
-          3. Roll back recent changes
+    - name: k6.warning
+      interval: 30s
+      rules:
+        - alert: K6ErrorRateHigh
+          expr: |
+            rate(k6_http_req_failed_total[5m]) / clamp_min(rate(k6_http_reqs_total[5m]), 1) > 0.05
+          for: 3m
+          labels:
+            severity: warning
+            test_type: "{{ `{{ $labels.test_type }}` }}"
+          annotations:
+            summary: K6 error rate exceeds 5%
+            description: "Error rate is {{ `{{ $value | humanizePercentage }}` }} for test type: {{ `{{ $labels.test_type }}` }} test"
+            runbook: |
+              1. Review k6 load test results for error trends.
+              2. Check application logs for 4xx and 5xx errors.
+              3. Optimize application performance and error handling.
+              4. Rerun load tests to verify improvements.
 
-  - name: k6.warning
-    interval: 30s
-    rules:
-    - alert: K6ErrorRateHigh
-      expr: |
-        rate(k6_http_req_failed_total[5m])
-        /
-        clamp_min(rate(k6_http_reqs_total[5m]), 1)
-        > 0.05
-      for: 3m
-      labels:
-        severity: warning
-      annotations:
-        summary: "K6 error rate exceeds 5%"
-        description: "Error rate is {{ $value | humanizePercentage }}"
+        - alert: K6P99LatencyHigh
+          expr: |
+            histogram_quantile(0.99, sum(rate(k6_http_req_duration_seconds_bucket[5m])) by (le, name)) > 1
+          for: 3m
+          labels:
+            severity: warning
+            test_type: "{{ `{{ $labels.test_type }}` }}"
+          annotations:
+            summary: K6 p99 latency exceeds 1000ms
+            description: "P99 latency is {{ `{{ $value }}` }}ms for test type: {{ `{{ $labels.test_type }}` }} test"
+            runbook: |
+              1. Analyze k6 load test results for latency issues.
+              2. Profile application performance to identify bottlenecks.
+              3. Optimize database queries, caching, and code efficiency.
+              4. Rerun load tests to confirm latency improvements.
 
-    - alert: K6P99LatencyHigh
-      expr: |
-        histogram_quantile(
-          0.99,
-          sum(rate(k6_http_req_duration_seconds_bucket[5m])) by (le)
-        ) > 1
-      for: 3m
-      labels:
-        severity: warning
-      annotations:
-        summary: "K6 p99 latency exceeds 1s"
-        description: "p99 latency is {{ $value }}s"
+        - alert: K6P95LatencyHigh
+          expr: |
+            histogram_quantile(0.95, sum(rate(k6_http_req_duration_seconds_bucket[5m])) by (le, name)) > 0.5
+          for: 3m
+          labels:
+            severity: warning
+            test_type: "{{ `{{ $labels.test_type }}` }}"
+          annotations:
+            summary: K6 p95 latency exceeds 500ms
+            description: "P95 latency is {{ `{{ $value }}` }}ms for test type: {{ `{{ $labels.test_type }}` }} test"
+            runbook: |
+              1. Check k6 load test results for latency patterns.
+              2. Investigate application components contributing to high latency.
+              3. Implement performance optimizations as needed.
+              4. Rerun load tests to validate latency reductions.
 
-    - alert: K6P95LatencyHigh
-      expr: |
-        histogram_quantile(
-          0.95,
-          sum(rate(k6_http_req_duration_seconds_bucket[5m])) by (le)
-        ) > 0.5
-      for: 3m
-      labels:
-        severity: warning
-      annotations:
-        summary: "K6 p95 latency exceeds 500ms"
-        description: "p95 latency is {{ $value }}s"
+        - alert: K6P50LatencyElevated
+          expr: |
+            histogram_quantile(0.50, sum(rate(k6_http_req_duration_seconds_bucket[5m])) by (le, name)) > 0.2
+          for: 5m
+          labels:
+            severity: info
+            test_type: "{{ `{{ $labels.test_type }}` }}"
+          annotations:
+            summary: K6 p50 latency exceeds 200ms
+            description: "Median latency is {{ `{{ $value }}` }}ms for test type: {{ `{{ $labels.test_type }}` }} test"
+            runbook: |
+              1. Monitor k6 load test results for median latency trends.
+              2. Identify any recent changes that may have impacted performance.
+              3. Consider minor optimizations to improve user experience.
+              4. Continue monitoring in subsequent load tests.
 
-    - alert: K6P50LatencyElevated
-      expr: |
-        histogram_quantile(
-          0.50,
-          sum(rate(k6_http_req_duration_seconds_bucket[5m])) by (le)
-        ) > 0.2
-      for: 5m
-      labels:
-        severity: info
-      annotations:
-        summary: "K6 p50 latency exceeds 200ms"
-        description: "p50 latency is {{ $value }}s"
+    - name: k6.performance
+      interval: 30s
+      rules:
+        - alert: K6ThroughputDrop
+          expr: |
+            rate(k6_http_reqs_total[5m]) < 10
+          for: 5m
+          labels:
+            severity: warning
+            test_type: "{{ `{{ $labels.test_type }}` }}"
+          annotations:
+            summary: K6 throughput dropped below 10 req/s
+            description: "Current throughput is {{ `{{ $value }}` }} RPS for test type: {{ `{{ $labels.test_type }}` }} test"
 
-  - name: k6.performance
-    interval: 30s
-    rules:
-    - alert: K6ThroughputDrop
-      expr: |
-        rate(k6_http_reqs_total[5m]) < 10
-      for: 5m
-      labels:
-        severity: warning
-      annotations:
-        summary: "K6 throughput below 10 req/s"
-        description: "Throughput is {{ $value }} req/s"
+        - alert: K6IterationRateLow
+          expr: |
+            rate(k6_iterations_total[5m]) < 5
+          for: 5m
+          labels:
+            severity: info
+            test_type: "{{ `{{ $labels.test_type }}` }}"
+          annotations:
+            summary: K6 iteration rate below 5 it/s
+            description: "Current iteration rate is {{ `{{ $value }}` }} it/s for test type: {{ `{{ $labels.test_type }}` }} test"
 
-    - alert: K6IterationRateLow
-      expr: |
-        rate(k6_iterations_total[5m]) < 5
-      for: 5m
-      labels:
-        severity: info
-      annotations:
-        summary: "K6 iteration rate low"
-        description: "Iteration rate is {{ $value }} it/s"
+    - name: k6.load-generator
+      interval: 30s
+      rules:
+        - alert: K6LoadGeneratorNotRunning
+          expr: |
+            absent(k6_http_reqs_total) OR rate(k6_http_reqs_total[2m]) < 0.001
+          for: 2m
+          labels:
+            severity: warning
+            test_type: "{{ `{{ $labels.test_type }}` }}"
+          annotations:
+            summary: K6 load generator not sending requests
+            description: "No requests detected from k6 load generator {{ `{{ $labels.test_type }}` }} test may have stopped"
+            runbook: |
+              1. Verify that the k6 load generator is running.
+              2. Check network connectivity between the load generator and the target application.
+              3. Restart the k6 load generator if necessary.
+              4. Monitor to ensure requests are being sent.
 
-  - name: k6.load-generator
-    interval: 30s
-    rules:
-    - alert: K6LoadGeneratorNotRunning
-      expr: |
-        absent(k6_http_reqs_total)
-        OR
-        rate(k6_http_reqs_total[2m]) < 0.001
-      for: 2m
-      labels:
-        severity: warning
-      annotations:
-        summary: "K6 load generator not sending traffic"
-        description: "No requests detected from k6"
+        - alert: K6VUCountUnexpected
+          expr: |
+            k6_vus == 0 AND k6_vus_max > 0
+          for: 5m
+          labels:
+            severity: info
+            test_type: "{{ `{{ $labels.test_type }}` }}"
+          annotations:
+            summary: K6 has no active VUs despite configured max
+            description: "Active VUs are at 0 while max VUs is {{ `{{ k6_vus_max }}` }} for test type: {{ `{{ $labels.test_type }}` }} test"
+            runbook: |
+              1. Check the k6 load test configuration for expected VU count.
+              2. Ensure that the load test is running as intended.
+              3. Adjust load test parameters if necessary to achieve desired load.
+              4. Monitor VU utilization during the test.
 
-    - alert: K6VUCountUnexpected
-      expr: |
-        k6_vus == 0
-        AND
-        k6_vus_max > 0
-      for: 5m
-      labels:
-        severity: info
-      annotations:
-        summary: "K6 has zero active VUs"
-        description: "Configured VUs exist but none are running"
+        - alert: K6LoadGeneratorCPUHigh
+          expr: |
+            rate(container_cpu_usage_seconds_total{pod=~"k6-.*"}[5m]) > 1.8
+          for: 3m
+          labels:
+            severity: warning
+            test_type: "{{ `{{ $labels.test_type }}` }}"
+          annotations:
+            summary: K6 load generator CPU usage is high
+            description: "CPU usage is at {{ `{{ $value | humanizePercentage }}` }} for test type: {{ `{{ $labels.test_type }}` }} test"
+            runbook: |
+              1. Monitor the CPU usage of the k6 load generator.
+              2. Consider scaling up the load generator resources if CPU remains high.
+              3. Optimize the load test script to reduce CPU load if possible.
+              4. Ensure that the load generator is not overloaded beyond its capacity.
 
-    - alert: K6LoadGeneratorCPUHigh
-      expr: |
-        rate(container_cpu_usage_seconds_total{pod=~"k6-.*"}[5m]) > 1.8
-      for: 3m
-      labels:
-        severity: warning
-      annotations:
-        summary: "K6 load generator CPU high"
-        description: "CPU usage is {{ $value }} cores"
+    - name: k6.slo
+      interval: 30s
+      rules:
+        - alert: K6AvailabilitySLO
+          expr: |
+            1 - (rate(k6_http_req_failed_total[10m]) / clamp_min(rate(k6_http_reqs_total[10m]), 1)) < 0.999
+          for: 5m
+          labels:
+            severity: critical
+            slo: availability
+            test_type: "{{ `{{ $labels.test_type }}` }}"
+          annotations:
+            summary: Service availability SLO (99.9%) violated in K6 test
+            description: "Current availability is {{ `{{ $value | humanizePercentage }}` }} for test type: {{ `{{ $labels.test_type }}` }} test"
+            runbook: |
+              1. Investigate the causes of failed requests during the load test.
+              2. Check application logs and metrics for errors or bottlenecks.
+              3. Implement fixes to improve availability.
+              4. Rerun the load test to verify SLO compliance.
 
-  - name: k6.slo
-    interval: 30s
-    rules:
-    - alert: K6AvailabilitySLOViolated
-      expr: |
-        1 -
-        (
-          rate(k6_http_req_failed_total[10m])
-          /
-          clamp_min(rate(k6_http_reqs_total[10m]), 1)
-        )
-        < 0.999
-      for: 5m
-      labels:
-        severity: critical
-        slo: availability
-      annotations:
-        summary: "Availability SLO (99.9%) violated"
-        description: "Availability is {{ $value | humanizePercentage }}"
+        - alert: K6LatencySLO
+          expr: |
+            histogram_quantile(0.95, sum(rate(k6_http_req_duration_seconds_bucket[10m])) by (le, name)) > 0.5
+          for: 5m
+          labels:
+            severity: critical
+            slo: latency
+            test_type: "{{ `{{ $labels.test_type }}` }}"
+          annotations:
+            summary: Service latency SLO (p95 < 500ms) violated in K6 test
+            description: "Current p95 latency is {{ `{{ $value }}` }}ms for test type: {{ `{{ $labels.test_type }}` }} test"
+            runbook: |
+              1. Analyze latency metrics from the k6 load test.
+              2. Identify and address performance bottlenecks in the application.
+              3. Optimize database queries, caching, and code efficiency.
+              4. Rerun the load test to confirm SLO compliance.
 
-    - alert: K6LatencySLOViolated
-      expr: |
-        histogram_quantile(
-          0.95,
-          sum(rate(k6_http_req_duration_seconds_bucket[10m])) by (le)
-        ) > 0.5
-      for: 5m
-      labels:
-        severity: critical
-        slo: latency
-      annotations:
-        summary: "Latency SLO violated"
-        description: "p95 latency is {{ $value }}s"
+    - name: k6.test-context
+      interval: 1m
+      rules:
+        # Error rate by endpoint
+        - record: k6:http:error_rate:by_endpoint
+          expr: |
+            rate(k6_http_req_failed_total[5m]) / clamp_min(rate(k6_http_reqs_total[5m]), 1)
 
-  - name: k6.recording
-    interval: 1m
-    rules:
-    - record: k6:http:error_rate
-      expr: |
-        rate(k6_http_req_failed_total[5m])
-        /
-        clamp_min(rate(k6_http_reqs_total[5m]), 1)
+        # Latency by endpoint
+        - record: k6:http:latency_p95:by_endpoint
+          expr: |
+            histogram_quantile(0.95, sum(rate(k6_http_req_duration_seconds_bucket[5m])) by (le, name))
 
-    - record: k6:http:latency:p95
-      expr: |
-        histogram_quantile(
-          0.95,
-          sum(rate(k6_http_req_duration_seconds_bucket[5m])) by (le)
-        )
+    - name: k6.rules
+      interval: 30s
+      rules:
+        - alert: K6ErrorRateHigh
+          expr: rate(k6_http_req_failed_total[5m]) / rate(k6_http_reqs_total[5m]) > 0.05
+          for: 2m
+          labels: 
+            severity: warning
+          annotations:
+            summary: K6 load test error rate exceeds 5%
+            description: "Error rate is {{ `{{ $value | humanizePercentage }}` }}"
+        
+        - alert: K6P99LatencyHigh
+          expr: k6_http_req_duration_p99 > 1
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: K6 p99 latency exceeds 1000ms
+            description: "P99 latency is {{ `{{ $value }}` }}ms"
+        
+        - alert: K6P95LatencyHigh
+          expr: k6_http_req_duration_p95 > 0.5
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: K6 p95 latency exceeds 500ms
+            description: "P95 latency is {{ `{{ $value }}` }}ms"
