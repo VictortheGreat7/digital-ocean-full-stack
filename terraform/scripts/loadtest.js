@@ -96,29 +96,23 @@ export default function () {
   let rand = Math.random();
 
   if (rand < 0.6) {
-    // Deliberate invalid endpoint to test error handling
-    group('invalid endpoint', () => {
-      let res = http.get(`${BASE_URL}/api/invalid-endpoint`);
-      check(res, { 'invalid status 404': (r) => r.status === 404 });
+    // Frontend(Homepage). Expected most common endpoint
+    group('homepage endpoint', () => {
+      let res = http.get(`${BASE_URL}/`, { tags: { name: 'homepage' } });
+      check(res, { 'homepage status 200': (r) => r.status === 200 });
     });
-  } else if (rand < 0.7) {
+  } else if (rand < 0.9) {
     // Current Time API Endpoint. Expected moderate frequency
     group('time endpoint', () => {
       let tz = TIMEZONES[Math.floor(rand * TIMEZONES.length)];
       let res = http.get(`${BASE_URL}/api/time?timezone=${tz}`);
       check(res, { 'time status 200': (r) => r.status === 200 });
     });
-  } else if (rand < 0.8) {
+  } else {
     // Timezones List API Endpoint. Expected least common
     group('timezones endpoint', () => {
       let res = http.get(`${BASE_URL}/api/timezones`);
       check(res, { 'timezones status 200': (r) => r.status === 200 });
-    });
-  } else {
-    // Frontend(Homepage). Expected most common endpoint
-    group('homepage endpoint', () => {
-      let res = http.get(`${BASE_URL}/`, { tags: { name: 'homepage' } });
-      check(res, { 'homepage status 200': (r) => r.status === 200 });
     });
   }
 
