@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   cleanup: 'post'
-  parallelism: 4
+  parallelism: 20
   runner:
     image: grafana/k6:latest
     resources:
