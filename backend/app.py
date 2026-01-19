@@ -219,7 +219,7 @@ def frontend_traces():
         }
     
         response = requests.post(
-            url=f"http://{tempo_endpoint.replace('4317', '4318')}/v1/traces",
+            url=f"http://tempo.monitoring.svc.cluster.local:4318/v1/traces",
             data=trace_data,
             headers=headers,
             timeout=5
