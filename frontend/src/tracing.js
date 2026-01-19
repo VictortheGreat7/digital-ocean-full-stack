@@ -10,7 +10,8 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 const provider = new WebTracerProvider({
   resource: new Resource({
     [SemanticResourceAttributes.SERVICE_NAME]: 'kronos-frontend',
-    [SemanticResourceAttributes.SERVICE_VERSION]: '1.0.0',
+    [SemanticResourceAttributes.SERVICE_NAMESPACE]: 'kronos',
+    [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: 'development',
   }),
 });
 
@@ -20,7 +21,10 @@ const exporter = new OTLPTraceExporter({
 });
 
 // Add span processor
-provider.addSpanProcessor(new BatchSpanProcessor(exporter));
+provider.addSpanProcessor(new BatchSpanProcessor(exporter, {
+  onStart(span) { console.log('span started:', span.name); },
+  onEnd(span) { console.log('span ended:', span.name); }
+}));
 
 // Register the provider
 provider.register();
