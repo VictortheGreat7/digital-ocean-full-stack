@@ -19,6 +19,14 @@ resource "helm_release" "kube_prometheus_stack" {
       name = "prometheus.prometheusSpec.enableRemoteWriteReceiver"
       value = "true"
     },
+    {
+      name  = "prometheus.prometheusSpec.enableFeatures[0]"
+      value = "native-histograms"
+    },
+    {
+      name = "prometheus.prometheusSpec.enableFeatures[1]"
+      value = "exemplar-storage"
+    },
     # Prometheus ingress
     {
       name  = "prometheus.ingress.enabled"
@@ -121,6 +129,22 @@ resource "helm_release" "tempo" {
     {
       name  = "tempo.receivers.otlp.protocols.http.endpoint"
       value = "0.0.0.0:4318"
+    },
+    {
+      name = "tempo.metricsGenerator.enabled"
+      value = "true"
+    },
+    {
+      name = "tempo.metricsGenerator.remoteWriteUrl"
+      value = "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
+    },
+    {
+      name = "tempo.metricsGenerator.processor.service_graphs.enabled"
+      value = "true"
+    },
+    {
+      name = "tempo.metricsGenerator.processor.span_metrics.enabled"
+      value = "true"
     },
     {
       name  = "persistence.enabled"
