@@ -10,11 +10,11 @@ spec:
     image: grafana/k6:latest
     resources:
       requests:
+        cpu: "1000m"
+        memory: "512Mi"
+      limits:
         cpu: "2000m"
         memory: "1Gi"
-      limits:
-        cpu: "4000m"
-        memory: "2Gi"
     env:
     - name: BASE_URL
       value: "{{ .Values.baseUrl }}"
