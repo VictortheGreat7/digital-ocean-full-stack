@@ -209,26 +209,26 @@ def record_metrics(response):
 
     return response
 
-#  # Backend proxy endpoint for frontend to send traces to Tempo
-# @app.route('/frontend-traces', methods=['POST'])
-# def frontend_traces():
-#     try:
-#         trace_data = request.get_data()
-#         headers = {
-#             'Content-Type': 'application/json'
-#         }
+# Backend proxy endpoint for frontend to send traces to Tempo
+@app.route('/frontend-traces', methods=['POST'])
+def frontend_traces():
+    try:
+        trace_data = request.get_data()
+        headers = {
+            'Content-Type': 'application/json'
+        }
     
-#         response = requests.post(
-#             url=f"http://{tempo_endpoint.replace('4317', '4318')}/v1/traces",
-#             data=trace_data,
-#             headers=headers,
-#             timeout=5
-#         )
+        response = requests.post(
+            url=f"http://{tempo_endpoint.replace('4317', '4318')}/v1/traces",
+            data=trace_data,
+            headers=headers,
+            timeout=5
+        )
 
-#         return jsonify({"status": "traces forwarded"}), response.status_code
-#     except Exception as e:
-#         app.logger.error(f"Error forwarding traces: {e}")
-#         return jsonify({"error": "Failed to forward traces"}), 500
+        return jsonify({"status": "traces forwarded"}), response.status_code
+    except Exception as e:
+        app.logger.error(f"Error forwarding traces: {e}")
+        return jsonify({"error": "Failed to forward traces"}), 500
 
 # Major cities with their timezones
 MAJOR_CITIES = {

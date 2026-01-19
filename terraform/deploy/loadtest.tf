@@ -101,30 +101,8 @@ resource "kubernetes_config_map_v1" "grafana_k6_dashboard" {
         },
         {
           type  = "timeseries"
-          title = "HTTP Latency p95 (seconds)"
-          gridPos = { x = 12, y = 8, w = 12, h = 8 }
-          targets = [
-            {
-              expr = "histogram_quantile(0.95, sum(rate(k6_http_req_duration_seconds_bucket[5m])) by (le))"
-              legendFormat = "p95"
-            }
-          ]
-        },
-        {
-          type  = "timeseries"
-          title = "HTTP Latency p99 (seconds)"
-          gridPos = { x = 0, y = 16, w = 12, h = 8 }
-          targets = [
-            {
-              expr = "histogram_quantile(0.99, sum(rate(k6_http_req_duration_seconds_bucket[5m])) by (le))"
-              legendFormat = "p99"
-            }
-          ]
-        },
-        {
-          type  = "timeseries"
           title = "Virtual Users"
-          gridPos = { x = 12, y = 16, w = 12, h = 8 }
+          gridPos = { x = 12, y = 8, w = 12, h = 8 }
           targets = [
             {
               expr         = "sum(k6_vus)"
@@ -135,7 +113,7 @@ resource "kubernetes_config_map_v1" "grafana_k6_dashboard" {
         {
           type  = "timeseries"
           title = "HTTP Success Rate (%)"
-          gridPos = { x = 0, y = 24, w = 12, h = 8 }
+          gridPos = { x = 0, y = 16, w = 12, h = 8 }
           targets = [
             {
               expr         = "100 * (1 - (sum(rate(k6_http_req_failed_rate[1m])) / clamp_min(sum(rate(k6_http_reqs_total[1m])), 1)))"
@@ -146,7 +124,7 @@ resource "kubernetes_config_map_v1" "grafana_k6_dashboard" {
         {
           type  = "timeseries"
           title = "Iterations"
-          gridPos = { x = 12, y = 24, w = 12, h = 8 }
+          gridPos = { x = 12, y = 16, w = 12, h = 8 }
           targets = [
             {
               expr         = "sum(rate(k6_iterations_total[1m]))"
