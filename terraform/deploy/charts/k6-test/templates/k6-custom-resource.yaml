@@ -4,8 +4,8 @@ metadata:
   name: kronos-loadtest
   namespace: {{ .Release.Namespace }}
 spec:
-  cleanup: 'post'
-  parallelism: 1000
+  # cleanup: 'post'
+  parallelism: 250
   runner:
     image: grafana/k6:latest
     resources:
