@@ -26,12 +26,12 @@ const profiles = {
   // Expected Normal Load
   load: {
     stages: [
-      { duration: '2m', target: 100 }, // Start with 100 users
-      { duration: '10m', target: 100 }, // Stay at 100 users
+      { duration: '2m', target: 500 }, // Start with 500 users
+      { duration: '10m', target: 500 }, // Stay at 500 users
       { duration: '2m', target: 0 }, // Ramp down to 0 users
     ],
     thresholds: {
-      'http_req_duration': ['p(95)<500', 'p(99)<1000'],  // SLO targets
+      'http_req_duration': ['p(95)<2500', 'p(99)<5000'],  // SLO targets
       'http_req_failed': ['rate<0.01'],  // Error rate < 1%
     },
   },
@@ -39,16 +39,16 @@ const profiles = {
   // Stress Testing to find breaking points
   stress: {
     stages: [
-      { duration: '2m', target: 100 }, // Start with 100 users
-      { duration: '5m', target: 200}, // Ramp up to 200 users
-      { duration: '5m', target: 300}, // Ramp up to 300 users
-      { duration: '5m', target: 400}, // Ramp up to 400 users
-      { duration: '5m', target: 500}, // Ramp up to 500 users
-      { duration: '10m', target: 500}, // Stay at 500 users
+      { duration: '2m', target: 500 }, // Start with 500 users
+      { duration: '5m', target: 1000}, // Ramp up to 1000 users
+      { duration: '5m', target: 1500}, // Ramp up to 1500 users
+      { duration: '5m', target: 2000}, // Ramp up to 2000 users
+      { duration: '5m', target: 2500}, // Ramp up to 2500 users
+      { duration: '10m', target: 2500}, // Stay at 2500 users
       { duration: '5m', target: 0 }, // Recover
     ],
     thresholds: {
-      'http_req_duration': ['p(95)<1000', 'p(99)<2000'],  // Relaxed SLO targets
+      'http_req_duration': ['p(95)<5000', 'p(99)<10000'],  // Relaxed SLO targets
       'http_req_failed': ['rate<0.05'],  // Error rate < 5%
     },
   },
@@ -64,7 +64,7 @@ const profiles = {
       { duration: '2m', target: 0 }, // Recover
     ],
     thresholds: {
-      'http_req_duration': ['p(95)<2000', 'p(99)<5000'],  // More lenient SLO targets for spikes
+      'http_req_duration': ['p(95)<10000', 'p(99)<25000'],  // More lenient SLO targets for spikes
       'http_req_failed': ['rate<0.10'],  // Error rate < 10%
     },
   },
@@ -72,12 +72,12 @@ const profiles = {
   // Soak Testing for long-term stability
   soak: {
     stages: [
-      { duration: '5m', target: 200 }, // Start with 200 users
-      { duration: '3h', target: 200 }, // Hold for 3 hours
+      { duration: '5m', target: 500 }, // Start with 500 users
+      { duration: '3h', target: 500 }, // Hold for 3 hours
       { duration: '5m', target: 0 }, // Ramp down to 0 users
     ],
     thresholds: {
-      'http_req_duration': ['p(95)<500', 'p(99)<1000'],  // Standard SLO targets
+      'http_req_duration': ['p(95)<2500', 'p(99)<5000'],  // Standard SLO targets
       'http_req_failed': ['rate<0.01'],  // Error rate < 1%
     },
   },

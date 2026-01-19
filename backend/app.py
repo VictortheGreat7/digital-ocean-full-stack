@@ -1,5 +1,6 @@
 import os
 import pytz
+import atexit
 import psycopg2
 import requests
 from queue import Queue
@@ -7,8 +8,10 @@ from flask_cors import CORS
 from threading import Thread
 from datetime import datetime
 from opentelemetry import trace
+from opentelemetry import context
 from time import monotonic, sleep
 from flask import Flask, jsonify, request, g
+from opentelemetry.trace import format_trace_id
 from opentelemetry.sdk.resources import Resource
 from prometheus_client import Counter, Histogram
 from opentelemetry.sdk.trace import TracerProvider
@@ -41,9 +44,18 @@ otlp_exporter = OTLPSpanExporter(
     insecure=True  # True for internal cluster communication
 )
 # Add span processor to process traces in batches
-tracer_provider.add_span_processor(BatchSpanProcessor(otlp_exporter))
+tracer_provider.add_span_processor(BatchSpanProcessor(
+    otlp_exporter,
+    schedule_delay_millis=2000,
+    max_export_batch_size=512
+))
 # Get tracer
 tracer = trace.get_tracer(__name__)
+
+@atexit.register
+def shutdown_tracer():
+    tracer_provider.shutdown()
+
 
 # Watch incoming requests to Flask app
 FlaskInstrumentor().instrument_app(app)
@@ -82,19 +94,24 @@ def db_worker():
                 continue
 
         # Get logged user request record
-        record = log_queue.get()
-        if record is None:
+        item = log_queue.get()
+        if item is None:
             if conn:
                 conn.close()
             break
 
+        record, ctx = item
+
+        token = context.attach(ctx) if ctx else None
+
         try:
-            with conn.cursor() as cur:
-                cur.execute("""
-                    INSERT INTO requests (path, method, status, latency_ms, timezone, city, trace_id)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)
-                """, record)
-                conn.commit()
+            with tracer.start_as_current_span("db.insert"):
+                with conn.cursor() as cur:
+                    cur.execute("""
+                        INSERT INTO requests (path, method, status, latency_ms, timezone, city, trace_id)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    """, record)
+                    conn.commit()
         except Exception as e:
             app.logger.error(f"DB write error: {e}")
             # On write failure, reset connection
@@ -105,6 +122,8 @@ def db_worker():
                 except:
                     pass
             conn = None  # Force reconnection
+        finally:
+            context.detach(token)
 
 # Start background worker thread
 db_thread = Thread(target=db_worker, daemon=True)
@@ -160,46 +179,56 @@ def record_metrics(response):
     
     # Add extra details to current trace span
     span = trace.get_current_span()
-    if span:
-        span.set_attribute("http.route", path)
-        span.set_attribute("http.method", request.method)
-        span.set_attribute("http.status_code", response.status_code)
+
+    # if span:
+    #     span.set_attribute("http.route", path)
+    #     span.set_attribute("http.method", request.method)
+    #     span.set_attribute("http.status_code", response.status_code)
     
-    trace_id = span.get_span_context().trace_id if span else None
+    trace_id = (
+        format_trace_id(span.get_span_context().trace_id)
+        if span and span.get_span_context().is_valid
+        else None
+    )
+
+    ctx = context.get_current() 
     
     # Queue the user request log record (non-blocking)
     log_queue.put((
-        path,
-        request.method,
-        status,
-        int(duration * 1000),  # latency in ms
-        request.args.get('timezone', 'unknown'),
-        request.args.get('city', 'unknown'),
-        str(trace_id) if trace_id else None
+        (
+            path,
+            request.method,
+            status,
+            int(duration * 1000),  # latency in ms
+            request.args.get('timezone', 'unknown'),
+            request.args.get('city', 'unknown'),
+            trace_id
+        ),
+        ctx
     ))
 
     return response
 
- # Backend proxy endpoint for frontend to send traces to Tempo
-@app.route('/frontend-traces', methods=['POST'])
-def frontend_traces():
-    try:
-        trace_data = request.get_data()
-        headers = {
-            'Content-Type': 'application/json'
-        }
+#  # Backend proxy endpoint for frontend to send traces to Tempo
+# @app.route('/frontend-traces', methods=['POST'])
+# def frontend_traces():
+#     try:
+#         trace_data = request.get_data()
+#         headers = {
+#             'Content-Type': 'application/json'
+#         }
     
-        response = requests.post(
-            url=f"http://{tempo_endpoint.replace('4317', '4318')}/v1/traces",
-            data=trace_data,
-            headers=headers,
-            timeout=5
-        )
+#         response = requests.post(
+#             url=f"http://{tempo_endpoint.replace('4317', '4318')}/v1/traces",
+#             data=trace_data,
+#             headers=headers,
+#             timeout=5
+#         )
 
-        return jsonify({"status": "traces forwarded"}), response.status_code
-    except Exception as e:
-        app.logger.error(f"Error forwarding traces: {e}")
-        return jsonify({"error": "Failed to forward traces"}), 500
+#         return jsonify({"status": "traces forwarded"}), response.status_code
+#     except Exception as e:
+#         app.logger.error(f"Error forwarding traces: {e}")
+#         return jsonify({"error": "Failed to forward traces"}), 500
 
 # Major cities with their timezones
 MAJOR_CITIES = {

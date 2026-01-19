@@ -355,6 +355,36 @@ resource "helm_release" "alloy" {
                 url = "http://loki.monitoring:3100/loki/api/v1/push"
               }
             }
+
+            otelcol.receiver.otlp "default" {
+              grpc {
+                endpoint = "0.0.0.0:4317"
+              }
+              http {
+                endpoint = "0.0.0.0:4318"
+              }
+            }
+
+            otelcol.processor.batch "default" {}
+
+            otelcol.exporter.otlp "tempo" {
+              client {
+                endpoint = "tempo.monitoring:4317"
+                tls {
+                  insecure = true
+                }
+              }
+            }
+
+            otelcol.service "traces" {
+              pipelines {
+                traces = {
+                  receivers  = [otelcol.receiver.otlp.default]
+                  processors = [otelcol.processor.batch.default]
+                  exporters  = [otelcol.exporter.otlp.tempo]
+                }
+              }
+            }
           EOT
         }
       }
