@@ -190,6 +190,12 @@ resource "kubernetes_config_map_v1" "grafana_datasources" {
             tracesToMetrics = {
               datasourceUid = "prometheus"
             }
+            serviceMap = {
+              datasourceUid = "prometheus"
+            }
+            nodeGraph = {
+              enabled = true
+            }
           }
         }
       ]
