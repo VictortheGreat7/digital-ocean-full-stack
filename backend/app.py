@@ -1,17 +1,8 @@
 import os
-import pytz
 import atexit
-import psycopg2
-import requests
-from queue import Queue
-from flask_cors import CORS
-from threading import Thread
-from datetime import datetime
 from opentelemetry import trace
 from opentelemetry import context
-from time import monotonic, sleep
-from flask import Flask, jsonify, request, g
-from opentelemetry.trace import format_trace_id
+from opentelemetry.trace import format_trace_id, NonRecordingSpan
 from opentelemetry.sdk.resources import Resource
 from prometheus_client import Counter, Histogram
 from opentelemetry.sdk.trace import TracerProvider
@@ -23,11 +14,6 @@ from opentelemetry.instrumentation.psycopg2 import Psycopg2Instrumentor
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
-
-# Instantiate a Flask app
-app = Flask(__name__)
-# Allow CrossOriginResourceSharing
-CORS(app)
 
 set_global_textmap(TraceContextTextMapPropagator())
 
@@ -60,10 +46,28 @@ tracer = trace.get_tracer(__name__)
 def shutdown_tracer():
     tracer_provider.shutdown()
 
-# Watch incoming requests to Flask app
-FlaskInstrumentor().instrument_app(app)
 # Watch outgoing requests via requests library
 RequestsInstrumentor().instrument()
+# Watch psycopg2 database connections
+Psycopg2Instrumentor().instrument()
+
+import pytz
+import psycopg2
+import requests
+from queue import Queue
+from flask_cors import CORS
+from threading import Thread
+from datetime import datetime
+from flask import Flask, jsonify, request, g
+from time import monotonic, sleep
+
+# Instantiate a Flask app
+app = Flask(__name__)
+# Allow CrossOriginResourceSharing
+CORS(app)
+
+# Watch incoming requests to Flask app
+FlaskInstrumentor().instrument_app(app)
 
 # Create /metrics endpoint on the Flask app for Prometheus scraping
 metrics = PrometheusMetrics(app)
@@ -78,9 +82,6 @@ DB_CONFIG = {
     "user": os.getenv("DB_USER", "app"),
     "password": os.getenv("DB_PASSWORD", "dev-password-change-in-prod")
 }
-
-# Watch psycopg2 database connections
-Psycopg2Instrumentor().instrument()
 
 # Queue for async user request logging (non-blocking)
 log_queue = Queue()
@@ -106,12 +107,15 @@ def db_worker():
                 conn.close()
             break
 
-        record, ctx = item
+        record, parent_span_ctx, ctx = item
+
+        # Create a non-recording span from the parent context
+        parent_span = trace.NonRecordingSpan(parent_span_ctx)
 
         token = context.attach(ctx) if ctx else None
 
         try:
-            with tracer.start_as_current_span("db.insert") as span:
+            with tracer.start_as_current_span("db.insert", context=trace.set_span_in_context(parent_span)) as span:
                 span.set_attribute("db.operation", "insert")
                 span.set_attribute("db.table", "requests")
                 
@@ -188,8 +192,8 @@ def record_metrics(response):
         ).inc()
     
     # Add extra details to current trace span
-    span = trace.get_current_span()
-    app.logger.info(f"Current span before SQL: {span.get_span_context().trace_id if span else 'None'}")
+    root_span = trace.get_current_span()
+    app.logger.info(f"Current span before SQL: {root_span.get_span_context().trace_id if root_span else 'None'}")
 
     # if span:
     #     span.set_attribute("http.route", path)
@@ -197,12 +201,12 @@ def record_metrics(response):
     #     span.set_attribute("http.status_code", response.status_code)
     
     trace_id = (
-        format_trace_id(span.get_span_context().trace_id)
-        if span and span.get_span_context().is_valid
+        format_trace_id(root_span.get_span_context().trace_id)
+        if root_span and root_span.get_span_context().is_valid
         else None
     )
 
-    ctx = context.get_current() 
+    ctx = context.get_current()
     
     # Queue the user request log record (non-blocking)
     log_queue.put((
@@ -213,8 +217,9 @@ def record_metrics(response):
             int(duration * 1000),  # latency in ms
             request.args.get('timezone', 'unknown'),
             request.args.get('city', 'unknown'),
-            trace_id
+            format_trace_id(root_span.get_span_context().trace_id)
         ),
+        root_span.get_span_context(),
         ctx
     ))
 
