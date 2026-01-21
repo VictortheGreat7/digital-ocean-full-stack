@@ -12,7 +12,7 @@ import { textSummary } from 'https://jslib.k6.io/k6-summary/0.0.1/index.js';
 const BASE_URL = __ENV.BASE_URL || 'http://localhost';
 const TEST_TYPE = __ENV.TEST_TYPE || 'load';
 
-console.log(`${TEST_TYPE} testing Kronos app on ${BASE_URL}`);
+// console.log(`${TEST_TYPE} testing Kronos app on ${BASE_URL}`);
 
 const TIMEZONES = new SharedArray('timezones', function() {
   return [
