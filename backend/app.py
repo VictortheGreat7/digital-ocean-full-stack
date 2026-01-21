@@ -111,19 +111,19 @@ def db_worker():
         token = context.attach(ctx) if ctx else None
 
         try:
-            with tracer.start_as_current_span("db.insert") as span:
-                span.set_attribute("db.operation", "insert")
-                span.set_attribute("db.table", "requests")
+            # with tracer.start_as_current_span("db.insert") as span:
+            #     span.set_attribute("db.operation", "insert")
+            #     span.set_attribute("db.table", "requests")
                 
-                # Debug logging
-                app.logger.info(f"DB span active: {span.is_recording()}, trace_id: {format_trace_id(span.get_span_context().trace_id)}")
+            #     # Debug logging
+            #     app.logger.info(f"DB span active: {span.is_recording()}, trace_id: {format_trace_id(span.get_span_context().trace_id)}")
 
-                with conn.cursor() as cur:
-                    cur.execute("""
-                        INSERT INTO requests (path, method, status, latency_ms, timezone, city, trace_id)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s)
-                    """, record)
-                    conn.commit()
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO requests (path, method, status, latency_ms, timezone, city, trace_id)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """, record)
+                conn.commit()
         except Exception as e:
             app.logger.error(f"DB write error: {e}")
             # On write failure, reset connection
