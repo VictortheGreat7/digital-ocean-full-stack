@@ -319,6 +319,19 @@ resource "helm_release" "alloy" {
             // loki.source.kubernetes tails logs from Kubernetes containers using the Kubernetes API.
             loki.source.kubernetes "pod_logs" {
               targets    = discovery.kubernetes.pods.targets
+              forward_to = [loki.process.pod_logs.receiver]
+            }
+            loki.process "pod_logs" {
+              stage.json {
+                expressions = {
+                  trace_id = "trace_id",
+                }
+              }
+              stage.labels {
+                values = {
+                  trace_id = "",
+                }
+              }
               forward_to = [loki.write.loki.receiver]
             }
 
@@ -349,40 +362,6 @@ resource "helm_release" "alloy" {
             loki.write "loki" {
               endpoint {
                 url = "http://loki.monitoring:3100/loki/api/v1/push"
-              }
-            }
-
-            otelcol.receiver.otlp "default" {
-              grpc {
-                endpoint = "0.0.0.0:4317"
-              }
-              http {
-                endpoint = "0.0.0.0:4318"
-              }
-              output {
-                traces = [otelcol.processor.batch.default.input]
-              }
-            }
-            otelcol.processor.batch "default" {
-                output {
-                  traces  = [otelcol.exporter.otlp.tempo.input]
-                }
-            }
-            otelcol.exporter.otlp "tempo" {
-              client {
-                endpoint = "tempo.monitoring:4317"
-                tls {
-                  insecure = true
-                }
-              }
-            }
-            otelcol.service "traces" {
-              pipelines {
-                traces = {
-                  receivers = [otelcol.receiver.otlp.default],
-                  processors = [otelcol.processor.batch.default],
-                  exporters = [otelcol.exporter.otlp.tempo],
-                }
               }
             }
           EOT
