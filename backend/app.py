@@ -217,7 +217,7 @@ def record_metrics(response):
             int(duration * 1000),  # latency in ms
             request.args.get('timezone', 'unknown'),
             request.args.get('city', 'unknown'),
-            format_trace_id(root_span.get_span_context().trace_id)
+            trace_id
         ),
         root_span.get_span_context(),
         ctx
