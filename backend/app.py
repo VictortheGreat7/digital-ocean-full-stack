@@ -193,10 +193,10 @@ def record_metrics(response):
     root_span = trace.get_current_span()
     app.logger.info(f"Current span before SQL: {root_span.get_span_context().trace_id if root_span else 'None'}")
 
-    # if span:
-    #     span.set_attribute("http.route", path)
-    #     span.set_attribute("http.method", request.method)
-    #     span.set_attribute("http.status_code", response.status_code)
+    if root_span:
+        root_span.set_attribute("http.route", path)
+        root_span.set_attribute("http.method", request.method)
+        root_span.set_attribute("http.status_code", response.status_code)
     
     trace_id = (
         format_trace_id(root_span.get_span_context().trace_id)
