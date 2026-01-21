@@ -27,7 +27,7 @@ from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapProp
 # Instantiate a Flask app
 app = Flask(__name__)
 # Allow CrossOriginResourceSharing
-CORS(app, resources={r"/frontend-traces": {"origins": "*"}})
+CORS(app)
 
 set_global_textmap(TraceContextTextMapPropagator())
 
@@ -37,7 +37,6 @@ resource = Resource(attributes={
     "service.namespace": "kronos",
     "deployment.environment": "development"
 })
-
 # Set up the tracer provider
 tracer_provider = TracerProvider(resource=resource)
 trace.set_tracer_provider(tracer_provider)
@@ -61,14 +60,10 @@ tracer = trace.get_tracer(__name__)
 def shutdown_tracer():
     tracer_provider.shutdown()
 
-set_global_textmap(TraceContextTextMapPropagator())
-
 # Watch incoming requests to Flask app
 FlaskInstrumentor().instrument_app(app)
 # Watch outgoing requests via requests library
 RequestsInstrumentor().instrument()
-# Watch psycopg2 database connections
-Psycopg2Instrumentor().instrument()
 
 # Create /metrics endpoint on the Flask app for Prometheus scraping
 metrics = PrometheusMetrics(app)
@@ -83,6 +78,9 @@ DB_CONFIG = {
     "user": os.getenv("DB_USER", "app"),
     "password": os.getenv("DB_PASSWORD", "dev-password-change-in-prod")
 }
+
+# Watch psycopg2 database connections
+Psycopg2Instrumentor().instrument()
 
 # Queue for async user request logging (non-blocking)
 log_queue = Queue()
@@ -113,7 +111,13 @@ def db_worker():
         token = context.attach(ctx) if ctx else None
 
         try:
-            with tracer.start_as_current_span("db.insert"):
+            with tracer.start_as_current_span("db.insert") as span:
+                span.set_attribute("db.operation", "insert")
+                span.set_attribute("db.table", "requests")
+                
+                # Debug logging
+                app.logger.info(f"DB span active: {span.is_recording()}, trace_id: {format_trace_id(span.get_span_context().trace_id)}")
+
                 with conn.cursor() as cur:
                     cur.execute("""
                         INSERT INTO requests (path, method, status, latency_ms, timezone, city, trace_id)
@@ -148,13 +152,11 @@ frontend_http_errors = Counter(
     'Total frontend HTTP request errors',
     ['method', 'path', 'status']
 )
-
 frontend_http_latency = Histogram(
     'frontend_http_request_duration_seconds',
     'Latency of frontend HTTP requests',
     ['method', 'path', 'status']
 )
-
 EXCLUDED_PATHS = [
     '/metrics',
     '/health',
@@ -187,6 +189,7 @@ def record_metrics(response):
     
     # Add extra details to current trace span
     span = trace.get_current_span()
+    app.logger.info(f"Current span before SQL: {span.get_span_context().trace_id if span else 'None'}")
 
     # if span:
     #     span.set_attribute("http.route", path)
@@ -218,12 +221,8 @@ def record_metrics(response):
     return response
 
 # Backend proxy endpoint for frontend to send traces to Tempo
-@app.route('/frontend-traces', methods=['POST', 'OPTIONS'])
+@app.route('/frontend-traces', methods=['POST'])
 def frontend_traces():
-    if request.method == 'OPTIONS':
-        # Preflight request; just respond OK
-        return '', 204
-
     try:
         trace_data = request.get_data()
         headers = {
