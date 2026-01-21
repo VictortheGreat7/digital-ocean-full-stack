@@ -196,7 +196,7 @@ def record_metrics(response):
     if root_span:
         root_span.set_attribute("http.route", path)
         root_span.set_attribute("http.method", request.method)
-        root_span.set_attribute("http.status_code", response.status_code)
+        root_span.set_attribute("http.status_code", status)
     
     trace_id = (
         format_trace_id(root_span.get_span_context().trace_id)
