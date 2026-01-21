@@ -17,7 +17,7 @@ const provider = new WebTracerProvider({
 
 // Configure OTLP exporter - use backend as proxy to Tempo
 const exporter = new OTLPTraceExporter({
-  url:  `${window.location.origin}/frontend-traces`
+  url:  `${window.location.origin}/api/frontend-traces`
 });
 
 // Add span processor
