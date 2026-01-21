@@ -1,19 +1,33 @@
 import os
+import pytz
 import atexit
+import psycopg2
+import requests
+from queue import Queue
+from flask_cors import CORS
+from threading import Thread
+from datetime import datetime
+from time import monotonic, sleep
 from opentelemetry import trace
-# from opentelemetry import context
-from opentelemetry.trace import format_trace_id, NonRecordingSpan
+from opentelemetry import context
+from flask import Flask, jsonify, request, g
 from opentelemetry.sdk.resources import Resource
 from prometheus_client import Counter, Histogram
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.propagate import set_global_textmap
 from prometheus_flask_exporter import PrometheusMetrics
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.trace import format_trace_id, NonRecordingSpan
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
 from opentelemetry.instrumentation.psycopg2 import Psycopg2Instrumentor
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
+
+# Instantiate a Flask app
+app = Flask(__name__)
+# Allow CrossOriginResourceSharing
+CORS(app)
 
 set_global_textmap(TraceContextTextMapPropagator())
 
@@ -46,29 +60,12 @@ tracer = trace.get_tracer(__name__)
 def shutdown_tracer():
     tracer_provider.shutdown()
 
+# Watch incoming requests to Flask app
+FlaskInstrumentor().instrument_app(app)
 # Watch outgoing requests via requests library
 RequestsInstrumentor().instrument()
 # Watch psycopg2 database connections
 Psycopg2Instrumentor().instrument()
-
-import pytz
-import psycopg2
-import requests
-# from queue import Queue
-from flask_cors import CORS
-# from threading import Thread
-from datetime import datetime
-from flask import Flask, jsonify, request, g
-from time import monotonic
-# , sleep
-
-# Instantiate a Flask app
-app = Flask(__name__)
-# Allow CrossOriginResourceSharing
-CORS(app)
-
-# Watch incoming requests to Flask app
-FlaskInstrumentor().instrument_app(app)
 
 # Create /metrics endpoint on the Flask app for Prometheus scraping
 metrics = PrometheusMetrics(app)
@@ -84,67 +81,67 @@ DB_CONFIG = {
     "password": os.getenv("DB_PASSWORD", "dev-password-change-in-prod")
 }
 
-# # Queue for async user request logging (non-blocking)
-# log_queue = Queue()
+# Queue for async user request logging (non-blocking)
+log_queue = Queue()
 
-# # Background worker thread that writes request logs to DB
-# def db_worker():
-#     conn = None
+# Background worker thread that writes request logs to DB
+def db_worker():
+    conn = None
 
-#     while True:
-#         if conn is None:
-#             try:
-#                 conn = psycopg2.connect(**DB_CONFIG)
-#                 app.logger.info("DB connection established")
-#             except Exception as e:
-#                 app.logger.error(f"DB connection failed, retrying in 5s: {e}")
-#                 sleep(5)
-#                 continue
+    while True:
+        if conn is None:
+            try:
+                conn = psycopg2.connect(**DB_CONFIG)
+                app.logger.info("DB connection established")
+            except Exception as e:
+                app.logger.error(f"DB connection failed, retrying in 5s: {e}")
+                sleep(5)
+                continue
 
-#         # Get logged user request record
-#         item = log_queue.get()
-#         if item is None:
-#             if conn:
-#                 conn.close()
-#             break
+        # Get logged user request record
+        item = log_queue.get()
+        if item is None:
+            if conn:
+                conn.close()
+            break
 
-#         record, parent_span_ctx, ctx = item
+        record, parent_span_ctx, ctx = item
 
-#         # Create a non-recording span from the parent context
-#         parent_span = trace.NonRecordingSpan(parent_span_ctx)
+        # Create a non-recording span from the parent context
+        parent_span = trace.NonRecordingSpan(parent_span_ctx)
 
-#         token = context.attach(ctx) if ctx else None
+        token = context.attach(ctx) if ctx else None
 
-#         try:
-#             with tracer.start_as_current_span("db.insert", context=trace.set_span_in_context(parent_span)) as span:
-#                 span.set_attribute("db.operation", "insert")
-#                 span.set_attribute("db.table", "requests")
+        try:
+            with tracer.start_as_current_span("db.insert", context=trace.set_span_in_context(parent_span)) as span:
+                span.set_attribute("db.operation", "insert")
+                span.set_attribute("db.table", "requests")
                 
-#                 # Debug logging
-#                 app.logger.info(f"DB span active: {span.is_recording()}, trace_id: {format_trace_id(span.get_span_context().trace_id)}")
+                # Debug logging
+                app.logger.info(f"DB span active: {span.is_recording()}, trace_id: {format_trace_id(span.get_span_context().trace_id)}")
 
-#                 with conn.cursor() as cur:
-#                     cur.execute("""
-#                         INSERT INTO requests (path, method, status, latency_ms, timezone, city, trace_id)
-#                         VALUES (%s, %s, %s, %s, %s, %s, %s)
-#                     """, record)
-#                     conn.commit()
-#         except Exception as e:
-#             app.logger.error(f"DB write error: {e}")
-#             # On write failure, reset connection
-#             if conn:
-#                 try:
-#                     conn.rollback()
-#                     conn.close()
-#                 except:
-#                     pass
-#             conn = None  # Force reconnection
-#         finally:
-#             context.detach(token)
+                with conn.cursor() as cur:
+                    cur.execute("""
+                        INSERT INTO requests (path, method, status, latency_ms, timezone, city, trace_id)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    """, record)
+                    conn.commit()
+        except Exception as e:
+            app.logger.error(f"DB write error: {e}")
+            # On write failure, reset connection
+            if conn:
+                try:
+                    conn.rollback()
+                    conn.close()
+                except:
+                    pass
+            conn = None  # Force reconnection
+        finally:
+            context.detach(token)
 
-# # Start background worker thread
-# db_thread = Thread(target=db_worker, daemon=True)
-# db_thread.start()
+# Start background worker thread
+db_thread = Thread(target=db_worker, daemon=True)
+db_thread.start()
 
 # Save user request start time
 @app.before_request
@@ -193,61 +190,36 @@ def record_metrics(response):
         ).inc()
     
     # Add extra details to current trace span
-    span = trace.get_current_span()
-    app.logger.info(f"Current span before SQL: {span.get_span_context().trace_id if span else 'None'}")
+    root_span = trace.get_current_span()
+    app.logger.info(f"Current span before SQL: {root_span.get_span_context().trace_id if root_span else 'None'}")
 
-    if span:
-        span.set_attribute("http.route", path)
-        span.set_attribute("http.method", request.method)
-        span.set_attribute("http.status_code", response.status_code)
+    # if span:
+    #     span.set_attribute("http.route", path)
+    #     span.set_attribute("http.method", request.method)
+    #     span.set_attribute("http.status_code", response.status_code)
     
-    # trace_id = (
-    #     format_trace_id(root_span.get_span_context().trace_id)
-    #     if root_span and root_span.get_span_context().is_valid
-    #     else None
-    # )
+    trace_id = (
+        format_trace_id(root_span.get_span_context().trace_id)
+        if root_span and root_span.get_span_context().is_valid
+        else None
+    )
 
-    # ctx = context.get_current()
+    ctx = context.get_current()
     
-    # # Queue the user request log record (non-blocking)
-    # log_queue.put((
-    #     (
-    #         path,
-    #         request.method,
-    #         status,
-    #         int(duration * 1000),  # latency in ms
-    #         request.args.get('timezone', 'unknown'),
-    #         request.args.get('city', 'unknown'),
-    #         trace_id
-    #     ),
-    #     root_span.get_span_context(),
-    #     ctx
-    # ))
-
-    try:
-        with tracer.start_as_current_span("db.insert") as db_span:
-            db_span.set_attribute("db.operation", "insert")
-            db_span.set_attribute("db.table", "requests")
-            
-            # Debug logging
-            app.logger.info(f"DB span active: {db_span.is_recording()}, trace_id: {format_trace_id(db_span.get_span_context().trace_id)}")
-
-            with psycopg2.connect(**DB_CONFIG) as conn:
-                with conn.cursor() as cur:
-                    cur.execute("""
-                        INSERT INTO requests (path, method, status, latency_ms, timezone, city, trace_id)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s)
-                    """, (
-                        path,
-                        request.method,status,
-                        int(duration * 1000),  # latency in ms
-                        request.args.get('timezone', 'unknown'),
-                        request.args.get('city', 'unknown'),
-                        format_trace_id(span.get_span_context().trace_id)
-                    ))
-                    conn.commit()
-    except Exception as e:
-        app.logger.error(f"DB write error: {e}")
+    # Queue the user request log record (non-blocking)
+    log_queue.put((
+        (
+            path,
+            request.method,
+            status,
+            int(duration * 1000),  # latency in ms
+            request.args.get('timezone', 'unknown'),
+            request.args.get('city', 'unknown'),
+            trace_id
+        ),
+        root_span.get_span_context(),
+        ctx
+    ))
 
     return response
 
