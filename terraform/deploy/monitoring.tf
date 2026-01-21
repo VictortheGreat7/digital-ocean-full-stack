@@ -315,11 +315,10 @@ resource "helm_release" "alloy" {
             // It watches cluster state and ensures targets are continually synced with what is currently running in your cluste  
             discovery.kubernetes "pods" {
               role = "pod"
-              }
             }
             // loki.source.kubernetes tails logs from Kubernetes containers using the Kubernetes API.
             loki.source.kubernetes "pod_logs" {
-              targets    = discovery.kubernetes.pods.target
+              targets    = discovery.kubernetes.pods.targets
               forward_to = [loki.write.loki.receiver]
             }
 
