@@ -15,16 +15,21 @@ from opentelemetry.trace import format_trace_id
 from opentelemetry.sdk.resources import Resource
 from prometheus_client import Counter, Histogram
 from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.propagate import set_global_textmap
 from prometheus_flask_exporter import PrometheusMetrics
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
+from opentelemetry.instrumentation.psycopg2 import Psycopg2Instrumentor
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
 
 # Instantiate a Flask app
 app = Flask(__name__)
 # Allow CrossOriginResourceSharing
-CORS(app)
+CORS(app, resources={r"/frontend-traces": {"origins": "*"}})
+
+set_global_textmap(TraceContextTextMapPropagator())
 
 # Identify service sending OpenTelemetry data
 resource = Resource(attributes={
@@ -56,11 +61,14 @@ tracer = trace.get_tracer(__name__)
 def shutdown_tracer():
     tracer_provider.shutdown()
 
+set_global_textmap(TraceContextTextMapPropagator())
 
 # Watch incoming requests to Flask app
 FlaskInstrumentor().instrument_app(app)
 # Watch outgoing requests via requests library
 RequestsInstrumentor().instrument()
+# Watch psycopg2 database connections
+Psycopg2Instrumentor().instrument()
 
 # Create /metrics endpoint on the Flask app for Prometheus scraping
 metrics = PrometheusMetrics(app)
@@ -210,12 +218,16 @@ def record_metrics(response):
     return response
 
 # Backend proxy endpoint for frontend to send traces to Tempo
-@app.route('/frontend-traces', methods=['POST'])
+@app.route('/frontend-traces', methods=['POST', 'OPTIONS'])
 def frontend_traces():
+    if request.method == 'OPTIONS':
+        # Preflight request; just respond OK
+        return '', 204
+
     try:
         trace_data = request.get_data()
         headers = {
-            'Content-Type': 'application/json'
+            'Content-Type': request.headers.get('Content-Type', 'application/x-protobuf')
         }
     
         response = requests.post(

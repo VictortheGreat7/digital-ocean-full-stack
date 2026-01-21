@@ -9,4 +9,5 @@ opentelemetry-sdk==1.27.0
 prometheus-flask-exporter==0.23.2
 opentelemetry-instrumentation-flask==0.48b0
 opentelemetry-instrumentation-requests==0.48b0
+opentelemetry-instrumentation-psycopg2==0.48b0
 opentelemetry-exporter-otlp-proto-grpc==1.27.0
