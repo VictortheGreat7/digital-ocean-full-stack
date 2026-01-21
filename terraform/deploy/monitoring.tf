@@ -317,7 +317,6 @@ resource "helm_release" "alloy" {
               role = "pod"
               }
             }
-
             // loki.source.kubernetes tails logs from Kubernetes containers using the Kubernetes API.
             loki.source.kubernetes "pod_logs" {
               targets    = discovery.kubernetes.pods.target
@@ -331,18 +330,15 @@ resource "helm_release" "alloy" {
               log_format = "logfmt"
               forward_to = [loki.process.cluster_events.receiver]
             }
-
             // loki.process receives log entries from other loki components, applies one or more processing stages,
             // and forwards the results to the list of receivers in the component's arguments.
             loki.process "cluster_events" {
               forward_to = [loki.write.loki.receiver]
-
               stage.static_labels {
                 values = {
                   cluster = "glad-colt-cluster",
                 }
               }
-
               stage.labels {
                 values = {
                   kubernetes_cluster_events = "job",
@@ -368,13 +364,11 @@ resource "helm_release" "alloy" {
                 traces = [otelcol.processor.batch.default.input]
               }
             }
-            
             otelcol.processor.batch "default" {
                 output {
                   traces  = [otelcol.exporter.otlp.tempo.input]
                 }
             }
-            
             otelcol.exporter.otlp "tempo" {
               client {
                 endpoint = "tempo.monitoring:4317"
@@ -383,7 +377,6 @@ resource "helm_release" "alloy" {
                 }
               }
             }
-            
             otelcol.service "traces" {
               pipelines {
                 traces = {
