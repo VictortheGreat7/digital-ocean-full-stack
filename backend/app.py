@@ -194,7 +194,7 @@ def record_metrics(response):
     
     # Add extra details to current trace span
     span = trace.get_current_span()
-    app.logger.info(f"Current span before SQL: {root_span.get_span_context().trace_id if root_span else 'None'}")
+    app.logger.info(f"Current span before SQL: {span.get_span_context().trace_id if span else 'None'}")
 
     if span:
         span.set_attribute("http.route", path)
