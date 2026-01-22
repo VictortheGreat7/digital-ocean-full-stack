@@ -2,19 +2,31 @@ module "nginx-controller" {
   source  = "terraform-iaac/nginx-controller/helm"
   version = ">=2.3.0"
 
-  values = [
-    yamlencode({
-      controller = {
-        config = {
-          enable-opentelemetry        = "true"
-          otlp-collector-host         = "tempo.monitoring.svc.cluster.local"
-          otlp-collector-port         = "4317"
-          otel-service-name           = "nginx-ingress"
-          otel-sampler                = "AlwaysOn"
-          otel-sampler-ratio          = "1.0"
-        }
-      }
-    })
+  additional_set = [
+    {
+      name  = "controller.config.enable-opentelemetry"
+      value = "true"
+    },
+    {
+      name  = "controller.config.otlp-collector-host"
+      value = "tempo.monitoring.svc.cluster.local"
+    },
+    {
+      name  = "controller.config.otlp-collector-port"
+      value = "4317"
+    },
+    {
+      name  = "controller.config.otel-service-name"
+      value = "nginx-ingress"
+    },
+    {
+      name  = "controller.config.otel-sampler"
+      value = "AlwaysOn"
+    },
+    {
+      name  = "controller.config.otel-sampler-ratio"
+      value = "1.0"
+    }
   ]
 
   metrics_enabled = true
