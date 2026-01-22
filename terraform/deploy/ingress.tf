@@ -2,6 +2,22 @@ module "nginx-controller" {
   source  = "terraform-iaac/nginx-controller/helm"
   version = ">=2.3.0"
 
+  values = [
+    yamlencode({
+      controller = {
+        config = {
+          enable-opentelemetry        = "true"
+          otlp-collector-host         = "tempo.monitoring.svc.cluster.local"
+          otlp-collector-port         = "4317"
+          otel-service-name           = "nginx-ingress"
+          otel-sampler                = "AlwaysOn"
+          otel-sampler-ratio          = "1.0"
+        }
+      }
+    })
+  ]
+
+  metrics_enabled = true
   timeout = 900
 
   depends_on = [digitalocean_kubernetes_cluster.kronos]
