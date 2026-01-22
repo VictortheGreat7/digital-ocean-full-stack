@@ -147,6 +147,10 @@ resource "helm_release" "tempo" {
       value = "span-metrics"
     },
     {
+      name  = "tempo.overrides.defaults.metrics_generator.processors[2]"
+      value = "local_blocks"
+    },
+    {
       name  = "persistence.enabled"
       value = "true"
     },
