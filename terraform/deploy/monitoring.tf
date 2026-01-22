@@ -138,6 +138,10 @@ resource "helm_release" "tempo" {
       name = "tempo.metricsGenerator.remoteWriteUrl"
       value = "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
     },
+    {
+      name = "tempo.metricsGenerator.processor"
+      value = "{service_graphs, span_metrics}"
+    },
     # {
     #   name = "tempo.metricsGenerator.processor.service_graphs.enabled"
     #   value = "true"
