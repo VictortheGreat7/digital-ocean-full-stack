@@ -139,17 +139,13 @@ resource "helm_release" "tempo" {
       value = "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
     },
     {
-      name = "tempo.metricsGenerator.processor"
-      value = "{service_graphs, span_metrics}"
+      name  = "tempo.overrides.defaults.metrics_generator.processors[0]"
+      value = "service-graphs"
     },
-    # {
-    #   name = "tempo.metricsGenerator.processor.service_graphs.enabled"
-    #   value = "true"
-    # },
-    # {
-    #   name = "tempo.metricsGenerator.processor.span_metrics.enabled"
-    #   value = "true"
-    # },
+    {
+      name  = "tempo.overrides.defaults.metrics_generator.processors[1]"
+      value = "span-metrics"
+    },
     {
       name  = "persistence.enabled"
       value = "true"
