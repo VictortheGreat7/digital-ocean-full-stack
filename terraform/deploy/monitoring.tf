@@ -334,6 +334,9 @@ resource "helm_release" "alloy" {
               }
               forward_to = [loki.write.loki.receiver]
             }
+            loki.source.podlogs "default" {
+              forward_to = [loki.write.loki.receiver]
+            }
 
             // loki.source.kubernetes_events tails events from the Kubernetes API and converts them
             // into log lines to forward to other Loki components.
@@ -348,7 +351,7 @@ resource "helm_release" "alloy" {
               forward_to = [loki.write.loki.receiver]
               stage.static_labels {
                 values = {
-                  cluster = "glad-colt-cluster",
+                  cluster = "devoted-sawfish-cluster",
                 }
               }
               stage.labels {
