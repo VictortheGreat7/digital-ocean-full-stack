@@ -4,17 +4,17 @@ metadata:
   name: kronos-loadtest
   namespace: {{ .Release.Namespace }}
 spec:
-  # cleanup: 'post'
-  parallelism: 4
+  cleanup: 'post'
+  parallelism: 2
   runner:
     image: grafana/k6:latest
     resources:
       requests:
-        cpu: "1000m"
+        cpu: "500m"
         memory: "512Mi"
       limits:
-        cpu: "2000m"
-        memory: "1Gi"
+        cpu: "500m"
+        memory: "512Mi"
     env:
     - name: BASE_URL
       value: "{{ .Values.baseUrl }}"

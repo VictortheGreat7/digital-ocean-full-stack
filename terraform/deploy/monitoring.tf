@@ -8,12 +8,28 @@ resource "helm_release" "kube_prometheus_stack" {
   set = [
     # Prometheus settings
     {
+      name = "prometheus.prometheusSpec.resources.requests.cpu"
+      value = "500m"
+    },
+    {
+      name  = "prometheus.prometheusSpec.resources.requests.memory"
+      value = "1.5Gi"
+    },
+    {
+      name  = "prometheus.prometheusSpec.resources.limits.cpu"
+      value = "1"
+    },
+    {
+      name  = "prometheus.prometheusSpec.resources.limits.memory"
+      value = "2Gi"
+    },
+    {
       name  = "prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.storageClassName"
       value = "do-block-storage"
     },
     {
       name  = "prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage"
-      value = "5Gi"
+      value = "10Gi"
     },
     {
       name  = "prometheus.prometheusSpec.enableRemoteWriteReceiver"
@@ -47,12 +63,28 @@ resource "helm_release" "kube_prometheus_stack" {
       value = "true"
     },
     {
+      name = "alertmanager.alertmanagerSpec.resources.requests.cpu"
+      value = "100m"
+    },
+    {
+      name  = "alertmanager.alertmanagerSpec.resources.requests.memory"
+      value = "256Mi"
+    },
+    {
+      name  = "alertmanager.alertmanagerSpec.resources.limits.cpu"
+      value = "200m"
+    },
+    {
+      name  = "alertmanager.alertmanagerSpec.resources.limits.memory"
+      value = "512Mi"
+    },
+    {
       name  = "alertmanager.alertmanagerSpec.storage.volumeClaimTemplate.spec.storageClassName"
       value = "do-block-storage"
     },
     {
       name  = "alertmanager.alertmanagerSpec.storage.volumeClaimTemplate.spec.resources.requests.storage"
-      value = "5Gi"
+      value = "10Gi"
     },
     # Alertmanager ingress
     {
@@ -74,12 +106,28 @@ resource "helm_release" "kube_prometheus_stack" {
       value = "true"
     },
     {
+      name = "grafana.resources.requests.cpu"
+      value = "100m"
+    },
+    {
+      name  = "grafana.resources.requests.memory"
+      value = "256Mi"
+    },
+    {
+      name  = "grafana.resources.limits.cpu"
+      value = "200m"
+    },
+    {
+      name  = "grafana.resources.limits.memory"
+      value = "512Mi"
+    },
+    {
       name  = "grafana.persistence.storageClassName"
       value = "do-block-storage"
     },
     {
       name  = "grafana.persistence.size"
-      value = "5Gi"
+      value = "10Gi"
     },
     {
       name  = "grafana.adminPassword"
@@ -114,6 +162,22 @@ resource "helm_release" "tempo" {
   create_namespace = false
 
   set = [
+    {
+      name = "tempo.resources.requests.cpu"
+      value = "200m"
+    },
+    {
+      name  = "tempo.resources.requests.memory"
+      value = "512Mi"
+    },
+    {
+      name  = "tempo.resources.limits.cpu"
+      value = "400m"
+    },
+    {
+      name  = "tempo.resources.limits.memory"
+      value = "1Gi"
+    },
     {
       name  = "tempo.storage.trace.backend"
       value = "local"
@@ -160,7 +224,7 @@ resource "helm_release" "tempo" {
     },
     {
       name  = "persistence.size"
-      value = "5Gi"
+      value = "10Gi"
     }
   ]
 
@@ -270,10 +334,20 @@ resource "helm_release" "loki" {
 
       singleBinary = {
         replicas = 1
+        resources = {
+          requests = {
+            cpu    = "200m"
+            memory = "512Mi"
+          }
+          limits = {
+            cpu    = "400m"
+            memory = "1Gi"
+          }
+        }
         persistence = {
           enabled          = true
           storageClassName = "do-block-storage"
-          size             = "5Gi"
+          size             = "10Gi"
         }
         memberlist = {
           enabled = false
@@ -313,6 +387,16 @@ resource "helm_release" "alloy" {
   values = [
     yamlencode({
       alloy = {
+        resources = {
+          requests = {
+            cpu    = "100m"
+            memory = "256Mi"
+          }
+          limits = {
+            cpu    = "200m"
+            memory = "512Mi"
+          }
+        }
         configMap = {
           content = <<-EOT
             // discovery.kubernetes allows you to find scrape targets from Kubernetes resources.

@@ -139,7 +139,7 @@ resource "kubernetes_stateful_set_v1" "kronos_db" {
 
         resources {
           requests = {
-            storage = "5Gi"
+            storage = "10Gi"
           }
         }
       }

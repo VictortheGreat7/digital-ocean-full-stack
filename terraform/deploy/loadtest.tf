@@ -6,6 +6,25 @@ resource "helm_release" "k6_operator" {
   namespace        = "default"
   create_namespace = false
 
+  set = [
+    {
+      name  = "manager.resources.requests.cpu"
+      value = "50m"
+    },
+    {
+      name  = "manager.resources.requests.memory"
+      value = "128Mi"
+    },
+    {
+      name  = "manager.resources.limits.cpu"
+      value = "200m"
+    },
+    {
+      name  = "manager.resources.limits.memory"
+      value = "256Mi"
+    }
+  ]
+
   wait    = true
   timeout = 600
 

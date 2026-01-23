@@ -28,6 +28,7 @@ resource "digitalocean_kubernetes_cluster" "kronos" {
     max_nodes  = 2
     tags       = [digitalocean_tag.kronos.name]
   }
+  one_click_apps = ["metrics-server"]
 
   # control_plane_firewall {
   #   enabled = true

@@ -32,6 +32,22 @@ module "nginx-controller" {
       name  = "controller.config.otel-sampler-ratio"
       value = "1.0"
       type  = "string"
+    },
+    {
+      name = "controller.resources.requests.cpu"
+      value = "100m"
+    },
+    {
+      name  = "controller.resources.requests.memory"
+      value = "256Mi"
+    },
+    {
+      name  = "controller.resources.limits.cpu"
+      value = "200m"
+    },
+    {
+      name  = "controller.resources.limits.memory"
+      value = "512Mi"
     }
   ]
 
