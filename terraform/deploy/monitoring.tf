@@ -164,19 +164,19 @@ resource "helm_release" "tempo" {
   set = [
     {
       name = "tempo.resources.requests.cpu"
-      value = "300m"
+      value = "200m"
     },
     {
       name  = "tempo.resources.requests.memory"
-      value = "2Gi"
+      value = "512Mi"
     },
     {
       name  = "tempo.resources.limits.cpu"
-      value = "1"
+      value = "400m"
     },
     {
       name  = "tempo.resources.limits.memory"
-      value = "3Gi"
+      value = "1Gi"
     },
     {
       name = "tempo.memBallastSizeMbs"
@@ -216,7 +216,7 @@ resource "helm_release" "tempo" {
     },
     {
       name  = "tempo.overrides.defaults.metrics_generator.processors[2]"
-      value = "local_blocks"
+      value = "local-blocks"
     },
     {
       name  = "persistence.enabled"
