@@ -91,8 +91,8 @@ resource "kubernetes_deployment_v1" "kronos_backend" {
               path = "/health"
               port = 5000
             }
-            initial_delay_seconds = 10
-            period_seconds        = 10
+            initial_delay_seconds = 30
+            period_seconds        = 15
             timeout_seconds       = 5
             failure_threshold     = 3
           }
@@ -102,9 +102,9 @@ resource "kubernetes_deployment_v1" "kronos_backend" {
               path = "/ready"
               port = 5000
             }
-            initial_delay_seconds = 5
+            initial_delay_seconds = 15
             period_seconds        = 5
-            timeout_seconds       = 5
+            timeout_seconds       = 3
             failure_threshold     = 3
           }
         }

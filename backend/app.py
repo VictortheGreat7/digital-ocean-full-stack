@@ -397,31 +397,30 @@ def get_current_time():
 def health():
     """Health check endpoint"""
     with tracer.start_as_current_span("health_check_endpoint") as span:
-        try:
-            conn = psycopg2.connect(**DB_CONFIG, connect_timeout=2)
-            conn.close()
-            db_status = "up"
-            span.set_attribute("db.status", "healthy")
-        except Exception as e:
-            db_status = f"unhealthy: {str(e)}"
-            span.set_attribute("db.status", "unhealthy")
-            span.set_attribute("error", True)
-            span.record_exception(e)
-
-        status_code = 200 if db_status == "up" else 500
-        span.set_attribute("http.status_code", status_code)
-        
-        return jsonify({
-            "status": "healthy",
-            "database": db_status
-        }), status_code
+        span.set_attribute("health.status", "alive")
+        return jsonify({"status": "alive"}), 200
 
 @app.route('/ready', methods=['GET'])
 def ready():
     """Readiness check endpoint"""
     with tracer.start_as_current_span("readiness_check_endpoint") as span:
-        span.set_attribute("readiness.status", "ready")
-        return jsonify({"status": "ready"})
+        try:
+            conn = psycopg2.connect(**DB_CONFIG, connect_timeout=2)
+            conn.close()
+            db_status = "up"
+            span.set_attribute("db.status", "healthy")
+            span.set_attribute("readiness.status", "ready")
+            return jsonify({"status": "ready", "database": db_status}), 200
+        except Exception as e:
+            db_status = f"unhealthy: {str(e)}"
+            span.set_attribute("db.status", "unhealthy")
+            span.set_attribute("error", True)
+            span.record_exception(e)
+            return jsonify({
+                "status": "not ready",
+                "database": db_status,
+                "error": str(e)
+            }), 503
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
