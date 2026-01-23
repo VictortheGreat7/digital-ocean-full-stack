@@ -16,7 +16,7 @@ resource "helm_release" "kube_prometheus_stack" {
       value = "5Gi"
     },
     {
-      name = "prometheus.prometheusSpec.enableRemoteWriteReceiver"
+      name  = "prometheus.prometheusSpec.enableRemoteWriteReceiver"
       value = "true"
     },
     {
@@ -24,7 +24,7 @@ resource "helm_release" "kube_prometheus_stack" {
       value = "native-histograms"
     },
     {
-      name = "prometheus.prometheusSpec.enableFeatures[1]"
+      name  = "prometheus.prometheusSpec.enableFeatures[1]"
       value = "exemplar-storage"
     },
     # Prometheus ingress
@@ -99,8 +99,8 @@ resource "helm_release" "kube_prometheus_stack" {
       value = "grafana.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
     }
   ]
-  
-  wait = true
+
+  wait    = true
   timeout = 600
 
   depends_on = [module.nginx-controller, helm_release.cert_manager_prod_issuer]
@@ -131,11 +131,11 @@ resource "helm_release" "tempo" {
       value = "0.0.0.0:4318"
     },
     {
-      name = "tempo.metricsGenerator.enabled"
+      name  = "tempo.metricsGenerator.enabled"
       value = "true"
     },
     {
-      name = "tempo.metricsGenerator.remoteWriteUrl"
+      name  = "tempo.metricsGenerator.remoteWriteUrl"
       value = "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
     },
     {

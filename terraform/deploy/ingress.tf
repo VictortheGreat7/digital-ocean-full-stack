@@ -6,32 +6,32 @@ module "nginx-controller" {
     {
       name  = "controller.config.enable-opentelemetry"
       value = "true"
-      type = "string"
+      type  = "string"
     },
     {
       name  = "controller.config.otlp-collector-host"
       value = "tempo.monitoring.svc.cluster.local"
-      type = "string"
+      type  = "string"
     },
     {
       name  = "controller.config.otlp-collector-port"
       value = "4317"
-      type = "string"
+      type  = "string"
     },
     {
       name  = "controller.config.otel-service-name"
       value = "nginx-ingress"
-      type = "string"
+      type  = "string"
     },
     {
       name  = "controller.config.otel-sampler"
       value = "AlwaysOn"
-      type = "string"
+      type  = "string"
     },
     {
       name  = "controller.config.otel-sampler-ratio"
       value = "1.0"
-      type = "string"
+      type  = "string"
     }
   ]
 

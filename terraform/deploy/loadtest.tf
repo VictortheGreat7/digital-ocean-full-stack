@@ -6,7 +6,7 @@ resource "helm_release" "k6_operator" {
   namespace        = "default"
   create_namespace = false
 
-  wait = true
+  wait    = true
   timeout = 600
 
   depends_on = [helm_release.kube_prometheus_stack, helm_release.alloy]
@@ -27,16 +27,16 @@ resource "kubernetes_config_map_v1" "k6_test_script" {
 }
 
 resource "helm_release" "k6_test" {
-  name       = "k6-test"
-  chart      = "./charts/k6-test"
-  namespace  = helm_release.k6_operator.namespace
+  name      = "k6-test"
+  chart     = "./charts/k6-test"
+  namespace = helm_release.k6_operator.namespace
 
   values = [
     yamlencode({
-      baseUrl       = "https://${var.subdomains[0]}.${var.domain}"
-      testType      = "spike"
-      configMapName = kubernetes_config_map_v1.k6_test_script.metadata[0].name
-      prometheusNamespace  = helm_release.kube_prometheus_stack.namespace
+      baseUrl             = "https://${var.subdomains[0]}.${var.domain}"
+      testType            = "spike"
+      configMapName       = kubernetes_config_map_v1.k6_test_script.metadata[0].name
+      prometheusNamespace = helm_release.kube_prometheus_stack.namespace
     })
   ]
 
@@ -67,8 +67,8 @@ resource "kubernetes_config_map_v1" "grafana_k6_dashboard" {
 
       panels = [
         {
-          type  = "timeseries"
-          title = "HTTP Request Rate"
+          type    = "timeseries"
+          title   = "HTTP Request Rate"
           gridPos = { x = 0, y = 0, w = 12, h = 8 }
           targets = [
             {
@@ -78,8 +78,8 @@ resource "kubernetes_config_map_v1" "grafana_k6_dashboard" {
           ]
         },
         {
-          type  = "timeseries"
-          title = "Average HTTP Latency (seconds)"
+          type    = "timeseries"
+          title   = "Average HTTP Latency (seconds)"
           gridPos = { x = 12, y = 0, w = 12, h = 8 }
           targets = [
             {
@@ -89,8 +89,8 @@ resource "kubernetes_config_map_v1" "grafana_k6_dashboard" {
           ]
         },
         {
-          type  = "timeseries"
-          title = "Virtual Users"
+          type    = "timeseries"
+          title   = "Virtual Users"
           gridPos = { x = 0, y = 8, w = 12, h = 8 }
           targets = [
             {
@@ -100,8 +100,8 @@ resource "kubernetes_config_map_v1" "grafana_k6_dashboard" {
           ]
         },
         {
-          type  = "timeseries"
-          title = "Iterations"
+          type    = "timeseries"
+          title   = "Iterations"
           gridPos = { x = 12, y = 8, w = 12, h = 8 }
           targets = [
             {
