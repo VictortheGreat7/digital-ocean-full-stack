@@ -16,6 +16,13 @@ variable "github_runner_token" {
   sensitive   = true
 }
 
+variable "ssh_key_ids" {
+  description = "List of ssh key IDs or fingerprints to attach to the Droplet"
+  type        = list(number)
+  default     = []
+}
+
+
 variable "cloudflare_api_token" {
   description = "Cloudflare API token for managing DNS records"
   type        = string

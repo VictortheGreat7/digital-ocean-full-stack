@@ -45,6 +45,9 @@ resource "digitalocean_kubernetes_cluster" "kronos" {
 output "doks_cluster_name" {
   value = digitalocean_kubernetes_cluster.kronos.name
 }
+output "doks_cluster_id" {
+  value = digitalocean_kubernetes_cluster.kronos.id
+}
 
 provider "kubernetes" {
   host  = digitalocean_kubernetes_cluster.kronos.endpoint

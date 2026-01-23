@@ -190,6 +190,9 @@ jobs:
           terraform validate
           
           terraform apply --auto-approve
+
+          DOKS_ID=$(terraform output -raw doks_cluster_id)
+          doctl kubernetes 1-click install $DOKS_ID --1-clicks metrics-server
         working-directory: ./terraform
       - name: Commit Terraform Lock File
         uses: stefanzweifel/git-auto-commit-action@v5
@@ -250,10 +253,7 @@ jobs:
           TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
         id: doks-info
         run: |
-          # Extract values from Terraform state
           DOKS_NAME=$(terraform output -raw doks_cluster_name)
-          
-          echo "Found Cluster: $DOKS_NAME"
 
           doctl kubernetes cluster kubeconfig save $DOKS_NAME
         working-directory: ./terraform
@@ -312,10 +312,7 @@ jobs:
           TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
         id: doks-info
         run: |
-          # Extract values from Terraform state
           DOKS_NAME=$(terraform output -raw doks_cluster_name)
-          
-          echo "Found Cluster: $DOKS_NAME"
 
           doctl kubernetes cluster kubeconfig save $DOKS_NAME
         working-directory: ./terraform

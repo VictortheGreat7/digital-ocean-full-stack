@@ -241,6 +241,9 @@ jobs:
         EOF
 
         terraform apply --auto-approve
+
+        DOKS_ID=$(terraform output -raw doks_cluster_id)
+        doctl kubernetes 1-click install $DOKS_ID --1-clicks metrics-server
       working-directory: ./terraform
     - name: Commit Terraform Lock File
       uses: stefanzweifel/git-auto-commit-action@v5
