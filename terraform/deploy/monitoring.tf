@@ -179,6 +179,10 @@ resource "helm_release" "tempo" {
       value = "1Gi"
     },
     {
+      name = "tempo.memBallastSizeMbs"
+      value = "256"
+    },
+    {
       name  = "tempo.storage.trace.backend"
       value = "local"
     },
