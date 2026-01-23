@@ -164,19 +164,19 @@ resource "helm_release" "tempo" {
   set = [
     {
       name = "tempo.resources.requests.cpu"
-      value = "200m"
+      value = "500m"
     },
     {
       name  = "tempo.resources.requests.memory"
-      value = "512Mi"
+      value = "1Gi"
     },
     {
       name  = "tempo.resources.limits.cpu"
-      value = "400m"
+      value = "1"
     },
     {
       name  = "tempo.resources.limits.memory"
-      value = "1Gi"
+      value = "2Gi"
     },
     {
       name = "tempo.memBallastSizeMbs"
