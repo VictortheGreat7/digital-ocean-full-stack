@@ -355,7 +355,7 @@ resource "helm_release" "alloy" {
               forward_to = [loki.write.loki.receiver]
               stage.static_labels {
                 values = {
-                  cluster = "devoted-sawfish-cluster",
+                  cluster = "${data.digitalocean_kubernetes_cluster.kronos.name}",
                 }
               }
               stage.labels {
