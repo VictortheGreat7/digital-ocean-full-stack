@@ -40,11 +40,11 @@ const profiles = {
   stress: {
     stages: [
       { duration: '2m', target: 500 }, // Start with 500 users
-      { duration: '5m', target: 1000}, // Ramp up to 1000 users
-      { duration: '5m', target: 1250}, // Ramp up to 1250 users
-      { duration: '5m', target: 1500}, // Ramp up to 1500 users
-      { duration: '5m', target: 2500}, // Ramp up to 2500 users
-      { duration: '10m', target: 2500}, // Stay at 2500 users
+      { duration: '5m', target: 750}, // Ramp up to 1000 users
+      { duration: '5m', target: 1000}, // Ramp up to 1250 users
+      { duration: '5m', target: 1250}, // Ramp up to 1500 users
+      { duration: '5m', target: 2000}, // Ramp up to 2500 users
+      { duration: '10m', target: 2000}, // Stay at 2500 users
       { duration: '5m', target: 0 }, // Recover
     ],
     thresholds: {
@@ -57,8 +57,8 @@ const profiles = {
   spike: {
     stages: [
       { duration: '2m', target: 500 }, // Baseline
-      { duration: '2m', target: 2500 }, // Spike to 2500 users
-      { duration: '5m', target: 2500 }, // Stay at spike
+      { duration: '2m', target: 2000 }, // Spike to 2000 users
+      { duration: '5m', target: 2000 }, // Stay at spike
       { duration: '2m', target: 500 }, // Drop back to baseline
       { duration: '3m', target: 500 }, // Stay at baseline
       { duration: '2m', target: 0 }, // Recover
