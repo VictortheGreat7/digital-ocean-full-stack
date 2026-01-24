@@ -31,7 +31,7 @@ resource "digitalocean_kubernetes_cluster" "kronos" {
 
   control_plane_firewall {
     enabled = true
-    allowed_addresses = [one(digitalocean_vpc_nat_gateway.kronos.vpcs).gateway_ip]
+    allowed_addresses = ["${digitalocean_droplet.kronos.ipv4_address}/32"]
   }
 
   auto_upgrade                     = true
