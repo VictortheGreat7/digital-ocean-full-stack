@@ -19,8 +19,8 @@ declare -A secrets=(
   ["TF_API_TOKEN"]="${TF_API_TOKEN}"
   ["CLOUDFLARE_TOKEN"]="${CLOUDFLARE_TOKEN}"
   ["CLOUDFLARE_ZONE_ID"]="${CLOUDFLARE_ZONE_ID}"
-  ["DOCKER_USERNAME"]=""
-  ["DOCKER_PASSWORD"]=""
+  ["DOCKER_USERNAME"]="${DOCKER_USERNAME}"
+  ["DOCKER_PASSWORD"]="${DOCKER_PASSWORD}"
 )
 
 # Iterate over the secrets and set them using `gh secret set`
