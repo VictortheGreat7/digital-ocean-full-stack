@@ -53,7 +53,7 @@ resource "helm_release" "k6_test" {
   values = [
     yamlencode({
       baseUrl             = "https://${var.subdomains[0]}.${var.domain}"
-      testType            = "spike"
+      testType            = "stress"
       configMapName       = kubernetes_config_map_v1.k6_test_script.metadata[0].name
       prometheusNamespace = helm_release.kube_prometheus_stack.namespace
     })

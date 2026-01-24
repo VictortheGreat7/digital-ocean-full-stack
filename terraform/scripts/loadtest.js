@@ -41,10 +41,10 @@ const profiles = {
     stages: [
       { duration: '2m', target: 500 }, // Start with 500 users
       { duration: '5m', target: 750}, // Ramp up to 750 users
-      { duration: '5m', target: 1000}, // Ramp up to 1000 users
-      { duration: '5m', target: 1250}, // Ramp up to 1250 users
-      { duration: '5m', target: 1500}, // Ramp up to 1500 users
-      { duration: '10m', target: 1500}, // Stay at 1500 users
+      { duration: '5m', target: 1250}, // Ramp up to 1000 users
+      { duration: '5m', target: 1500}, // Ramp up to 1250 users
+      { duration: '5m', target: 2500}, // Ramp up to 1500 users
+      { duration: '10m', target: 2500}, // Stay at 1500 users
       { duration: '5m', target: 0 }, // Recover
     ],
     thresholds: {
