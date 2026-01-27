@@ -4,23 +4,21 @@ set -eu
 # Define name for use in uninitialized directories
 REPO_NAME=""
 
-TF_API_TOKEN=
-GITHUB_RUNNER_TOKEN=""
+TF_API_TOKEN=""
+DOCKER_USERNAME=""
+DOCKER_PASSWORD=""
 DO_API_TOKEN=""
 CLOUDFLARE_TOKEN=""
 CLOUDFLARE_ZONE_ID=""
-DOCKER_USERNAME=
-DOCKER_PASSWORD=
 
 # Declare an associative array to hold secrets and their corresponding values
 declare -A secrets=(
-  ["RUNNER_TOKEN"]="${GITHUB_RUNNER_TOKEN}"
-  ["DO_API_TOKEN"]="${DO_API_TOKEN}"
   ["TF_API_TOKEN"]="${TF_API_TOKEN}"
-  ["CLOUDFLARE_TOKEN"]="${CLOUDFLARE_TOKEN}"
-  ["CLOUDFLARE_ZONE_ID"]="${CLOUDFLARE_ZONE_ID}"
   ["DOCKER_USERNAME"]="${DOCKER_USERNAME}"
   ["DOCKER_PASSWORD"]="${DOCKER_PASSWORD}"
+  ["DO_API_TOKEN"]="${DO_API_TOKEN}"
+  ["CLOUDFLARE_TOKEN"]="${CLOUDFLARE_TOKEN}"
+  ["CLOUDFLARE_ZONE_ID"]="${CLOUDFLARE_ZONE_ID}"
 )
 
 # Iterate over the secrets and set them using `gh secret set`

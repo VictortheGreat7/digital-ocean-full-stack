@@ -10,19 +10,6 @@ variable "do_token" {
   sensitive   = true
 }
 
-variable "github_runner_token" {
-  description = "GitHub Actions runner registration token"
-  type        = string
-  sensitive   = true
-}
-
-variable "ssh_key_ids" {
-  description = "List of ssh key IDs or fingerprints to attach to the Droplet"
-  type        = list(number)
-  default     = []
-}
-
-
 variable "cloudflare_api_token" {
   description = "Cloudflare API token for managing DNS records"
   type        = string

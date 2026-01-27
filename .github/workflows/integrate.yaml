@@ -1,9 +1,9 @@
 name: Subsequent Builds and Deployments
 
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
   workflow_dispatch:
 
 jobs:
@@ -150,10 +150,6 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
-      - name: Move /deploy contents to /terraform
-        run: |
-          mv deploy/* .
-        working-directory: ./terraform
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
@@ -169,7 +165,6 @@ jobs:
         env:
           TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
           DIGITALOCEAN_API_TOKEN: ${{ secrets.DO_API_TOKEN }}
-          RUNNER_TOKEN: ${{ secrets.RUNNER_TOKEN }}
           CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
           CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
         run: |
@@ -178,7 +173,6 @@ jobs:
 
           cat <<EOF > terraform.tfvars.json
           {
-            "github_runner_token": "$RUNNER_TOKEN",
             "do_token": "$DIGITALOCEAN_API_TOKEN",
             "cloudflare_api_token": "$CLOUDFLARE_TOKEN",
             "cloudflare_zone_id": "$CLOUDFLARE_ZONE_ID"
@@ -218,10 +212,6 @@ jobs:
         uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DO_API_TOKEN }}
-      - name: Move /deploy contents to /terraform
-        run: |
-          mv deploy/* .
-        working-directory: ./terraform
       - name: Cache Terraform Plugin Dir
         uses: actions/cache@v3
         with:
@@ -277,10 +267,6 @@ jobs:
         uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DO_API_TOKEN }}
-      - name: Move /deploy contents to /terraform
-        run: |
-          mv deploy/* .
-        working-directory: ./terraform
       - name: Cache Terraform Plugin Dir
         uses: actions/cache@v3
         with:

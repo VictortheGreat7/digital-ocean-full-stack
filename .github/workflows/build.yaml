@@ -1,4 +1,4 @@
-name: Provision Runner VM, Azure Kubernetes Infrastructure and Deploy API
+name: Build, Provision Cloud Infrastructure for and Deploy Application
 
 # This workflow will run on pushes to the main branch and manual triggers
 on:
@@ -132,7 +132,7 @@ jobs:
             victorthegreat7/kronos-frontend:latest
           cache-from: type=gha
 
-  provision-runner:
+  provision-and-build:
     needs: [build-backend, build-frontend]
     if: ${{ always() && (needs.build-backend.result == 'skipped' || needs.build-backend.result == 'success') && (needs.build-frontend.result == 'skipped' || needs.build-frontend.result == 'success') }}
     runs-on: ubuntu-latest
@@ -160,7 +160,6 @@ jobs:
         env:
           TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
           DIGITALOCEAN_API_TOKEN: ${{ secrets.DO_API_TOKEN }}
-          RUNNER_TOKEN: ${{ secrets.RUNNER_TOKEN }}
           CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
           CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
         run: |
@@ -172,7 +171,6 @@ jobs:
 
           cat <<EOF > terraform.tfvars.json
           {
-            "github_runner_token": "$RUNNER_TOKEN",
             "do_token": "$DIGITALOCEAN_API_TOKEN",  
             "cloudflare_api_token": "$CLOUDFLARE_TOKEN",
             "cloudflare_zone_id": "$CLOUDFLARE_ZONE_ID"
@@ -188,67 +186,3 @@ jobs:
           file_pattern: "terraform/.terraform.lock.hcl"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
-
-  build:
-    needs: provision-runner
-    if: ${{ always() && needs.provision-runner.result == 'success' }}
-    runs-on: self-hosted
-    permissions:
-      contents: write
-    steps:
-    - name: Checkout current Github repository
-      uses: actions/checkout@v4
-    - name: Move /deploy contents to /terraform
-      run: |
-        mv deploy/* .
-      working-directory: ./terraform
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v3
-      with:
-          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
-    - name: Install doctl
-      uses: digitalocean/action-doctl@v2
-      with:
-        token: ${{ secrets.DO_API_TOKEN }}
-    - name: Cache Terraform Plugin Dir
-      uses: actions/cache@v3
-      with:
-        path: ~/.terraform.d/plugin-cache
-        key: terraform-plugin-cache-${{ runner.os }}-${{ hashFiles('terraform/.terraform.lock.hcl') }}
-        restore-keys: |
-          terraform-plugin-cache-${{ runner.os }}-
-    - name: Apply Terraform configuration
-      env:
-        TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
-        RUNNER_TOKEN: ${{ secrets.RUNNER_TOKEN }}
-        DIGITALOCEAN_API_TOKEN: ${{ secrets.DO_API_TOKEN }}
-        CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
-        CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
-      run: |
-        mkdir -p ~/.terraform.d/plugin-cache
-        echo 'plugin_cache_dir   = "$HOME/.terraform.d/plugin-cache"' > ~/.terraformrc
-
-        terraform init
-        terraform validate
-
-        cat <<EOF > terraform.tfvars.json
-        {
-          "github_runner_token": "$RUNNER_TOKEN",
-          "do_token": "$DIGITALOCEAN_API_TOKEN",
-          "cloudflare_api_token": "$CLOUDFLARE_TOKEN",
-          "cloudflare_zone_id": "$CLOUDFLARE_ZONE_ID"
-        }
-        EOF
-
-        terraform apply --auto-approve
-
-        DOKS_ID=$(terraform output -raw doks_cluster_id)
-        doctl kubernetes 1-click install $DOKS_ID --1-clicks metrics-server
-      working-directory: ./terraform
-    - name: Commit Terraform Lock File
-      uses: stefanzweifel/git-auto-commit-action@v5
-      with:
-        commit_message: "chore: update terraform.lock.hcl"
-        file_pattern: "terraform/.terraform.lock.hcl"
-        commit_user_name: "github-actions[bot]"
-        commit_user_email: "github-actions[bot]@users.noreply.github.com"

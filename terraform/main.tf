@@ -1,31 +1,45 @@
-# This file contains the main Terraform configuration for creating an Azure Kubernetes Service (AKS) cluster for the Time API application.
-
 resource "random_pet" "kronos" {}
 
-# Create a new Web Droplet in the nyc2 region
-resource "digitalocean_droplet" "kronos" {
-  image    = "ubuntu-24-04-x64"
-  name     = "${random_pet.kronos.id}-bastion"
-  region   = var.region
-  size     = "s-1vcpu-1gb-intel"
-  vpc_uuid = digitalocean_vpc.kronos.id
-  user_data = templatefile(
-    "${path.module}/cloud-init.yaml.tpl",
-    {
-      github_runner_token = var.github_runner_token
-      do_api_token        = var.do_token
-    }
-  )
-  ssh_keys          = [53204003]
-  graceful_shutdown = true
-  backups           = true
-  backup_policy {
-    plan    = "weekly"
-    weekday = "TUE"
-    hour    = 8
-  }
+resource "digitalocean_project" "kronos" {
+  name        = "kronos"
+  description = "Kronos World Clock Project"
+  purpose     = "Class project / Educational purposes"
+  environment = "Development"
+  resources = [
+    digitalocean_kubernetes_cluster.kronos.urn
+  ]
+
+  depends_on = [
+    digitalocean_kubernetes_cluster.kronos
+  ]
 }
 
-output "ssh_command" {
-  value = "ssh -i ssh_keys/id_rsa root@${digitalocean_droplet.kronos.ipv4_address}"
+resource "digitalocean_kubernetes_cluster" "kronos" {
+  name     = "${random_pet.kronos.id}-cluster"
+  region   = var.region
+  version  = data.digitalocean_kubernetes_versions.kronos.latest_version
+  vpc_uuid = digitalocean_vpc.kronos.id
+
+  node_pool {
+    name       = "worker-pool"
+    size       = "s-4vcpu-8gb"
+    auto_scale = true
+    min_nodes  = 1
+    max_nodes  = 2
+    tags       = [digitalocean_tag.kronos.name]
+  }
+
+  auto_upgrade                     = true
+  destroy_all_associated_resources = true
+
+  tags = [digitalocean_tag.kronos.name]
+
+}
+
+resource "kubernetes_namespace_v1" "kronos" {
+  metadata {
+    name = "kronos"
+  }
+
+  depends_on = [digitalocean_kubernetes_cluster.kronos]
 }
