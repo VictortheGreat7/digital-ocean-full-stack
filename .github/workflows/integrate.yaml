@@ -140,7 +140,7 @@ jobs:
   modify-infra:
     needs: [changes]
     if: ${{ needs.changes.outputs.terraform == 'true' }}
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
@@ -197,7 +197,7 @@ jobs:
   update-doks-backend-images:
     needs: [changes, build-backend, modify-infra]
     if: ${{ always() && (needs.modify-infra.result == 'skipped' || needs.modify-infra.result == 'success') && (needs.build-backend.result == 'success') }}
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
@@ -252,7 +252,7 @@ jobs:
   update-doks-frontend-image:
     needs: [changes, build-frontend, modify-infra]
     if: ${{ always() && (needs.modify-infra.result == 'skipped' || needs.modify-infra.result == 'success') && (needs.build-frontend.result == 'success') }}
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:

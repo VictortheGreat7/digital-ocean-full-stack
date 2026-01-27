@@ -21,8 +21,8 @@ spec:
     - name: TEST_TYPE
       value: "{{ .Values.testType }}"
     # Enable Prometheus Remote Write output
-    - name: K6_OUT
-      value: experimental-prometheus-rw
+    # - name: K6_OUT
+    #   value: experimental-prometheus-rw
     # Prometheus Remote Write endpoint
     - name: K6_PROMETHEUS_RW_SERVER_URL
       value: http://kube-prometheus-stack-prometheus.{{ .Values.prometheusNamespace }}.svc.cluster.local:9090/api/v1/write
