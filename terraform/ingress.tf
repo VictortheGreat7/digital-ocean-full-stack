@@ -34,7 +34,7 @@ module "nginx-controller" {
       type  = "string"
     },
     {
-      name = "controller.resources.requests.cpu"
+      name  = "controller.resources.requests.cpu"
       value = "100m"
     },
     {

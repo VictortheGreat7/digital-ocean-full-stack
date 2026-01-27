@@ -1,37 +1,50 @@
-terraform {
-  required_providers {
-    azurerm = ">= 4.57.0"
-    digitalocean = {
-      source  = "digitalocean/digitalocean"
-      version = ">= 2.72.0"
-    }
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = ">= 3.0.1"
-    }
-    helm = {
-      source  = "hashicorp/helm"
-      version = ">= 3.1.1"
-    }
-    kubectl = {
-      source  = "alekc/kubectl"
-      version = ">= 2.1.3"
-    }
-    cloudflare = {
-      source  = "cloudflare/cloudflare"
-      version = ">= 5.15.0"
-    }
+resource "digitalocean_project" "kronos" {
+  name        = "kronos"
+  description = "Kronos World Clock Project"
+  purpose     = "Class project / Educational purposes"
+  environment = "Development"
+  resources = [
+    digitalocean_kubernetes_cluster.kronos.urn
+  ]
+
+  depends_on = [
+    digitalocean_kubernetes_cluster.kronos
+  ]
+}
+
+resource "digitalocean_kubernetes_cluster" "kronos" {
+  name     = "${random_pet.kronos.id}-cluster"
+  region   = var.region
+  version  = data.digitalocean_kubernetes_versions.kronos.latest_version
+  vpc_uuid = digitalocean_vpc.kronos.id
+
+  node_pool {
+    name       = "worker-pool"
+    size       = "s-4vcpu-8gb"
+    auto_scale = true
+    min_nodes  = 1
+    max_nodes  = 2
+    tags       = [digitalocean_tag.kronos.name]
   }
+
+  control_plane_firewall {
+    enabled = true
+    allowed_addresses = [azurerm_linux_virtual_machine.jump_vm.public_ip_address]
+  }
+
+  auto_upgrade                     = true
+  destroy_all_associated_resources = true
+
+  tags = [digitalocean_tag.kronos.name]
+
+  depends_on = [azurerm_linux_virtual_machine.jump_vm]
 }
 
-provider "azurerm" {
-  features {}
-
-  subscription_id = var.azure_subscription
+output "doks_cluster_name" {
+  value = digitalocean_kubernetes_cluster.kronos.name
 }
-
-provider "digitalocean" {
-  token = var.do_token
+output "doks_cluster_id" {
+  value = digitalocean_kubernetes_cluster.kronos.id
 }
 
 provider "kubernetes" {
@@ -76,8 +89,4 @@ provider "kubectl" {
   cluster_ca_certificate = base64decode(
     digitalocean_kubernetes_cluster.kronos.kube_config[0].cluster_ca_certificate
   )
-}
-
-provider "cloudflare" {
-  api_token = var.cloudflare_api_token
 }

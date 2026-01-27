@@ -8,7 +8,7 @@ resource "helm_release" "kube_prometheus_stack" {
   set = [
     # Prometheus settings
     {
-      name = "prometheus.prometheusSpec.resources.requests.cpu"
+      name  = "prometheus.prometheusSpec.resources.requests.cpu"
       value = "500m"
     },
     {
@@ -63,7 +63,7 @@ resource "helm_release" "kube_prometheus_stack" {
       value = "true"
     },
     {
-      name = "alertmanager.alertmanagerSpec.resources.requests.cpu"
+      name  = "alertmanager.alertmanagerSpec.resources.requests.cpu"
       value = "100m"
     },
     {
@@ -106,7 +106,7 @@ resource "helm_release" "kube_prometheus_stack" {
       value = "true"
     },
     {
-      name = "grafana.resources.requests.cpu"
+      name  = "grafana.resources.requests.cpu"
       value = "100m"
     },
     {
@@ -163,7 +163,7 @@ resource "helm_release" "tempo" {
 
   set = [
     {
-      name = "tempo.resources.requests.cpu"
+      name  = "tempo.resources.requests.cpu"
       value = "500m"
     },
     {
@@ -179,7 +179,7 @@ resource "helm_release" "tempo" {
       value = "2Gi"
     },
     {
-      name = "tempo.memBallastSizeMbs"
+      name  = "tempo.memBallastSizeMbs"
       value = "256"
     },
     {

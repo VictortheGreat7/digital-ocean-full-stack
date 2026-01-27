@@ -11,6 +11,10 @@ jobs:
     steps:
     - name: Checkout this Github repository
       uses: actions/checkout@v4
+    - name: Login to Microsoft Azure CLI
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
     - name: Install doctl
       uses: digitalocean/action-doctl@v2
       with:
@@ -26,7 +30,7 @@ jobs:
         key: terraform-plugin-cache-${{ runner.os }}-${{ hashFiles('terraform/.terraform.lock.hcl') }}
         restore-keys: |
           terraform-plugin-cache-${{ runner.os }}-
-    - name: Destory DOKS Terraform Resources
+    - name: Destroy DOKS Terraform Resources
       env:
         TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
         DIGITALOCEAN_API_TOKEN: ${{ secrets.DO_API_TOKEN }}
@@ -41,6 +45,7 @@ jobs:
 
         cat <<EOF > terraform.tfvars.json
         {
+          "azure_subscription": "$ARM_SUBSCRIPTION_ID",
           "do_token": "$DIGITALOCEAN_API_TOKEN",
           "cloudflare_api_token": "$CLOUDFLARE_TOKEN",
           "cloudflare_zone_id": "$CLOUDFLARE_ZONE_ID"
