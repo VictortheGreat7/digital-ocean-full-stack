@@ -95,7 +95,7 @@ export let options = {
 export default function () {
   let rand = Math.random();
 
-  if (rand < 0.95) {
+  if (rand < 0.8) {
     // Frontend(Homepage). Expected most common endpoint
     group('homepage endpoint', () => {
       let res = http.get(`${BASE_URL}/`, { tags: { name: 'homepage' } });
