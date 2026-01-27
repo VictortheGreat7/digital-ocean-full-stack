@@ -4,6 +4,18 @@ variable "region" {
   default     = "nyc1"
 }
 
+variable "azure_region" {
+  description = "The location/region of the Azure resource group"
+  type        = string
+  default     = "eastus"
+}
+
+variable "azure_subscription" {
+  description = "The Azure Subscription ID"
+  type        = string
+  sensitive   = true
+}
+
 variable "do_token" {
   description = "The DigitalOcean API token"
   type        = string
@@ -15,13 +27,6 @@ variable "github_runner_token" {
   type        = string
   sensitive   = true
 }
-
-variable "ssh_key_ids" {
-  description = "List of ssh key IDs or fingerprints to attach to the Droplet"
-  type        = list(number)
-  default     = []
-}
-
 
 variable "cloudflare_api_token" {
   description = "Cloudflare API token for managing DNS records"

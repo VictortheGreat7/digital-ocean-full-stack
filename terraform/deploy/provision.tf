@@ -4,12 +4,10 @@ resource "digitalocean_project" "kronos" {
   purpose     = "Class project / Educational purposes"
   environment = "Development"
   resources = [
-    digitalocean_droplet.kronos.urn,
-    digitalocean_kubernetes_cluster.kronos.urn,
+    digitalocean_kubernetes_cluster.kronos.urn
   ]
 
   depends_on = [
-    digitalocean_droplet.kronos,
     digitalocean_kubernetes_cluster.kronos
   ]
 }
@@ -29,17 +27,17 @@ resource "digitalocean_kubernetes_cluster" "kronos" {
     tags       = [digitalocean_tag.kronos.name]
   }
 
-  # control_plane_firewall {
-  #   enabled = true
-  #   allowed_addresses = ["${digitalocean_droplet.kronos.ipv4_address}/32"]
-  # }
+  control_plane_firewall {
+    enabled = true
+    allowed_addresses = ["${azurerm_linux_virtual_machine.jump_vm.public_ip_address}/32"]
+  }
 
   auto_upgrade                     = true
   destroy_all_associated_resources = true
 
   tags = [digitalocean_tag.kronos.name]
 
-  depends_on = [digitalocean_droplet.kronos]
+  depends_on = [azurerm_linux_virtual_machine.jump_vm]
 }
 
 output "doks_cluster_name" {

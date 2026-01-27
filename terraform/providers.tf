@@ -2,6 +2,7 @@
 
 terraform {
   required_providers {
+    azurerm = ">= 4.57.0"
     digitalocean = {
       source  = "digitalocean/digitalocean"
       version = ">= 2.72.0"
@@ -23,6 +24,12 @@ terraform {
       version = ">= 5.15.0"
     }
   }
+}
+
+provider "azurerm" {
+  features {}
+
+  subscription_id = var.azure_subscription
 }
 
 provider "digitalocean" {

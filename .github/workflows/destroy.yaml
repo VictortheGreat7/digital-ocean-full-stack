@@ -11,6 +11,10 @@ jobs:
     steps:
     - name: Checkout this Github repository
       uses: actions/checkout@v4
+    - name: Login to Microsoft Azure CLI
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
     - name: Install doctl
       uses: digitalocean/action-doctl@v2
       with:
@@ -30,8 +34,12 @@ jobs:
         key: terraform-plugin-cache-${{ runner.os }}-${{ hashFiles('terraform/.terraform.lock.hcl') }}
         restore-keys: |
           terraform-plugin-cache-${{ runner.os }}-
-    - name: Destory DOKS Terraform Resources
+    - name: Destroy DOKS Terraform Resources
       env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
         TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
         DIGITALOCEAN_API_TOKEN: ${{ secrets.DO_API_TOKEN }}
         RUNNER_TOKEN: ${{ secrets.RUNNER_TOKEN }}
@@ -44,6 +52,7 @@ jobs:
 
         cat <<EOF > terraform.tfvars.json
         {
+          "azure_subscription": "$ARM_SUBSCRIPTION_ID",
           "github_runner_token": "$RUNNER_TOKEN",
           "do_token": "$DIGITALOCEAN_API_TOKEN",
           "cloudflare_api_token": "$CLOUDFLARE_TOKEN",
@@ -78,6 +87,10 @@ jobs:
       run: |
         mv deploy/* .
       working-directory: ./terraform
+    - name: Login to Microsoft Azure CLI
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
     - name: Install doctl
       uses: digitalocean/action-doctl@v2
       with:
@@ -95,6 +108,10 @@ jobs:
           terraform-plugin-cache-${{ runner.os }}-
     - name: Destroy remaining Terraform Resources
       env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
         TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
         RUNNER_TOKEN: ${{ secrets.RUNNER_TOKEN }}
         DIGITALOCEAN_API_TOKEN: ${{ secrets.DO_API_TOKEN }}
@@ -109,6 +126,7 @@ jobs:
 
         cat <<EOF > terraform.tfvars.json
         {
+          "azure_subscription": "$ARM_SUBSCRIPTION_ID",
           "do_token": "$DIGITALOCEAN_API_TOKEN",
           "github_runner_token": "$RUNNER_TOKEN",
           "cloudflare_api_token": "$CLOUDFLARE_TOKEN",

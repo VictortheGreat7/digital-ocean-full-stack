@@ -2,9 +2,9 @@ name: Provision Runner VM, Azure Kubernetes Infrastructure and Deploy API
 
 # This workflow will run on pushes to the main branch and manual triggers
 on:
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
   workflow_dispatch:  
 
 jobs:
@@ -145,6 +145,10 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+      - name: Login to Microsoft Azure CLI
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
@@ -158,6 +162,10 @@ jobs:
             terraform-plugin-cache-${{ runner.os }}-
       - name: Apply Terraform configuration
         env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
           TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
           DIGITALOCEAN_API_TOKEN: ${{ secrets.DO_API_TOKEN }}
           RUNNER_TOKEN: ${{ secrets.RUNNER_TOKEN }}
@@ -172,6 +180,7 @@ jobs:
 
           cat <<EOF > terraform.tfvars.json
           {
+            "azure_subscription": "$ARM_SUBSCRIPTION_ID",
             "github_runner_token": "$RUNNER_TOKEN",
             "do_token": "$DIGITALOCEAN_API_TOKEN",  
             "cloudflare_api_token": "$CLOUDFLARE_TOKEN",
@@ -206,6 +215,10 @@ jobs:
       uses: hashicorp/setup-terraform@v3
       with:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+    - name: Login to Microsoft Azure CLI
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
     - name: Install doctl
       uses: digitalocean/action-doctl@v2
       with:
@@ -219,6 +232,10 @@ jobs:
           terraform-plugin-cache-${{ runner.os }}-
     - name: Apply Terraform configuration
       env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
         TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
         RUNNER_TOKEN: ${{ secrets.RUNNER_TOKEN }}
         DIGITALOCEAN_API_TOKEN: ${{ secrets.DO_API_TOKEN }}
@@ -233,6 +250,7 @@ jobs:
 
         cat <<EOF > terraform.tfvars.json
         {
+          "azure_subscription": "$ARM_SUBSCRIPTION_ID",
           "github_runner_token": "$RUNNER_TOKEN",
           "do_token": "$DIGITALOCEAN_API_TOKEN",
           "cloudflare_api_token": "$CLOUDFLARE_TOKEN",
