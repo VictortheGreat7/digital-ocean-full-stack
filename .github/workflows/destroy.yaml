@@ -45,7 +45,6 @@ jobs:
 
         cat <<EOF > terraform.tfvars.json
         {
-          "azure_subscription": "$ARM_SUBSCRIPTION_ID",
           "do_token": "$DIGITALOCEAN_API_TOKEN",
           "cloudflare_api_token": "$CLOUDFLARE_TOKEN",
           "cloudflare_zone_id": "$CLOUDFLARE_ZONE_ID"

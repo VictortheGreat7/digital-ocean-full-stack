@@ -4,18 +4,6 @@ variable "region" {
   default     = "nyc1"
 }
 
-variable "azure_region" {
-  description = "The location/region of the Azure resource group"
-  type        = string
-  default     = "eastus"
-}
-
-variable "azure_subscription" {
-  description = "The Azure Subscription ID"
-  type        = string
-  sensitive   = true
-}
-
 variable "do_token" {
   description = "The DigitalOcean API token"
   type        = string
