@@ -28,8 +28,8 @@ resource "digitalocean_kubernetes_cluster" "kronos" {
   }
 
   control_plane_firewall {
-    enabled           = true
-    allowed_addresses = ["${azurerm_linux_virtual_machine.jump_vm.public_ip_address}"]
+    enabled = true
+    allowed_addresses = [format("%s/32", azurerm_linux_virtual_machine.jump_vm.public_ip_address)]
   }
 
   auto_upgrade                     = true
