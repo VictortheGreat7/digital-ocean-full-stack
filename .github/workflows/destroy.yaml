@@ -40,15 +40,11 @@ jobs:
         ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
         ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
         ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-        TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
-        WS_ID: ${{ secrets.TF_WS_ID }}
         DIGITALOCEAN_API_TOKEN: ${{ secrets.DO_API_TOKEN }}
         RUNNER_TOKEN: ${{ secrets.RUNNER_TOKEN }}
         CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
         CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
       run: |
-        ./scripts/tfc_vars.sh
-
         echo "Configuring Terraform to use plugin cache"
         mkdir -p ~/.terraform.d/plugin-cache
         echo 'plugin_cache_dir   = "$HOME/.terraform.d/plugin-cache"' > ~/.terraformrc
@@ -115,16 +111,12 @@ jobs:
         ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
         ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
         ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-        TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
-        WS_ID: ${{ secrets.TF_WS_ID }}
         RUNNER_TOKEN: ${{ secrets.RUNNER_TOKEN }}
         DIGITALOCEAN_API_TOKEN: ${{ secrets.DO_API_TOKEN }}
         CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
         CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
       run: |
         set -e
-
-        ./scripts/tfc_vars.sh
 
         echo "Initializing and validating Terraform configuration"
         terraform init
