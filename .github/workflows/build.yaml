@@ -162,10 +162,7 @@ jobs:
             terraform-plugin-cache-${{ runner.os }}-
       - name: Apply Terraform configuration
         env:
-          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
           TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
           DIGITALOCEAN_API_TOKEN: ${{ secrets.DO_API_TOKEN }}
           RUNNER_TOKEN: ${{ secrets.RUNNER_TOKEN }}
