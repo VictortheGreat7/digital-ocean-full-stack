@@ -168,7 +168,7 @@ resource "helm_release" "tempo" {
     },
     {
       name  = "tempo.resources.requests.memory"
-      value = "1Gi"
+      value = "2Gi"
     },
     {
       name  = "tempo.resources.limits.cpu"
@@ -176,7 +176,7 @@ resource "helm_release" "tempo" {
     },
     {
       name  = "tempo.resources.limits.memory"
-      value = "2Gi"
+      value = "4Gi"
     },
     {
       name  = "tempo.memBallastSizeMbs"

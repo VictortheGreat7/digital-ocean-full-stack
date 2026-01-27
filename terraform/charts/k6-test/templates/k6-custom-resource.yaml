@@ -13,8 +13,8 @@ spec:
         cpu: "500m"
         memory: "512Mi"
       limits:
-        cpu: "500m"
-        memory: "768Mi"
+        cpu: "1"
+        memory: "1Gi"
     env:
     - name: BASE_URL
       value: "{{ .Values.baseUrl }}"
