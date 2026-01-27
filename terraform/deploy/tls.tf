@@ -12,19 +12,19 @@ resource "helm_release" "cert_manager" {
       value = "true"
     },
     {
-      name = "resources.requests.cpu"
+      name  = "resources.requests.cpu"
       value = "100m"
     },
     {
-      name = "resources.requests.memory"
+      name  = "resources.requests.memory"
       value = "256Mi"
     },
     {
-      name = "resources.limits.cpu"
+      name  = "resources.limits.cpu"
       value = "200m"
     },
     {
-      name = "resources.limits.memory"
+      name  = "resources.limits.memory"
       value = "512Mi"
     }
   ]

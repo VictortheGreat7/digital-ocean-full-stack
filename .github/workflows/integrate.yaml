@@ -162,7 +162,7 @@ jobs:
         run: |
           chmod +x pre-apply.sh
           ./pre-apply.sh
-        working-directory: ./terraform/bash_scripts
+        working-directory: ./terraform/scripts
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
