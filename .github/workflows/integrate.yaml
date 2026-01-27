@@ -176,11 +176,14 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
           TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+          WS_ID: ${{ secrets.TF_WS_ID }}
           DIGITALOCEAN_API_TOKEN: ${{ secrets.DO_API_TOKEN }}
           RUNNER_TOKEN: ${{ secrets.RUNNER_TOKEN }}
           CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
           CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
         run: |
+          ./scripts/tfc_vars.sh
+
           mkdir -p ~/.terraform.d/plugin-cache
           echo 'plugin_cache_dir   = "$HOME/.terraform.d/plugin-cache"' > ~/.terraformrc
 
