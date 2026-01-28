@@ -556,15 +556,15 @@ resource "helm_release" "datadog" {
       value = "${digitalocean_kubernetes_cluster.kronos.name}"
     },
     {
-      name  = "operator.datadog.datadogCRDs.crds.datadogAgents"
+      name  = "operator.datadogCRDs.crds.datadogAgents"
       value = "true"
     },
     {
-      name  = "operator.datadog.datadogCRDs.crds.datadogAgentInternals"
+      name  = "operator.datadogCRDs.crds.datadogAgentInternals"
       value = "true"
     },
     {
-      name  = "operator.datadog.datadogCRDs.crds.datadogDashboards"
+      name  = "operator.datadogCRDs.crds.datadogDashboards"
       value = "true"
     },
     {
