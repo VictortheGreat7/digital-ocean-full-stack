@@ -565,5 +565,5 @@ resource "helm_release" "datadog" {
     }
   ]
 
-  depends_on = [kubernetes_secret_v1.datadog_secret]
+  depends_on = [helm_release.kube_prometheus_stack]
 }
