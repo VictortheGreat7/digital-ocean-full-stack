@@ -4,6 +4,8 @@ resource "helm_release" "kube_prometheus_stack" {
   chart            = "kube-prometheus-stack"
   create_namespace = true
   namespace        = "monitoring"
+  atomic           = true
+  cleanup_on_fail  = true
 
   set = [
     # Prometheus settings
@@ -160,6 +162,8 @@ resource "helm_release" "tempo" {
   chart            = "tempo"
   namespace        = helm_release.kube_prometheus_stack.namespace
   create_namespace = false
+  atomic           = true
+  cleanup_on_fail  = true
 
   set = [
     {
@@ -283,6 +287,8 @@ resource "helm_release" "loki" {
   chart            = "loki"
   namespace        = helm_release.kube_prometheus_stack.namespace
   create_namespace = false
+  atomic           = true
+  cleanup_on_fail  = true
 
   values = [
     yamlencode({
@@ -387,6 +393,8 @@ resource "helm_release" "alloy" {
   chart            = "alloy"
   namespace        = helm_release.kube_prometheus_stack.namespace
   create_namespace = false
+  atomic           = true
+  cleanup_on_fail  = true
 
   values = [
     yamlencode({
@@ -527,6 +535,8 @@ resource "helm_release" "datadog" {
   chart            = "datadog"
   namespace        = "monitoring"
   create_namespace = false
+  atomic           = true
+  cleanup_on_fail  = true
 
   set = [
     {
@@ -542,31 +552,31 @@ resource "helm_release" "datadog" {
       value = var.datadog_site
     },
     {
-      name = "datadog.clusterName"
+      name  = "datadog.clusterName"
       value = "${digitalocean_kubernetes_cluster.kronos.name}"
     },
     {
-      name = "datadog.datadogCRDs.crds.datadogAgents"
+      name  = "datadog.datadogCRDs.crds.datadogAgents"
       value = "true"
     },
     {
-      name = "datadog.datadogCRDs.crds.datadogAgentInternals"
+      name  = "datadog.datadogCRDs.crds.datadogAgentInternals"
       value = "true"
     },
     {
-      name = "datadog.datadogCRDs.crds.datadogDashboards"
+      name  = "datadog.datadogCRDs.crds.datadogDashboards"
       value = "true"
     },
     {
-      name = "operator.datadogAgent.enabled"
+      name  = "operator.datadogAgent.enabled"
       value = "true"
     },
     {
-      name = "operator.datadogAgentInternal.enabled"
+      name  = "operator.datadogAgentInternal.enabled"
       value = "true"
     },
     {
-      name = "operator.datadogDashboard.enabled"
+      name  = "operator.datadogDashboard.enabled"
       value = "true"
     }
   ]

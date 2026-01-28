@@ -5,6 +5,8 @@ resource "helm_release" "k6_operator" {
   chart            = "k6-operator"
   namespace        = "default"
   create_namespace = false
+  atomic           = true
+  cleanup_on_fail  = true
 
   set = [
     {
@@ -46,9 +48,11 @@ resource "kubernetes_config_map_v1" "k6_test_script" {
 }
 
 resource "helm_release" "k6_test" {
-  name      = "k6-test"
-  chart     = "./charts/k6-test"
-  namespace = helm_release.k6_operator.namespace
+  name            = "k6-test"
+  chart           = "./charts/k6-test"
+  namespace       = helm_release.k6_operator.namespace
+  atomic          = true
+  cleanup_on_fail = true
 
   values = [
     yamlencode({
