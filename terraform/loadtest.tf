@@ -53,12 +53,11 @@ resource "helm_release" "k6_test" {
   namespace       = helm_release.k6_operator.namespace
   atomic          = true
   cleanup_on_fail = true
-  force_update    = true
 
   values = [
     yamlencode({
       baseUrl             = "https://${var.subdomains[0]}.${var.domain}"
-      testType            = "stress"
+      testType            = "spike"
       configMapName       = kubernetes_config_map_v1.k6_test_script.metadata[0].name
       prometheusNamespace = helm_release.kube_prometheus_stack.namespace
     })
