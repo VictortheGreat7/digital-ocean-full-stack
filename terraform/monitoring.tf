@@ -560,7 +560,7 @@ resource "helm_release" "datadog" {
     {
       name = "operator.datadogAgent.enabled"
       value = "true"
-    }
+    },
     {
       name = "operator.datadogAgentInternal.enabled"
       value = "true"
