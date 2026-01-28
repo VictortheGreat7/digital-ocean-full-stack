@@ -13,7 +13,7 @@ resource "helm_release" "kube_prometheus_stack" {
     },
     {
       name  = "prometheus.prometheusSpec.resources.requests.memory"
-      value = "1.5Gi"
+      value = "1Gi"
     },
     {
       name  = "prometheus.prometheusSpec.resources.limits.cpu"
@@ -503,4 +503,73 @@ resource "kubernetes_config_map_v1" "grafana_loki_datasource" {
   }
 
   depends_on = [helm_release.loki]
+}
+
+resource "kubernetes_secret_v1" "datadog_secret" {
+  metadata {
+    name      = "datadog-secret"
+    namespace = "monitoring"
+  }
+
+  data = {
+    apiKey = var.datadog_api_key
+    appKey = var.datadog_app_key
+  }
+
+  type = "Opaque"
+
+  depends_on = [helm_release.kube_prometheus_stack]
+}
+
+resource "helm_release" "datadog" {
+  name             = "datadog"
+  repository       = "https://helm.datadoghq.com"
+  chart            = "datadog"
+  namespace        = "monitoring"
+  create_namespace = false
+
+  set = [
+    {
+      name  = "datadog.apiKeyExistingSecret"
+      value = "datadog-secret.apiKey"
+    },
+    {
+      name  = "datadog.appKeyExistingSecret"
+      value = "datadog-secret.appKey"
+    },
+    {
+      name  = "datadog.site"
+      value = var.datadog_site
+    },
+    {
+      name = "datadog.clusterName"
+      value = "${digitalocean_kubernetes_cluster.kronos.name}"
+    },
+    {
+      name = "datadog.datadogCRDs.crds.datadogAgents"
+      value = "true"
+    },
+    {
+      name = "datadog.datadogCRDs.crds.datadogAgentInternals"
+      value = "true"
+    },
+    {
+      name = "datadog.datadogCRDs.crds.datadogDashboards"
+      value = "true"
+    },
+    {
+      name = "operator.datadogAgent.enabled"
+      value = "true"
+    }
+    {
+      name = "operator.datadogAgentInternal.enabled"
+      value = "true"
+    },
+    {
+      name = "operator.datadogDashboard.enabled"
+      value = "true"
+    }
+  ]
+
+  depends_on = [kubernetes_secret_v1.datadog_secret]
 }

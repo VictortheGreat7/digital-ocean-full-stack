@@ -2,9 +2,9 @@ name: Build, Provision Cloud Infrastructure for and Deploy Application
 
 # This workflow will run on pushes to the main branch and manual triggers
 on:
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
   workflow_dispatch:  
 
 jobs:
@@ -159,9 +159,6 @@ jobs:
       - name: Apply Terraform configuration
         env:
           TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
-          DIGITALOCEAN_API_TOKEN: ${{ secrets.DO_API_TOKEN }}
-          CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
-          CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
         run: |
           mkdir -p ~/.terraform.d/plugin-cache
           echo 'plugin_cache_dir   = "$HOME/.terraform.d/plugin-cache"' > ~/.terraformrc
@@ -171,9 +168,11 @@ jobs:
 
           cat <<EOF > terraform.tfvars.json
           {
-            "do_token": "$DIGITALOCEAN_API_TOKEN",  
-            "cloudflare_api_token": "$CLOUDFLARE_TOKEN",
-            "cloudflare_zone_id": "$CLOUDFLARE_ZONE_ID"
+            "do_token": "${{ secrets.DO_API_TOKEN }}",  
+            "cloudflare_api_token": "${{ secrets.CLOUDFLARE_TOKEN }}",
+            "cloudflare_zone_id": "${{ secrets.CLOUDFLARE_ZONE_ID }}",
+            "datadog_api_key": "${{ secrets.DATADOG_API_KEY }}",
+            "datadog_app_key": "${{ secrets.DATADOG_APP_KEY }}"
           }
           EOF
 

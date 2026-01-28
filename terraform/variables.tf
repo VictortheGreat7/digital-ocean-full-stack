@@ -35,3 +35,21 @@ variable "domain" {
   type        = string
   default     = "mywonderworks.tech"
 }
+
+variable "datadog_api_key" {
+  description = "Datadog API key for monitoring"
+  type        = string
+  sensitive   = true
+}
+
+variable "datadog_app_key" {
+  description = "Datadog Application key for monitoring"
+  type        = string
+  sensitive   = true
+}
+
+variable "datadog_site" {
+  description = "Datadog site (e.g., datadoghq.com, datadoghq.eu)"
+  type        = string
+  default     = "us5.datadoghq.com"
+}

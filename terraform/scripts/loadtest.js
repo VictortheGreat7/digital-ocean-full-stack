@@ -40,15 +40,15 @@ const profiles = {
   stress: {
     stages: [
       { duration: '2m', target: 500 }, // Start with 500 users
-      { duration: '5m', target: 750}, // Ramp up to 1000 users
-      { duration: '5m', target: 1000}, // Ramp up to 1250 users
-      { duration: '5m', target: 1250}, // Ramp up to 1500 users
-      { duration: '5m', target: 2000}, // Ramp up to 2500 users
-      { duration: '10m', target: 2000}, // Stay at 2500 users
+      { duration: '5m', target: 750}, // Ramp up to 750 users
+      { duration: '5m', target: 1250}, // Ramp up to 1250 users
+      { duration: '5m', target: 2500}, // Ramp up to 2500 users
+      { duration: '5m', target: 5000}, // Ramp up to 5000 users
+      { duration: '10m', target: 5000}, // Stay at 5000 users
       { duration: '5m', target: 0 }, // Recover
     ],
     thresholds: {
-      'http_req_duration': ['p(95)<5000', 'p(99)<10000'],  // Relaxed SLO targets
+      'http_req_duration': ['p(95)<10000', 'p(99)<20000'],  // Relaxed SLO targets
       'http_req_failed': ['rate<0.05'],  // Error rate < 5%
     },
   },
@@ -57,8 +57,8 @@ const profiles = {
   spike: {
     stages: [
       { duration: '2m', target: 500 }, // Baseline
-      { duration: '2m', target: 2000 }, // Spike to 2000 users
-      { duration: '5m', target: 2000 }, // Stay at spike
+      { duration: '2m', target: 5000 }, // Spike to 5000 users
+      { duration: '5m', target: 5000 }, // Stay at spike
       { duration: '2m', target: 500 }, // Drop back to baseline
       { duration: '3m', target: 500 }, // Stay at baseline
       { duration: '2m', target: 0 }, // Recover
