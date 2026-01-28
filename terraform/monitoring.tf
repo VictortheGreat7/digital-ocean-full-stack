@@ -513,22 +513,6 @@ resource "kubernetes_config_map_v1" "grafana_loki_datasource" {
   depends_on = [helm_release.loki]
 }
 
-resource "kubernetes_secret_v1" "datadog_secret" {
-  metadata {
-    name      = "datadog-secret"
-    namespace = "monitoring"
-  }
-
-  data = {
-    api-key = var.datadog_api_key
-    app-key = var.datadog_app_key
-  }
-
-  type = "Opaque"
-
-  depends_on = [helm_release.kube_prometheus_stack]
-}
-
 resource "helm_release" "datadog" {
   name             = "datadog"
   repository       = "https://helm.datadoghq.com"
@@ -540,12 +524,12 @@ resource "helm_release" "datadog" {
 
   set = [
     {
-      name  = "datadog.apiKeyExistingSecret"
-      value = kubernetes_secret_v1.datadog_secret.metadata[0].name
+      name  = "datadog.apiKey"
+      value = var.datadog_api_key
     },
     {
-      name  = "datadog.appKeyExistingSecret"
-      value = kubernetes_secret_v1.datadog_secret.metadata[0].name
+      name  = "datadog.appKey"
+      value = var.datadog_app_key
     },
     {
       name  = "datadog.site"
