@@ -53,6 +53,7 @@ resource "helm_release" "k6_test" {
   namespace       = helm_release.k6_operator.namespace
   atomic          = true
   cleanup_on_fail = true
+  force_update    = true
 
   values = [
     yamlencode({
