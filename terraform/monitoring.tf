@@ -522,8 +522,6 @@ resource "kubernetes_secret_v1" "datadog_secret" {
   data = {
     api-key = var.datadog_api_key
     app-key = var.datadog_app_key
-    api_key = var.datadog_api_key
-    app_key = var.datadog_app_key
   }
 
   type = "Opaque"
@@ -541,6 +539,14 @@ resource "helm_release" "datadog" {
   cleanup_on_fail  = true
 
   set = [
+    {
+      name = "datadog.apiKey"
+      value = var.datadog_api_key
+    },
+    {
+      name = "datadog.appKey"
+      value = var.datadog_app_key
+    },
     {
       name  = "datadog.apiKeyExistingSecret"
       value = kubernetes_secret_v1.datadog_secret.metadata[0].name
