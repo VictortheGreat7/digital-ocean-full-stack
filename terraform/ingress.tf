@@ -35,19 +35,19 @@ module "nginx-controller" {
     },
     {
       name  = "controller.resources.requests.cpu"
-      value = "500m"
+      value = "300m"
     },
     {
       name  = "controller.resources.requests.memory"
-      value = "512Mi"
+      value = "128Mi"
     },
     {
       name  = "controller.resources.limits.cpu"
-      value = "1"
+      value = "500m"
     },
     {
       name  = "controller.resources.limits.memory"
-      value = "1Gi"
+      value = "512Mi"
     }
   ]
 
