@@ -520,8 +520,8 @@ resource "kubernetes_secret_v1" "datadog_secret" {
   }
 
   data = {
-    api-key = var.datadog_api_key
-    app-key = var.datadog_app_key
+    api_key = var.datadog_api_key
+    app_key = var.datadog_app_key
   }
 
   type = "Opaque"
