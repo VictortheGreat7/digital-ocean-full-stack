@@ -586,6 +586,18 @@ resource "helm_release" "datadog" {
     {
       name  = "operator.datadogDashboard.enabled"
       value = "true"
+    },
+    {
+      name = "datadog.logs.enabled"
+      value = "true"
+    },
+    {
+      name = "datadog.logs.containerCollectAll"
+      value = "true"
+    },
+    {
+      name = "datadog.logs.autoMultiLineDetection"
+      value = "true"
     }
   ]
 
