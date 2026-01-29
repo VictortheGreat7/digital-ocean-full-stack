@@ -51,6 +51,8 @@ module "nginx-controller" {
     }
   ]
 
+  metrics_enabled = true
+
   timeout = 900
 
   depends_on = [digitalocean_kubernetes_cluster.kronos]
