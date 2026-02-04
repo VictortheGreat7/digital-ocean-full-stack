@@ -154,6 +154,7 @@ resource "kubernetes_horizontal_pod_autoscaler_v2" "kronos_backend_hpa" {
     scale_target_ref {
       kind = "Deployment"
       name = kubernetes_deployment_v1.kronos_backend.metadata[0].name
+      api_version = "apps/v1"
     }
 
     max_replicas = 5
