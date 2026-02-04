@@ -34,20 +34,8 @@ module "nginx-controller" {
       type  = "string"
     },
     {
-      name  = "controller.resources.requests.cpu"
-      value = "300m"
-    },
-    {
-      name  = "controller.resources.requests.memory"
-      value = "128Mi"
-    },
-    {
-      name  = "controller.resources.limits.cpu"
-      value = "350m"
-    },
-    {
-      name  = "controller.resources.limits.memory"
-      value = "512Mi"
+      name = "controller.autoscaling.enabled"
+      value = "true"
     }
   ]
 

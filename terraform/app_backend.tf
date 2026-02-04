@@ -82,7 +82,7 @@ resource "kubernetes_deployment_v1" "kronos_backend" {
             }
             limits = {
               memory = "288Mi"
-              cpu    = "500m"
+              cpu    = "400m"
             }
           }
 
@@ -139,6 +139,45 @@ resource "kubernetes_service_v1" "kronos_backend" {
     }
 
     type = "ClusterIP"
+  }
+
+  depends_on = [kubernetes_deployment_v1.kronos_backend]
+}
+
+resource "kubernetes_horizontal_pod_autoscaler_v2" "kronos_backend_hpa" {
+  metadata {
+    name      = "kronos-backend-hpa"
+    namespace = kubernetes_namespace_v1.kronos.metadata[0].name
+  }
+
+  spec {
+    scale_target_ref {
+      kind = "Deployment"
+      name = kubernetes_deployment_v1.kronos_backend.metadata[0].name
+    }
+
+    max_replicas = 5
+
+    metric {
+      type = "Resource"
+      resource {
+        name = "cpu"
+        target {
+          type               = "Utilization"
+          average_utilization = 100
+        }
+      }
+    }
+    metric {
+      type = "Resource"
+      resource {
+        name = "memory"
+        target {
+          type               = "Utilization"
+          average_utilization = 100
+        }
+      }
+    }
   }
 
   depends_on = [kubernetes_deployment_v1.kronos_backend]

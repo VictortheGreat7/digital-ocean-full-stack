@@ -11,19 +11,19 @@ resource "helm_release" "kube_prometheus_stack" {
     # Prometheus settings
     {
       name  = "prometheus.prometheusSpec.resources.requests.cpu"
-      value = "500m"
+      value = "60m"
     },
     {
       name  = "prometheus.prometheusSpec.resources.requests.memory"
-      value = "1Gi"
+      value = "500Mi"
     },
     {
       name  = "prometheus.prometheusSpec.resources.limits.cpu"
-      value = "1"
+      value = "70m"
     },
     {
       name  = "prometheus.prometheusSpec.resources.limits.memory"
-      value = "2Gi"
+      value = "600Mi"
     },
     {
       name  = "prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.storageClassName"
@@ -66,19 +66,19 @@ resource "helm_release" "kube_prometheus_stack" {
     },
     {
       name  = "alertmanager.alertmanagerSpec.resources.requests.cpu"
-      value = "100m"
+      value = "1m"
     },
     {
       name  = "alertmanager.alertmanagerSpec.resources.requests.memory"
-      value = "256Mi"
+      value = "50Mi"
     },
     {
       name  = "alertmanager.alertmanagerSpec.resources.limits.cpu"
-      value = "200m"
+      value = "2m"
     },
     {
       name  = "alertmanager.alertmanagerSpec.resources.limits.memory"
-      value = "512Mi"
+      value = "60Mi"
     },
     {
       name  = "alertmanager.alertmanagerSpec.storage.volumeClaimTemplate.spec.storageClassName"
@@ -109,7 +109,7 @@ resource "helm_release" "kube_prometheus_stack" {
     },
     {
       name  = "grafana.resources.requests.cpu"
-      value = "100m"
+      value = "20m"
     },
     {
       name  = "grafana.resources.requests.memory"
@@ -117,11 +117,11 @@ resource "helm_release" "kube_prometheus_stack" {
     },
     {
       name  = "grafana.resources.limits.cpu"
-      value = "200m"
+      value = "30m"
     },
     {
       name  = "grafana.resources.limits.memory"
-      value = "512Mi"
+      value = "320Mi"
     },
     {
       name  = "grafana.persistence.storageClassName"
@@ -168,19 +168,19 @@ resource "helm_release" "tempo" {
   set = [
     {
       name  = "tempo.resources.requests.cpu"
-      value = "500m"
+      value = "250m"
     },
     {
       name  = "tempo.resources.requests.memory"
-      value = "2Gi"
+      value = "1Gi"
     },
     {
       name  = "tempo.resources.limits.cpu"
-      value = "1"
+      value = "300m"
     },
     {
       name  = "tempo.resources.limits.memory"
-      value = "4Gi"
+      value = "1.5Gi"
     },
     {
       name  = "tempo.memBallastSizeMbs"
@@ -344,14 +344,20 @@ resource "helm_release" "loki" {
 
       singleBinary = {
         replicas = 1
+        autoscaling = {
+          enabled = true
+          maxReplicas = 3
+          targetCPUUtilizationPercentage = 90
+          targetMemoryUtilizationPercentage = 90
+        }
         resources = {
           requests = {
-            cpu    = "200m"
+            cpu    = "50m"
             memory = "512Mi"
           }
           limits = {
-            cpu    = "400m"
-            memory = "1Gi"
+            cpu    = "60m"
+            memory = "640Mi"
           }
         }
         persistence = {
@@ -402,12 +408,18 @@ resource "helm_release" "alloy" {
         resources = {
           requests = {
             cpu    = "100m"
-            memory = "256Mi"
+            memory = "100Mi"
           }
           limits = {
             cpu    = "200m"
-            memory = "512Mi"
+            memory = "150Mi"
           }
+        }
+        autoscaling = {
+          enabled = true
+          maxReplicas = 3
+          targetCPUUtilizationPercentage = 90
+          targetMemoryUtilizationPercentage = 90
         }
         configMap = {
           content = <<-EOT
