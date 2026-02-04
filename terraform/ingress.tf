@@ -43,7 +43,7 @@ module "nginx-controller" {
     },
     {
       name  = "controller.resources.limits.cpu"
-      value = "500m"
+      value = "350m"
     },
     {
       name  = "controller.resources.limits.memory"

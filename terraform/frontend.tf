@@ -48,12 +48,12 @@ resource "kubernetes_deployment_v1" "kronos_frontend" {
 
           resources {
             requests = {
-              memory = "8Mi"
+              memory = "6Mi"
               cpu    = "50m"
             }
             limits = {
-              memory = "16Mi"
-              cpu    = "100m"
+              memory = "8Mi"
+              cpu    = "70m"
             }
           }
 

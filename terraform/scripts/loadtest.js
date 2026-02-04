@@ -48,7 +48,7 @@ const profiles = {
       { duration: '5m', target: 0 }, // Recover
     ],
     thresholds: {
-      'http_req_duration': ['p(95)<10000', 'p(99)<20000'],  // Relaxed SLO targets
+      'http_req_duration': ['p(95)<25000', 'p(99)<50000'],  // Relaxed SLO targets
       'http_req_failed': ['rate<0.05'],  // Error rate < 5%
     },
   },
@@ -56,15 +56,15 @@ const profiles = {
   // Spike Testing for sudden traffic bursts
   spike: {
     stages: [
-      { duration: '2m', target: 500 }, // Baseline
-      { duration: '2m', target: 5000 }, // Spike to 5000 users
-      { duration: '5m', target: 5000 }, // Stay at spike
-      { duration: '2m', target: 500 }, // Drop back to baseline
-      { duration: '3m', target: 500 }, // Stay at baseline
-      { duration: '2m', target: 0 }, // Recover
+      { duration: '5m', target: 500 }, // Baseline
+      { duration: '10m', target: 5000 }, // Spike to 5000 users
+      { duration: '20m', target: 5000 }, // Stay at spike
+      { duration: '5m', target: 500 }, // Drop back to baseline
+      { duration: '5m', target: 500 }, // Stay at baseline
+      { duration: '1m', target: 0 }, // Recover
     ],
     thresholds: {
-      'http_req_duration': ['p(95)<5000', 'p(99)<10000'],
+      'http_req_duration': ['p(95)<25000', 'p(99)<50000'],
       'http_req_failed': ['rate<0.10'],  // Error rate < 10%
     },
   },

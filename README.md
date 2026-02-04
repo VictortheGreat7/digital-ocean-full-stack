@@ -217,15 +217,15 @@ To destroy all Terraform resources:
 ```txt
 digital-ocean-full-stack/
 ├── .github/
-│   └── workflows/                                        # GitHub Actions CI/CD pipelines
-│       ├── build.yaml                                    # Main deployment workflow
-│       ├── destroy.yaml                                  # Resource cleanup workflow
-│       └── integrate.yaml                                # Subsequent infrastructure/deployment changes workflow
-├── backend/                                              # Flask API application
-│   ├── app.py                                            # Flask Time API code
+│   └── workflows/                                        # GitHub Actions CI/CD workflows
+│       ├── build.yaml                                    # Workflow for building from scratch
+│       ├── destroy.yaml                                  # Cleanup workflow
+│       └── integrate.yaml                                # Workflow for subsequent infrastructure/deployment changes
+├── backend/                                              # Flask Time API backend
+│   ├── app.py                                            # Flask Time API logic
 │   ├── Dockerfile                                        # Backend container image definition
 │   └── requirements.txt                                  # Python dependencies
-├── frontend/                                             # Vite React application
+├── frontend/                                             # Vite React frontend
 │   ├── public/                                           # Static assets
 │   │   └── vite.svg                                      # Vite logo
 │   ├── src/                                              # React source code
@@ -255,44 +255,36 @@ digital-ocean-full-stack/
 │   └── vite.config.js                                    # Vite build configuration
 ├── screenshots/                                          # Project screenshots and documentation images
 ├── terraform/                                            # Infrastructure as Code (IaC) and automation
-│   ├── deploy/                                           # Application deployment Terraform modules
-│   │   ├── charts/                                       # Helm charts for application components
-│   │   │   └── k6-test/                                  # K6 load testing Helm chart folder
-│   │   │       ├── templates/                            # Helm chart templates
-│   │   │       │    ├── k6-custom-resource.yaml          # K6 custom resource definition
-│   │   │       │    └── prometheus-rule.yaml             # Prometheus rule for K6
-│   │   │       ├── Chart.yaml                            # Helm chart metadata
-│   │   │       └── values.yaml                           # Default Helm chart values
-│   │   ├── app_backend.tf                                # Backend application deployment resources
-│   │   ├── data.tf                                       # Data sources for existing resources
-│   │   ├── db.tf                                         # Database deployment resources
-│   │   ├── deploy.tf                                     # Application deployment resources
-│   │   ├── dns.tf                                        # DNS configuration using Cloudflare
-│   │   ├── frontend.tf                                   # Frontend application deployment resources
-│   │   ├── ingress.tf                                    # Ingress controller and routing configuration
-│   │   ├── loadtest.tf                                   # Load testing resources using K6
-│   │   ├── monitoring.tf                                 # Monitoring and observability stack (Prometheus/Grafana)
-│   │   ├── netpolicy.tf                                  # Kubernetes network policies
-│   │   ├── provision.tf                                  # Kubernetes cluster provisioning resources
-│   │   └── tls.tf                                        # TLS certificate management using Cert Manager
+│   ├── charts/                                           # Helm charts for application components
+│   │   └── k6-test/                                      # K6 load testing Helm chart folder
+│   │       ├── templates/                                # Helm chart templates
+│   │       │    ├── k6-custom-resource.yaml              # K6 custom resource definition
+│   │       │    └── prometheus-rule.yaml                 # Prometheus rule for K6
+│   │       ├── Chart.yaml                                # Helm chart metadata
+│   │       └── values.yaml                               # Default Helm chart values
 │   ├── scripts/                                          # Helper automation scripts
 │   │   ├── gh_secret.sh                                  # GitHub secrets management script
 │   │   ├── loadtest.js                                   # K6 load testing script
-│   │   ├── loadtest.py                                   # Python load testing script
-│   │   └── ssh_import.sh                                 # SSH key import script for self-hosted runner
-│   ├── ssh_keys/                                         # SSH keys for self-hosted runner access
-│   │   ├── id_rsa                                        # Private SSH key (git-ignored)
-│   │   └── id_rsa.pub                                    # Public SSH key
+│   │   └── loadtest.py                                   # Python load testing script
 │   ├── .terraform.lock.hcl                               # Terraform dependency lock file
+│   ├── app_backend.tf                                    # Backend application deployment resources
 │   ├── backend.tf                                        # Terraform remote state backend configuration
-│   ├── cloud-init.yaml.tpl                               # Cloud-init template for self-hosted GitHub runner setup
+│   ├── data.tf                                           # Data sources for existing resources
+│   ├── db.tf                                             # Database deployment resources
+│   ├── dns.tf                                            # DNS configuration using Cloudflare
+│   ├── frontend.tf                                       # Frontend application deployment resources
+│   ├── ingress.tf                                        # Ingress controller and routing configuration
+│   ├── loadtest.tf                                       # Load testing resources using K6
 │   ├── main.tf                                           # Main Terraform entry point (AKS cluster, resource groups, runner VM)
+│   ├── monitoring.tf                                     # Monitoring and observability stack (Prometheus/Grafana)
+│   ├── netpolicy.tf                                      # Kubernetes network policies
 │   ├── network.tf                                        # Azure networking configuration (VNet, subnets, NSG)
+│   ├── outputs.tf                                        # Terraform output definitions
 │   ├── providers.tf                                      # Terraform provider configurations
 │   ├── terraform.tfvars.json                             # Terraform variable values (auto-generated from GitHub secrets)
+│   ├── tls.tf                                            # TLS certificate management using Cert Manager
 │   └── variables.tf                                      # Terraform variable definitions
 ├── .gitignore                                            # Root Git ignore rules
-├── Dockerfile                                            # Legacy/root Dockerfile (if applicable)
 └── README.md                                             # Project documentation
 ```
 
