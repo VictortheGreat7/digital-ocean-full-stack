@@ -34,8 +34,32 @@ module "nginx-controller" {
       type  = "string"
     },
     {
+      name  = "controller.resources.requests.cpu"
+      value = "300m"
+    },
+    {
+      name  = "controller.resources.requests.memory"
+      value = "128Mi"
+    },
+    {
+      name  = "controller.resources.limits.cpu"
+      value = "350m"
+    },
+    {
+      name  = "controller.resources.limits.memory"
+      value = "160Mi"
+    },
+    {
       name = "controller.autoscaling.enabled"
       value = "true"
+    },
+    {
+      name = "controller.autoscaling.minReplicas"
+      value = "1"
+    },
+    {
+      name = "controller.autoscaling.maxReplicas"
+      value = "11"
     }
   ]
 
