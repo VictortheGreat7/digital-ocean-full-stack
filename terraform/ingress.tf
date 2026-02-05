@@ -7,6 +7,7 @@ resource "kubernetes_manifest" "cilium_gateway" {
       namespace = "kube-system"
       annotations ={
         "cert-manager.io/cluster-issuer" = "letsencrypt-prod"
+        "cert-manager.io/common-name"     = "${var.subdomains[0]}.${var.domain}"
       }
     }
     spec = {
@@ -16,6 +17,7 @@ resource "kubernetes_manifest" "cilium_gateway" {
           name     = "http"
           protocol = "HTTP"
           port     = 80
+          hostname = "${var.subdomains[0]}.${var.domain}"
           allowedRoutes = {
             namespaces = {
               from = "All"
@@ -62,6 +64,7 @@ resource "kubernetes_manifest" "kronos_https_route" {
       parentRefs = [
         {
           name = kubernetes_manifest.cilium_gateway.manifest["metadata"]["name"]
+          namespace = kubernetes_manifest.cilium_gateway.manifest["metadata"]["namespace"]
           sectionName = "https"
         }
       ]
