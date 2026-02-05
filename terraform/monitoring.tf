@@ -71,15 +71,15 @@ resource "helm_release" "kube_prometheus_stack" {
       value = "/monitoring/prometheus"
     },
     {
-      name = "prometheus.route.main.filters[1].type"
+      name = "prometheus.route.main.filters[0].type"
       value = "URLRewrite"
     },
     {
-      name = "prometheus.route.main.filters[1].urlRewrite.path.type"
+      name = "prometheus.route.main.filters[0].urlRewrite.path.type"
       value = "ReplacePrefixMatch"
     },
     {
-      name = "prometheus.route.main.filters[1].urlRewrite.path.replacePrefixMatch"
+      name = "prometheus.route.main.filters[0].urlRewrite.path.replacePrefixMatch"
       value = "/"
     },
 
@@ -138,15 +138,15 @@ resource "helm_release" "kube_prometheus_stack" {
       value = "/monitoring/alertmanager"
     },
     {
-      name = "alertmanager.route.main.filters[1].type"
+      name = "alertmanager.route.main.filters[0].type"
       value = "URLRewrite"
     },
     {
-      name = "alertmanager.route.main.filters[1].urlRewrite.path.type"
+      name = "alertmanager.route.main.filters[0].urlRewrite.path.type"
       value = "ReplacePrefixMatch"
     },
     {
-      name = "alertmanager.route.main.filters[1].urlRewrite.path.replacePrefixMatch"
+      name = "alertmanager.route.main.filters[0].urlRewrite.path.replacePrefixMatch"
       value = "/"
     },
 
@@ -209,15 +209,15 @@ resource "helm_release" "kube_prometheus_stack" {
       value = "/monitoring/grafana"
     },
     {
-      name = "grafana.route.main.filters[1].type"
+      name = "grafana.route.main.filters[0].type"
       value = "URLRewrite"
     },
     {
-      name = "grafana.route.main.filters[1].urlRewrite.path.type"
+      name = "grafana.route.main.filters[0].urlRewrite.path.type"
       value = "ReplacePrefixMatch"
     },
     {
-      name = "grafana.route.main.filters[1].urlRewrite.path.replacePrefixMatch"
+      name = "grafana.route.main.filters[0].urlRewrite.path.replacePrefixMatch"
       value = "/"
     }
   ]

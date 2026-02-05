@@ -71,30 +71,33 @@ resource "kubernetes_manifest" "kronos_http_route" {
             }
           ]
         },
-        # {
-        #   matches = [
-        #     {
-        #       path = {
-        #         type  = "PathPrefix"
-        #         value = "/api/metrics"
-        #       }
-        #     }
-        #   ]
-        #   filters = [
-        #     {
-        #       type = "RequestRedirect"
-        #       requestRedirect = {
-        #         statusCode = 404
-        #       }
-        #     }
-        #   ]
-        #   backendRefs = [
-        #     {
-        #       name = kubernetes_service_v1.kronos_backend.metadata[0].name
-        #       port = kubernetes_service_v1.kronos_backend.spec[0].port[0].port
-        #     }
-        #   ]
-        # },
+        {
+          matches = [
+            {
+              path = {
+                type  = "PathPrefix"
+                value = "/api/metrics"
+              }
+            }
+          ]
+          filters = [
+            {
+              type = "URLRewrite"
+              urlRewrite = {
+                path = {
+                  type  = "ReplacePrefixMatch"
+                  replacePrefixMatch = "/"
+                }
+              }
+            }
+          ]
+          backendRefs = [
+            {
+              name = kubernetes_service_v1.kronos_backend.metadata[0].name
+              port = kubernetes_service_v1.kronos_backend.spec[0].port[0].port
+            }
+          ]
+        },
         {
           matches = [
             {
