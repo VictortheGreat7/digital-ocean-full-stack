@@ -28,7 +28,7 @@ resource "helm_release" "cert_manager" {
       value = "512Mi"
     },
     {
-      name = "config.enableGateawayAPI"
+      name = "config.enableGatewayAPI"
       value = "true"
     }
   ]
