@@ -28,6 +28,7 @@ resource "kubernetes_manifest" "cilium_gateway" {
             certificateRefs = [
               {
                 name = "kronos-tls"
+                namespaces = kubernetes_namespace_v1.kronos.metadata[0].name
                 kind = "Secret"
               }
             ]
@@ -57,7 +58,6 @@ resource "kubernetes_manifest" "kronos_https_route" {
       parentRefs = [
         {
           name = kubernetes_manifest.cilium_gateway.manifest["metadata"]["name"]
-          namespace = kubernetes_manifest.cilium_gateway.manifest["metadata"]["namespace"]
           sectionName = "https"
         }
       ]
