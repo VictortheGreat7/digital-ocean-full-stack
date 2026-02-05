@@ -4,7 +4,7 @@ resource "kubernetes_manifest" "cilium_gateway" {
     kind       = "Gateway"
     metadata = {
       name = "kronos"
-      namespace = "kube-system"
+      namespace = "kronos"
     }
     spec = {
       gatewayClassName = "cilium"
