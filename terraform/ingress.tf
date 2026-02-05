@@ -31,6 +31,7 @@ resource "kubernetes_manifest" "cilium_gateway" {
             certificateRefs = [
               {
                 name = "kronos-tls"
+                group = ""
                 kind = "Secret"
               }
             ]
