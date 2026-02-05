@@ -29,6 +29,7 @@ resource "kubernetes_manifest" "cilium_gateway" {
               {
                 name = "kronos-tls"
                 kind = "Secret"
+                namespace = "kronos"
               }
             ]
           }
