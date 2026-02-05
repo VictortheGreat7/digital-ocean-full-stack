@@ -560,14 +560,6 @@ resource "helm_release" "datadog" {
       value = var.datadog_app_key
     },
     {
-      name = "datadog.apiKeyExistingSecret"
-      value = kubernetes_secret_v1.datadog_secret.metadata[0].name
-    },
-    {
-      name = "datadog.appKeyExistingSecret"
-      value = kubernetes_secret_v1.datadog_secret.metadata[0].name
-    },
-    {
       name  = "datadog.site"
       value = var.datadog_site
     },
