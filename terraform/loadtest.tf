@@ -64,7 +64,7 @@ resource "helm_release" "k6_test" {
   ]
 
   depends_on = [
-    digitalocean_kubernetes_cluster.kronos,
+    module.doks,
     helm_release.k6_operator,
     kubernetes_config_map_v1.k6_test_script,
     helm_release.kube_prometheus_stack
@@ -137,5 +137,5 @@ resource "kubernetes_config_map_v1" "grafana_k6_dashboard" {
     })
   }
 
-  depends_on = [digitalocean_kubernetes_cluster.kronos, helm_release.kube_prometheus_stack]
+  depends_on = [module.doks, helm_release.kube_prometheus_stack]
 }

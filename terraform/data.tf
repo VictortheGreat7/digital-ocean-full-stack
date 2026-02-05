@@ -2,9 +2,9 @@
 data "digitalocean_kubernetes_versions" "kronos" {}
 
 data "digitalocean_kubernetes_cluster" "kronos" {
-  name = digitalocean_kubernetes_cluster.kronos.name
+  name = module.doks.name
 
-  depends_on = [digitalocean_kubernetes_cluster.kronos]
+  depends_on = [module.doks]
 }
 
 data "kubernetes_service_v1" "nginx_ingress" {

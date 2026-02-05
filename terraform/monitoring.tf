@@ -565,7 +565,27 @@ resource "helm_release" "datadog" {
     },
     {
       name  = "datadog.clusterName"
-      value = "${digitalocean_kubernetes_cluster.kronos.name}"
+      value = "${module.doks.name}"
+    },
+    {
+      name = "datadog.logs.enabled"
+      value = "true"
+    },
+    {
+      name = "datadog.logs.containerCollectAll"
+      value = "true"
+    },
+    {
+      name = "datadog.logs.autoMultiLineDetection"
+      value = "true"
+    },
+    {
+      name = "datadog.prometheusScrape.enabled"
+      value = "true"
+    },
+    {
+      name = "datadog.prometheusScrape.serviceEndpoints"
+      value = "true"
     },
     {
       name  = "operator.datadogCRDs.crds.datadogAgents"
@@ -589,18 +609,6 @@ resource "helm_release" "datadog" {
     },
     {
       name  = "operator.datadogDashboard.enabled"
-      value = "true"
-    },
-    {
-      name = "datadog.logs.enabled"
-      value = "true"
-    },
-    {
-      name = "datadog.logs.containerCollectAll"
-      value = "true"
-    },
-    {
-      name = "datadog.logs.autoMultiLineDetection"
       value = "true"
     }
   ]

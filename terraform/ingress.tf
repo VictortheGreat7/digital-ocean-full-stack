@@ -34,22 +34,26 @@ module "nginx-controller" {
       type  = "string"
     },
     {
-      name = "controller.autoscaling.enabled"
-      value = "true"
+      name  = "controller.resources.requests.cpu"
+      value = "300m"
     },
     {
-      name = "controller.autoscaling.minReplicas"
-      value = "1"
+      name  = "controller.resources.requests.memory"
+      value = "128Mi"
     },
     {
-      name = "controller.autoscaling.maxReplicas"
-      value = "11"
+      name  = "controller.resources.limits.cpu"
+      value = "400m"
+    },
+    {
+      name  = "controller.resources.limits.memory"
+      value = "160Mi"
     }
   ]
 
   timeout = 900
 
-  depends_on = [digitalocean_kubernetes_cluster.kronos]
+  depends_on = [module.doks]
 }
 
 # Ingress Webhook Check: This makes sure the ingress controller's admission webhook is ready before creating ingress resources.
@@ -74,7 +78,7 @@ resource "null_resource" "wait_for_ingress_webhook" {
 
       doctl auth init -t ${var.do_token}
 
-      doctl kubernetes cluster kubeconfig save ${digitalocean_kubernetes_cluster.kronos.name} --access-token ${var.do_token}
+      doctl kubernetes cluster kubeconfig save ${module.doks.name} --access-token ${var.do_token}
 
       echo "Waiting for ingress-nginx-controller DaemonSet pods to be ready..."
       for i in {1..100}; do

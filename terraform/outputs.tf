@@ -1,8 +1,5 @@
-output "doks_cluster_name" {
-  value = digitalocean_kubernetes_cluster.kronos.name
-}
-output "doks_cluster_id" {
-  value = digitalocean_kubernetes_cluster.kronos.id
+output "doks_connect" {
+  value = "doctl kubernetes cluster kubeconfig save ${module.doks.name}"
 }
 
 output "ingress_ip" {
