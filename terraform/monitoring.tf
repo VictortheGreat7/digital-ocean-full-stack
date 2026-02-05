@@ -45,18 +45,54 @@ resource "helm_release" "kube_prometheus_stack" {
       name  = "prometheus.prometheusSpec.enableFeatures[1]"
       value = "exemplar-storage"
     },
-    # Prometheus ingress
+    # Prometheus HTTPRouting
     {
-      name  = "prometheus.ingress.enabled"
+      name  = "prometheus.route.main.enabled"
       value = "true"
     },
     {
-      name  = "prometheus.ingress.ingressClassName"
-      value = "nginx"
+      name  = "prometheus.route.main.parentRefs[0].name"
+      value = kubernetes_manifest.cilium_gateway.manifest["metadata"]["name"]
     },
     {
-      name  = "prometheus.ingress.hosts[0]"
-      value = "prometheus.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
+      name = "prometheus.route.main.parentRefs[0].sectionName"
+      value = "https"
+    },
+    {
+      name = "prometheus.route.main.hostnames[0]"
+      value = "${var.subdomains[0]}.${var.domain}"
+    },
+    {
+      name = "prometheus.route.main.matches[0].path.type"
+      value = "PathPrefix"
+    },
+    {
+      name = "prometheus.route.main.matches[0].path.value"
+      value = "/monitoring/prometheus"
+    },
+    {
+      name = "prometheus.route.main.filters[0].type"
+      value = "RequestRedirect"
+    },
+    {
+      name = "prometheus.route.main.filters[0].requestRedirect.scheme"
+      value = "https"
+    },
+    {
+      name = "prometheus.route.main.filters[0].requestRedirect.statusCode"
+      value = "301"
+    },
+    {
+      name = "prometheus.route.main.filters[1].type"
+      value = "URLRewrite"
+    },
+    {
+      name = "prometheus.route.main.filters[1].urlRewrite.path.type"
+      value = "ReplacePrefixMatch"
+    },
+    {
+      name = "prometheus.route.main.filters[1].urlRewrite.path.value"
+      value = "/"
     },
 
     # Alertmanager settings
@@ -90,16 +126,52 @@ resource "helm_release" "kube_prometheus_stack" {
     },
     # Alertmanager ingress
     {
-      name  = "alertmanager.ingress.enabled"
+      name  = "alertmanager.route.main.enabled"
       value = "true"
     },
     {
-      name  = "alertmanager.ingress.ingressClassName"
-      value = "nginx"
+      name  = "alertmanager.route.main.parentRefs[0].name"
+      value = kubernetes_manifest.cilium_gateway.manifest["metadata"]["name"]
     },
     {
-      name  = "alertmanager.ingress.hosts[0]"
-      value = "alertmanager.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
+      name = "alertmanager.route.main.parentRefs[0].sectionName"
+      value = "https"
+    },
+    {
+      name = "alertmanager.route.main.hostnames[0]"
+      value = "${var.subdomains[0]}.${var.domain}"
+    },
+    {
+      name = "alertmanager.route.main.matches[0].path.type"
+      value = "PathPrefix"
+    },
+    {
+      name = "alertmanager.route.main.matches[0].path.value"
+      value = "/monitoring/alertmanager"
+    },
+    {
+      name = "alertmanager.route.main.filters[0].type"
+      value = "RequestRedirect"
+    },
+    {
+      name = "alertmanager.route.main.filters[0].requestRedirect.scheme"
+      value = "https"
+    },
+    {
+      name = "alertmanager.route.main.filters[0].requestRedirect.statusCode"
+      value = "301"
+    },
+    {
+      name = "alertmanager.route.main.filters[1].type"
+      value = "URLRewrite"
+    },
+    {
+      name = "alertmanager.route.main.filters[1].urlRewrite.path.type"
+      value = "ReplacePrefixMatch"
+    },
+    {
+      name = "alertmanager.route.main.filters[1].urlRewrite.path.value"
+      value = "/"
     },
 
     # Grafana settings
@@ -137,23 +209,59 @@ resource "helm_release" "kube_prometheus_stack" {
     },
     # Grafana ingress
     {
-      name  = "grafana.ingress.enabled"
+      name  = "grafana.route.main.enabled"
       value = "true"
     },
     {
-      name  = "grafana.ingress.ingressClassName"
-      value = "nginx"
+      name  = "grafana.route.main.parentRefs[0].name"
+      value = kubernetes_manifest.cilium_gateway.manifest["metadata"]["name"]
     },
     {
-      name  = "grafana.ingress.hosts[0]"
-      value = "grafana.${data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.ip}.nip.io"
+      name = "grafana.route.main.parentRefs[0].sectionName"
+      value = "https"
+    },
+    {
+      name = "grafana.route.main.hostnames[0]"
+      value = "${var.subdomains[0]}.${var.domain}"
+    },
+    {
+      name = "grafana.route.main.matches[0].path.type"
+      value = "PathPrefix"
+    },
+    {
+      name = "grafana.route.main.matches[0].path.value"
+      value = "/monitoring/grafana"
+    },
+    {
+      name = "grafana.route.main.filters[0].type"
+      value = "RequestRedirect"
+    },
+    {
+      name = "grafana.route.main.filters[0].requestRedirect.scheme"
+      value = "https"
+    },
+    {
+      name = "grafana.route.main.filters[0].requestRedirect.statusCode"
+      value = "301"
+    },
+    {
+      name = "grafana.route.main.filters[1].type"
+      value = "URLRewrite"
+    },
+    {
+      name = "grafana.route.main.filters[1].urlRewrite.path.type"
+      value = "ReplacePrefixMatch"
+    },
+    {
+      name = "grafana.route.main.filters[1].urlRewrite.path.value"
+      value = "/"
     }
   ]
 
   wait    = true
   timeout = 600
 
-  depends_on = [module.nginx-controller, helm_release.cert_manager_prod_issuer]
+  depends_on = [kubernetes_manifest.cilium_gateway, helm_release.cert_manager_prod_issuer]
 }
 
 resource "helm_release" "tempo" {
@@ -570,6 +678,18 @@ resource "helm_release" "datadog" {
     {
       name = "datadog.prometheusScrape.serviceEndpoints"
       value = "true"
+    },
+    {
+      name  = "datadog.confd.cilium\\.yaml"
+      value = <<-EOT
+        ad_identifiers:
+          - cilium-agent
+        init_config:
+        instances:
+          - prometheus_url: http://%%host%%:9090/metrics
+            tags:
+              - "component:cilium-agent"
+      EOT
     },
     {
       name  = "operator.apiKey"

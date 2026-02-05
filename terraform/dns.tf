@@ -20,8 +20,8 @@ resource "cloudflare_dns_record" "kronos" {
   name    = each.value
   type    = "A"
   ttl     = 1
-  content = data.kubernetes_service_v1.nginx_ingress.status[0].load_balancer[0].ingress[0].ip
+  content = data.kubernetes_service_v1.cilium_gateway.status[0].load_balancer[0].ingress[0].ip
   proxied = true
 
-  depends_on = [module.nginx-controller]
+  depends_on = [kubernetes_manifest.cilium_gateway]
 }

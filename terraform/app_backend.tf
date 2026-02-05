@@ -113,7 +113,6 @@ resource "kubernetes_deployment_v1" "kronos_backend" {
   }
 
   depends_on = [
-    module.nginx-controller,
     kubernetes_namespace_v1.kronos
   ]
 }

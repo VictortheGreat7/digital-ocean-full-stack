@@ -31,10 +31,7 @@ resource "helm_release" "cert_manager" {
 
   timeout = 600
 
-  depends_on = [
-    module.nginx-controller,
-    kubernetes_job_v1.wait_for_ingress_webhook
-  ]
+  depends_on = [kubernetes_manifest.cilium_gateway]
 }
 
 resource "helm_release" "cert_manager_prod_issuer" {

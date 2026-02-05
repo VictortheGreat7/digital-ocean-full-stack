@@ -7,11 +7,11 @@ data "digitalocean_kubernetes_cluster" "kronos" {
   depends_on = [module.doks]
 }
 
-data "kubernetes_service_v1" "nginx_ingress" {
+data "kubernetes_service_v1" "cilium_gateway" {
   metadata {
-    name      = "ingress-nginx-controller"
+    name      = "cilium-gateway-kronos"
     namespace = "kube-system"
   }
 
-  depends_on = [module.nginx-controller]
+  depends_on = [kubernetes_manifest.cilium_gateway]
 }
