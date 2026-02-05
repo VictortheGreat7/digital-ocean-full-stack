@@ -26,6 +26,7 @@ resource "kubernetes_manifest" "cilium_gateway" {
           name     = "https"
           protocol = "HTTPS"
           port     = 443
+          hostname = "${var.subdomains[0]}.${var.domain}"
           tls = {
             mode = "Terminate"
             certificateRefs = [
