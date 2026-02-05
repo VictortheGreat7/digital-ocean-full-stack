@@ -10,7 +10,7 @@ data "digitalocean_kubernetes_cluster" "kronos" {
 data "kubernetes_service_v1" "cilium_gateway" {
   metadata {
     name      = "cilium-gateway-kronos"
-    namespace = "kube-system"
+    namespace = "cert-manager"
   }
 
   depends_on = [kubernetes_manifest.cilium_gateway]
