@@ -79,7 +79,7 @@ resource "helm_release" "kube_prometheus_stack" {
       value = "ReplacePrefixMatch"
     },
     {
-      name = "prometheus.route.main.filters[1].urlRewrite.path.value"
+      name = "prometheus.route.main.filters[1].urlRewrite.path.replacePrefixMatch"
       value = "/"
     },
 
@@ -146,7 +146,7 @@ resource "helm_release" "kube_prometheus_stack" {
       value = "ReplacePrefixMatch"
     },
     {
-      name = "alertmanager.route.main.filters[1].urlRewrite.path.value"
+      name = "alertmanager.route.main.filters[1].urlRewrite.path.replacePrefixMatch"
       value = "/"
     },
 
@@ -217,7 +217,7 @@ resource "helm_release" "kube_prometheus_stack" {
       value = "ReplacePrefixMatch"
     },
     {
-      name = "grafana.route.main.filters[1].urlRewrite.path.value"
+      name = "grafana.route.main.filters[1].urlRewrite.path.replacePrefixMatch"
       value = "/"
     }
   ]
