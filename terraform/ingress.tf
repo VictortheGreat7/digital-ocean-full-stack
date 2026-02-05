@@ -7,7 +7,6 @@ resource "kubernetes_manifest" "cilium_gateway" {
       namespace = "kube-system"
       annotations ={
         "cert-manager.io/cluster-issuer" = "letsencrypt-prod"
-        "cert-manager.io/common-name"     = "${var.subdomains[0]}.${var.domain}"
       }
     }
     spec = {
@@ -34,7 +33,6 @@ resource "kubernetes_manifest" "cilium_gateway" {
             certificateRefs = [
               {
                 name = "kronos-tls"
-                group = ""
                 kind = "Secret"
               }
             ]
@@ -64,13 +62,31 @@ resource "kubernetes_manifest" "kronos_https_route" {
       parentRefs = [
         {
           name = kubernetes_manifest.cilium_gateway.manifest["metadata"]["name"]
-          namespace = kubernetes_manifest.cilium_gateway.manifest["metadata"]["namespace"]
           sectionName = "https"
         }
       ]
       hostnames = ["${var.subdomains[0]}.${var.domain}"]
       rules = [
         {
+          matches = [
+            {
+              path = {
+                type  = "PathPrefix"
+                value = "/"
+              }
+            }
+          ]
+          # filters = [
+          #   {
+          #     type = "URLRewrite"
+          #     urlRewrite = {
+          #       path = {
+          #         type  = "ReplacePrefixMatch"
+          #         replacePrefixMatch = "/"
+          #       }
+          #     }
+          #   }
+          # ]
           backendRefs = [
             {
               name = kubernetes_service_v1.kronos_frontend.metadata[0].name
