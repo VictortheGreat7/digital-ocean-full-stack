@@ -59,7 +59,7 @@ resource "kubernetes_manifest" "kronos_reference_grant" {
         {
           group     = "gateway.networking.k8s.io"
           kind      = "Gateway"
-          namespace = "kube-system" # The namespace of your Gateway
+          namespace = "kube-system"
         }
       ]
       to = [
