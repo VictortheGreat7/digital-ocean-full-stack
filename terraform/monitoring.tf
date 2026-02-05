@@ -609,5 +609,5 @@ resource "helm_release" "datadog" {
     }
   ]
 
-  depends_on = [kubernetes_secret_v1.datadog_secret, helm_release.alloy]
+  depends_on = [helm_release.alloy]
 }
