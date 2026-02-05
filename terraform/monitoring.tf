@@ -610,6 +610,18 @@ resource "helm_release" "datadog" {
     {
       name  = "operator.datadogDashboard.enabled"
       value = "true"
+    },
+    {
+      name  = "operator.watchNamespaces"
+      value = ""
+    },
+    {
+      name  = "operator.apiKey"
+      value = var.datadog_api_key
+    },
+    {
+      name  = "operator.appKey"
+      value = var.datadog_app_key
     }
   ]
 
