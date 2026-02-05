@@ -47,7 +47,7 @@ module "nginx-controller" {
     },
     {
       name  = "controller.resources.limits.memory"
-      value = "160Mi"
+      value = "256Mi"
     }
   ]
 

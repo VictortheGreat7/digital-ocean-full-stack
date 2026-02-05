@@ -35,6 +35,13 @@ output name {
   depends_on  = [digitalocean_kubernetes_cluster.module]
 }
 
+output cluster_id {
+  value       = digitalocean_kubernetes_cluster.module.id
+  sensitive   = true
+  description = "The ID of the DigitalOcean Kubernetes cluster"
+  depends_on  = [digitalocean_kubernetes_cluster.module]
+}
+
 
 output urn {
   value       = digitalocean_kubernetes_cluster.module.urn
