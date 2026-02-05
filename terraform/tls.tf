@@ -26,6 +26,10 @@ resource "helm_release" "cert_manager" {
     {
       name  = "resources.limits.memory"
       value = "512Mi"
+    },
+    {
+      name = "config.enableGateawayAPI"
+      value = "true"
     }
   ]
 
