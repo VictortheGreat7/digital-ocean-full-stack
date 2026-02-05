@@ -4,7 +4,7 @@ resource "kubernetes_manifest" "cilium_gateway" {
     kind       = "Gateway"
     metadata = {
       name = "kronos"
-      namespace = "cert-manager"
+      namespace = "kube-system"
     }
     spec = {
       gatewayClassName = "cilium"
@@ -29,7 +29,7 @@ resource "kubernetes_manifest" "cilium_gateway" {
               {
                 name = "kronos-tls"
                 kind = "Secret"
-                namespace = "cert-manager"
+                namespace = "kronos"
               }
             ]
           }
