@@ -64,15 +64,6 @@ resource "kubernetes_manifest" "kronos_http_route" {
       hostnames = ["${var.subdomains[0]}.${var.domain}"]
       rules = [
         {
-          filters = [
-            {
-              type = "RequestRedirect"
-              requestRedirect = {
-                scheme = "https"
-                statusCode = 301
-              }
-            }
-          ]
           backendRefs = [
             {
               name = kubernetes_service_v1.kronos_frontend.metadata[0].name
@@ -90,13 +81,6 @@ resource "kubernetes_manifest" "kronos_http_route" {
             }
           ]
           filters = [
-            {
-              type = "RequestRedirect"
-              requestRedirect = {
-                scheme = "https"
-                statusCode = 301
-              }
-            },
             {
               type = "RequestRedirect"
               requestRedirect = {
@@ -128,13 +112,6 @@ resource "kubernetes_manifest" "kronos_http_route" {
                   type  = "ReplacePrefixMatch"
                   value = "/"
                 }
-              }
-            },
-            {
-              type = "RequestRedirect"
-              requestRedirect = {
-                scheme = "https"
-                statusCode = 301
               }
             }
           ]

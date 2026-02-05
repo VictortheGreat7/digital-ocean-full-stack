@@ -71,18 +71,6 @@ resource "helm_release" "kube_prometheus_stack" {
       value = "/monitoring/prometheus"
     },
     {
-      name = "prometheus.route.main.filters[0].type"
-      value = "RequestRedirect"
-    },
-    {
-      name = "prometheus.route.main.filters[0].requestRedirect.scheme"
-      value = "https"
-    },
-    {
-      name = "prometheus.route.main.filters[0].requestRedirect.statusCode"
-      value = "301"
-    },
-    {
       name = "prometheus.route.main.filters[1].type"
       value = "URLRewrite"
     },
@@ -148,18 +136,6 @@ resource "helm_release" "kube_prometheus_stack" {
     {
       name = "alertmanager.route.main.matches[0].path.value"
       value = "/monitoring/alertmanager"
-    },
-    {
-      name = "alertmanager.route.main.filters[0].type"
-      value = "RequestRedirect"
-    },
-    {
-      name = "alertmanager.route.main.filters[0].requestRedirect.scheme"
-      value = "https"
-    },
-    {
-      name = "alertmanager.route.main.filters[0].requestRedirect.statusCode"
-      value = "301"
     },
     {
       name = "alertmanager.route.main.filters[1].type"
@@ -231,18 +207,6 @@ resource "helm_release" "kube_prometheus_stack" {
     {
       name = "grafana.route.main.matches[0].path.value"
       value = "/monitoring/grafana"
-    },
-    {
-      name = "grafana.route.main.filters[0].type"
-      value = "RequestRedirect"
-    },
-    {
-      name = "grafana.route.main.filters[0].requestRedirect.scheme"
-      value = "https"
-    },
-    {
-      name = "grafana.route.main.filters[0].requestRedirect.statusCode"
-      value = "301"
     },
     {
       name = "grafana.route.main.filters[1].type"
