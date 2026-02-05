@@ -82,6 +82,14 @@ resource "helm_release" "kube_prometheus_stack" {
       name = "prometheus.route.main.filters[0].urlRewrite.path.replacePrefixMatch"
       value = "/"
     },
+    {
+      name  = "prometheus.prometheusSpec.externalUrl"
+      value = "https://${var.subdomains[0]}.${var.domain}/monitoring/prometheus/"
+    },
+    {
+      name  = "prometheus.prometheusSpec.routePrefix"
+      value = "/"
+    },
 
     # Alertmanager settings
     {
@@ -147,6 +155,14 @@ resource "helm_release" "kube_prometheus_stack" {
     },
     {
       name = "alertmanager.route.main.filters[0].urlRewrite.path.replacePrefixMatch"
+      value = "/"
+    },
+    {
+      name  = "alertmanager.alertmanagerSpec.externalUrl"
+      value = "https://${var.subdomains[0]}.${var.domain}/monitoring/alertmanager/"
+    },
+    {
+      name  = "alertmanager.alertmanagerSpec.routePrefix"
       value = "/"
     },
 
@@ -219,6 +235,14 @@ resource "helm_release" "kube_prometheus_stack" {
     {
       name = "grafana.route.main.filters[0].urlRewrite.path.replacePrefixMatch"
       value = "/"
+    },
+    {
+      name  = "grafana.grafana.ini.server.root_url"
+      value = "https://${var.subdomains[0]}.${var.domain}/monitoring/grafana/"
+    },
+    {
+      name  = "grafana.grafana.ini.server.serve_from_sub_path"
+      value = "true"
     }
   ]
 
