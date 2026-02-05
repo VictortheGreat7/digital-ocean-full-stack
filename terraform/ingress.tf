@@ -46,6 +46,33 @@ resource "kubernetes_manifest" "cilium_gateway" {
   depends_on = [module.doks]
 }
 
+resource "kubernetes_manifest" "kronos_reference_grant" {
+  manifest = {
+    apiVersion = "gateway.networking.k8s.io/v1"
+    kind       = "ReferenceGrant"
+    metadata = {
+      name      = "allow-gateway-to-tls"
+      namespace = "kronos" 
+    }
+    spec = {
+      from = [
+        {
+          group     = "gateway.networking.k8s.io"
+          kind      = "Gateway"
+          namespace = "kube-system" # The namespace of your Gateway
+        }
+      ]
+      to = [
+        {
+          group = "" # Core group for Secrets
+          kind  = "Secret"
+          name  = "kronos-tls"
+        }
+      ]
+    }
+  }
+}
+
 resource "kubernetes_manifest" "kronos_https_route" {
   manifest = {
     apiVersion = kubernetes_manifest.cilium_gateway.manifest["apiVersion"]
