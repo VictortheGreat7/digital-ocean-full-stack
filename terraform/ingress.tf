@@ -4,7 +4,10 @@ resource "kubernetes_manifest" "cilium_gateway" {
     kind       = "Gateway"
     metadata = {
       name = "kronos"
-      namespace = "kronos"
+      namespace = "kube-system"
+      annotations ={
+        "cert-manager.io/cluster-issuer" = "letsencrypt-prod"
+      }
     }
     spec = {
       gatewayClassName = "cilium"
@@ -28,7 +31,6 @@ resource "kubernetes_manifest" "cilium_gateway" {
             certificateRefs = [
               {
                 name = "kronos-tls"
-                namespaces = kubernetes_namespace_v1.kronos.metadata[0].name
                 kind = "Secret"
               }
             ]
