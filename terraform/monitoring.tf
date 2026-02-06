@@ -595,3 +595,45 @@ resource "helm_release" "datadog" {
 
   depends_on = [helm_release.alloy]
 }
+
+resource "kubernetes_network_policy_v1" "allow_datadog_to_cilium" {
+  metadata {
+    name      = "allow-datadog-to-cilium-metrics"
+    namespace = "kube-system"
+  }
+
+  spec {
+    pod_selector {
+      match_labels = {
+        "k8s-app" = "cilium"
+      }
+    }
+
+    ingress {
+      from {
+        namespace_selector {
+          match_labels = {
+            "kubernetes.io/metadata.name" = "monitoring"
+          }
+        }
+      }
+
+      ports {
+        port     = "9090"
+        protocol = "TCP"
+      }
+      
+      ports {
+        port     = "9963"
+        protocol = "TCP"
+      }
+
+      ports {
+        port     = "9964"
+        protocol = "TCP"
+      }
+    }
+
+    policy_types = ["Ingress"]
+  }
+}
