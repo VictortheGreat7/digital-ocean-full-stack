@@ -3,8 +3,8 @@ resource "helm_release" "k6_operator" {
   name             = "k6-operator"
   repository       = "https://grafana.github.io/helm-charts"
   chart            = "k6-operator"
-  namespace        = "k6"
-  create_namespace = true
+  namespace        = "default"
+  create_namespace = false
   atomic           = true
   cleanup_on_fail  = true
 
