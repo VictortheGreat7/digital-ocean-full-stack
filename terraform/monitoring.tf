@@ -546,11 +546,6 @@ resource "helm_release" "datadog" {
           autoMultiLineDetection = true
         }
 
-        prometheusScrape = {
-          enabled          = true
-          serviceEndpoints = true
-        }
-
         ignoreAutoConfig = ["cilium"]
 
         confd = {
