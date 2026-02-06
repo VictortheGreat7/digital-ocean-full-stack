@@ -50,6 +50,53 @@ resource "kubernetes_manifest" "cilium_gateway" {
   depends_on = [module.doks]
 }
 
+resource "kubernetes_manifest" "kronos_http_route" {
+  manifest = {
+    apiVersion = kubernetes_manifest.cilium_gateway.manifest["apiVersion"]
+    kind       = "HTTPRoute"
+    metadata = {
+      name      = "kronos-http-route"
+      namespace = kubernetes_namespace_v1.kronos.metadata[0].name
+    }
+    spec = {
+      parentRefs = [
+        {
+          name = kubernetes_manifest.cilium_gateway.manifest["metadata"]["name"]
+          sectionName = "http"
+        }
+      ]
+      hostnames = ["${var.subdomains[0]}.${var.domain}"]
+      rules = [
+        {
+          matches = [
+            {
+              path = {
+                type  = "PathPrefix"
+                value = "/"
+              }
+            }
+          ]
+          filters = [
+            {
+              type = "RequestRedirect"
+              requestRedirect = {
+                scheme = "https"
+                statusCode   = 301
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+
+  depends_on = [
+    kubernetes_service_v1.kronos_frontend,
+    kubernetes_service_v1.kronos_backend,
+    kubernetes_manifest.cilium_gateway
+  ]
+}
+
 resource "kubernetes_manifest" "kronos_https_route" {
   manifest = {
     apiVersion = kubernetes_manifest.cilium_gateway.manifest["apiVersion"]
@@ -144,53 +191,7 @@ resource "kubernetes_manifest" "kronos_https_route" {
   depends_on = [
     kubernetes_service_v1.kronos_frontend,
     kubernetes_service_v1.kronos_backend,
-    kubernetes_manifest.cilium_gateway
-  ]
-}
-
-resource "kubernetes_manifest" "kronos_http_route" {
-  manifest = {
-    apiVersion = kubernetes_manifest.cilium_gateway.manifest["apiVersion"]
-    kind       = "HTTPRoute"
-    metadata = {
-      name      = "kronos-http-route"
-      namespace = kubernetes_namespace_v1.kronos.metadata[0].name
-    }
-    spec = {
-      parentRefs = [
-        {
-          name = kubernetes_manifest.cilium_gateway.manifest["metadata"]["name"]
-          sectionName = "http"
-        }
-      ]
-      hostnames = ["${var.subdomains[0]}.${var.domain}"]
-      rules = [
-        {
-          matches = [
-            {
-              path = {
-                type  = "PathPrefix"
-                value = "/"
-              }
-            }
-          ]
-          filters = [
-            {
-              type = "RequestRedirect"
-              requestRedirect = {
-                scheme = "https"
-                statusCode   = 301
-              }
-            }
-          ]
-        }
-      ]
-    }
-  }
-
-  depends_on = [
-    kubernetes_service_v1.kronos_frontend,
-    kubernetes_service_v1.kronos_backend,
-    kubernetes_manifest.cilium_gateway
+    kubernetes_manifest.cilium_gateway,
+    kubernetes_manifest.kronos_http_route
   ]
 }
