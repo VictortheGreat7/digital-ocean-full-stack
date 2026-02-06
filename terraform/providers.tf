@@ -12,10 +12,6 @@ terraform {
       source  = "hashicorp/helm"
       version = ">= 3.1.1"
     }
-    kubectl = {
-      source  = "alekc/kubectl"
-      version = ">= 2.1.3"
-    }
     cloudflare = {
       source  = "cloudflare/cloudflare"
       version = ">= 5.15.0"
@@ -55,20 +51,6 @@ provider "helm" {
       module.doks.kubeconfig.cluster_ca_certificate
     )
   }
-}
-
-provider "kubectl" {
-  host  = module.doks.api_server_endpoint
-  token = module.doks.kubeconfig.token
-  client_certificate = base64decode(
-    module.doks.kubeconfig.client_certificate
-  )
-  client_key = base64decode(
-    module.doks.kubeconfig.client_key
-  )
-  cluster_ca_certificate = base64decode(
-    module.doks.kubeconfig.cluster_ca_certificate
-  )
 }
 
 provider "cloudflare" {
