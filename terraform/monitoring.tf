@@ -2,8 +2,8 @@ resource "helm_release" "kube_prometheus_stack" {
   name             = "kube-prometheus-stack"
   repository       = "https://prometheus-community.github.io/helm-charts"
   chart            = "kube-prometheus-stack"
-  create_namespace = true
-  namespace        = "monitoring"
+  namespace        = kubernetes_namespace_v1.kronos_monitoring.metadata[0].name
+  create_namespace = false
   atomic           = true
   cleanup_on_fail  = true
 
@@ -34,16 +34,16 @@ resource "helm_release" "kube_prometheus_stack" {
             }
           }
           enableRemoteWriteReceiver = true
-          enableFeatures = ["native-histograms", "exemplar-storage"]
-          externalUrl = "https://${var.subdomains[0]}.${var.domain}/monitoring/prometheus/"
-          routePrefix = "/"
+          enableFeatures            = ["native-histograms", "exemplar-storage"]
+          externalUrl               = "https://${var.subdomains[0]}.${var.domain}/monitoring/prometheus/"
+          routePrefix               = "/"
         }
         route = {
           main = {
             enabled = true
             parentRefs = [{
-              name        = kubernetes_manifest.cilium_gateway.manifest["metadata"]["name"]
-              namespace   = kubernetes_manifest.cilium_gateway.manifest["metadata"]["namespace"]
+              name        = "kronos"
+              namespace   = "kube-system"
               sectionName = "https"
             }]
             hostnames = ["${var.subdomains[0]}.${var.domain}"]
@@ -57,8 +57,8 @@ resource "helm_release" "kube_prometheus_stack" {
               type = "URLRewrite"
               urlRewrite = {
                 path = {
-                  type                 = "ReplacePrefixMatch"
-                  replacePrefixMatch   = "/"
+                  type               = "ReplacePrefixMatch"
+                  replacePrefixMatch = "/"
                 }
               }
             }]
@@ -97,8 +97,8 @@ resource "helm_release" "kube_prometheus_stack" {
           main = {
             enabled = true
             parentRefs = [{
-              name        = kubernetes_manifest.cilium_gateway.manifest["metadata"]["name"]
-              namespace   = kubernetes_manifest.cilium_gateway.manifest["metadata"]["namespace"]
+              name        = "kronos"
+              namespace   = "kube-system"
               sectionName = "https"
             }]
             hostnames = ["${var.subdomains[0]}.${var.domain}"]
@@ -147,8 +147,8 @@ resource "helm_release" "kube_prometheus_stack" {
           main = {
             enabled = true
             parentRefs = [{
-              name        = kubernetes_manifest.cilium_gateway.manifest["metadata"]["name"]
-              namespace   = kubernetes_manifest.cilium_gateway.manifest["metadata"]["namespace"]
+              name        = "kronos"
+              namespace   = "kube-system"
               sectionName = "https"
             }]
             hostnames = ["${var.subdomains[0]}.${var.domain}"]
@@ -167,7 +167,7 @@ resource "helm_release" "kube_prometheus_stack" {
   wait    = true
   timeout = 600
 
-  depends_on = [kubernetes_manifest.cilium_gateway, helm_release.cert_manager_prod_issuer]
+  depends_on = [module.manifests, helm_release.cert_manager_prod_issuer]
 }
 
 resource "helm_release" "tempo" {
@@ -214,7 +214,7 @@ resource "helm_release" "tempo" {
           }
         }
         metricsGenerator = {
-          enabled      = true
+          enabled        = true
           remoteWriteUrl = "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
         }
         overrides = {
@@ -342,9 +342,9 @@ resource "helm_release" "loki" {
       singleBinary = {
         replicas = 1
         autoscaling = {
-          enabled = true
-          maxReplicas = 3
-          targetCPUUtilizationPercentage = 90
+          enabled                           = true
+          maxReplicas                       = 3
+          targetCPUUtilizationPercentage    = 90
           targetMemoryUtilizationPercentage = 90
         }
         resources = {
@@ -413,9 +413,9 @@ resource "helm_release" "alloy" {
           }
         }
         autoscaling = {
-          enabled = true
-          maxReplicas = 3
-          targetCPUUtilizationPercentage = 90
+          enabled                           = true
+          maxReplicas                       = 3
+          targetCPUUtilizationPercentage    = 90
           targetMemoryUtilizationPercentage = 90
         }
         configMap = {
@@ -541,8 +541,8 @@ resource "helm_release" "datadog" {
         clusterName = module.doks.name
 
         logs = {
-          enabled             = true
-          containerCollectAll = true
+          enabled                = true
+          containerCollectAll    = true
           autoMultiLineDetection = true
         }
 
@@ -567,9 +567,9 @@ resource "helm_release" "datadog" {
 
         datadogCRDs = {
           crds = {
-            datadogAgents        = true
+            datadogAgents         = true
             datadogAgentInternals = true
-            datadogDashboards    = true
+            datadogDashboards     = true
           }
         }
 

@@ -23,8 +23,5 @@ resource "cloudflare_dns_record" "kronos" {
   content = data.kubernetes_service_v1.cilium_gateway.status[0].load_balancer[0].ingress[0].ip
   proxied = true
 
-  depends_on = [
-    kubernetes_manifest.cilium_gateway,
-    kubernetes_manifest.kronos_https_route
-  ]
+  depends_on = [module.manifests, helm_release.kube_prometheus_stack]
 }

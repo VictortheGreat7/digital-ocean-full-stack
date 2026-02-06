@@ -13,5 +13,5 @@ data "kubernetes_service_v1" "cilium_gateway" {
     namespace = "kube-system"
   }
 
-  depends_on = [kubernetes_manifest.cilium_gateway]
+  depends_on = [helm_release.kube_prometheus_stack]
 }

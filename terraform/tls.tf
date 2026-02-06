@@ -28,14 +28,14 @@ resource "helm_release" "cert_manager" {
       value = "512Mi"
     },
     {
-      name = "config.enableGatewayAPI"
+      name  = "config.enableGatewayAPI"
       value = "true"
     }
   ]
 
   timeout = 600
 
-  depends_on = [kubernetes_manifest.cilium_gateway]
+  depends_on = [module.doks]
 }
 
 resource "helm_release" "cert_manager_prod_issuer" {

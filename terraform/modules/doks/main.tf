@@ -28,14 +28,14 @@ resource "digitalocean_kubernetes_cluster" "module" {
   tags = [var.tag_name]
 }
 
-output name {
+output "name" {
   value       = digitalocean_kubernetes_cluster.module.name
   sensitive   = false
   description = "The name of the DigitalOcean Kubernetes cluster"
   depends_on  = [digitalocean_kubernetes_cluster.module]
 }
 
-output cluster_id {
+output "cluster_id" {
   value       = digitalocean_kubernetes_cluster.module.id
   sensitive   = true
   description = "The ID of the DigitalOcean Kubernetes cluster"
@@ -43,21 +43,21 @@ output cluster_id {
 }
 
 
-output urn {
+output "urn" {
   value       = digitalocean_kubernetes_cluster.module.urn
   sensitive   = true
   description = "The URN of the DigitalOcean Kubernetes cluster"
   depends_on  = [digitalocean_kubernetes_cluster.module]
 }
 
-output api_server_endpoint {
+output "api_server_endpoint" {
   value       = digitalocean_kubernetes_cluster.module.endpoint
   sensitive   = true
   description = "The API server endpoint of the DigitalOcean Kubernetes cluster"
   depends_on  = [digitalocean_kubernetes_cluster.module]
 }
 
-output kubeconfig {
+output "kubeconfig" {
   value       = digitalocean_kubernetes_cluster.module.kube_config[0]
   sensitive   = true
   description = "The kubeconfig of the DigitalOcean Kubernetes cluster"

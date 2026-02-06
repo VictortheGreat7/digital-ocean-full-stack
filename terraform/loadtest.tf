@@ -3,34 +3,32 @@ resource "helm_release" "k6_operator" {
   name             = "k6-operator"
   repository       = "https://grafana.github.io/helm-charts"
   chart            = "k6-operator"
-  namespace        = "default"
-  create_namespace = false
+  namespace        = "k6"
+  create_namespace = true
   atomic           = true
   cleanup_on_fail  = true
 
-  set = [
-    {
-      name  = "manager.resources.requests.cpu"
-      value = "50m"
-    },
-    {
-      name  = "manager.resources.requests.memory"
-      value = "128Mi"
-    },
-    {
-      name  = "manager.resources.limits.cpu"
-      value = "200m"
-    },
-    {
-      name  = "manager.resources.limits.memory"
-      value = "256Mi"
-    }
+  values = [
+    yamlencode({
+      manager = {
+        resources = {
+          requests = {
+            cpu    = "50m"
+            memory = "128Mi"
+          }
+          limits = {
+            cpu    = "200m"
+            memory = "256Mi"
+          }
+        }
+      }
+    })
   ]
 
   wait    = true
   timeout = 600
 
-  depends_on = [helm_release.kube_prometheus_stack, helm_release.alloy]
+  depends_on = [module.doks]
 }
 
 # ConfigMap with K6 test script
@@ -47,35 +45,11 @@ resource "kubernetes_config_map_v1" "k6_test_script" {
   depends_on = [helm_release.k6_operator]
 }
 
-resource "helm_release" "k6_test" {
-  name            = "k6-test"
-  chart           = "./charts/k6-test"
-  namespace       = helm_release.k6_operator.namespace
-  atomic          = true
-  cleanup_on_fail = true
-
-  values = [
-    yamlencode({
-      baseUrl             = "https://${var.subdomains[0]}.${var.domain}"
-      testType            = "spike"
-      configMapName       = kubernetes_config_map_v1.k6_test_script.metadata[0].name
-      prometheusNamespace = helm_release.kube_prometheus_stack.namespace
-    })
-  ]
-
-  depends_on = [
-    module.doks,
-    helm_release.k6_operator,
-    kubernetes_config_map_v1.k6_test_script,
-    helm_release.kube_prometheus_stack
-  ]
-}
-
 # Grafana Dashboard for K6 results
 resource "kubernetes_config_map_v1" "grafana_k6_dashboard" {
   metadata {
     name      = "grafana-k6-dashboard"
-    namespace = helm_release.kube_prometheus_stack.namespace
+    namespace = kubernetes_namespace_v1.kronos_monitoring.metadata[0].name
     labels = {
       grafana_dashboard = "1"
     }
@@ -137,5 +111,5 @@ resource "kubernetes_config_map_v1" "grafana_k6_dashboard" {
     })
   }
 
-  depends_on = [module.doks, helm_release.kube_prometheus_stack]
+  depends_on = [kubernetes_namespace_v1.kronos_monitoring]
 }

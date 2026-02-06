@@ -150,20 +150,31 @@ resource "kubernetes_horizontal_pod_autoscaler_v2" "kronos_backend_hpa" {
   }
 
   spec {
+    max_replicas = 10
+
     scale_target_ref {
-      kind = "Deployment"
-      name = kubernetes_deployment_v1.kronos_backend.metadata[0].name
+      kind        = "Deployment"
+      name        = kubernetes_deployment_v1.kronos_backend.metadata[0].name
       api_version = "apps/v1"
     }
 
-    max_replicas = 10
+    behavior {
+      scale_down {
+        stabilization_window_seconds = 300
+        policy {
+          period_seconds = 60
+          type           = "Pods"
+          value          = 1
+        }
+      }
+    }
 
     metric {
       type = "Resource"
       resource {
         name = "cpu"
         target {
-          type               = "Utilization"
+          type                = "Utilization"
           average_utilization = 80
         }
       }
@@ -173,7 +184,7 @@ resource "kubernetes_horizontal_pod_autoscaler_v2" "kronos_backend_hpa" {
       resource {
         name = "memory"
         target {
-          type               = "Utilization"
+          type                = "Utilization"
           average_utilization = 80
         }
       }

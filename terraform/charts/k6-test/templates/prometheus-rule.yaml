@@ -4,7 +4,7 @@ metadata:
   name: k6-alerts
   namespace: {{ .Release.Namespace }}
   labels:
-    prometheus: kube-prometheus
+    release: kube-prometheus-stack
 spec:
   groups:
     - name: k6.critical

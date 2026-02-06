@@ -2,9 +2,9 @@ output "doks_connect" {
   value = "doctl kubernetes cluster kubeconfig save ${module.doks.name}"
 }
 
-output doks_cluster_id {
-  value       = module.doks.cluster_id
-  sensitive   = true
+output "doks_cluster_id" {
+  value     = module.doks.cluster_id
+  sensitive = true
 }
 
 # output "ingress_ip" {
