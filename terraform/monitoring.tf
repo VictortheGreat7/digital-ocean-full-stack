@@ -158,15 +158,6 @@ resource "helm_release" "kube_prometheus_stack" {
                 value = "/monitoring/grafana"
               }
             }]
-            filters = [{
-              type = "URLRewrite"
-              urlRewrite = {
-                path = {
-                  type               = "ReplacePrefixMatch"
-                  replacePrefixMatch = "/"
-                }
-              }
-            }]
           }
         }
       }
