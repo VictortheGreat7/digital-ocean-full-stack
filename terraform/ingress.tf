@@ -120,7 +120,7 @@ resource "kubernetes_manifest" "kronos_https_route" {
           matches = [
             {
               path = {
-                type  = "Exact"
+                type  = "PathPrefix"
                 value = "/"
               }
             }

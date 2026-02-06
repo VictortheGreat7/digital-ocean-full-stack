@@ -35,8 +35,8 @@ resource "helm_release" "kube_prometheus_stack" {
           }
           enableRemoteWriteReceiver = true
           enableFeatures = ["native-histograms", "exemplar-storage"]
-          # externalUrl = "https://${var.subdomains[0]}.${var.domain}/monitoring/prometheus/"
-          # routePrefix = "/"
+          externalUrl = "https://${var.subdomains[0]}.${var.domain}/monitoring/prometheus/"
+          routePrefix = "/"
         }
         route = {
           main = {
@@ -90,8 +90,8 @@ resource "helm_release" "kube_prometheus_stack" {
               }
             }
           }
-          # externalUrl = "https://${var.subdomains[0]}.${var.domain}/monitoring/alertmanager/"
-          # routePrefix = "/"
+          externalUrl = "https://${var.subdomains[0]}.${var.domain}/monitoring/alertmanager/"
+          routePrefix = "/"
         }
         route = {
           main = {
@@ -137,14 +137,12 @@ resource "helm_release" "kube_prometheus_stack" {
           }
         }
         adminPassword = "admin"
-        # grafana = {
-        #   ini = {
-        #     server = {
-        #       root_url            = "https://${var.subdomains[0]}.${var.domain}/monitoring/grafana/"
-        #       serve_from_sub_path = true
-        #     }
-        #   }
-        # }
+        "grafana.ini" = {
+          server = {
+            root_url            = "https://${var.subdomains[0]}.${var.domain}/monitoring/grafana/"
+            serve_from_sub_path = true
+          }
+        }
         route = {
           main = {
             enabled = true
