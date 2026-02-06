@@ -12,6 +12,10 @@ terraform {
       source  = "hashicorp/helm"
       version = ">= 3.1.1"
     }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = ">= 2.1.3"
+    }
     cloudflare = {
       source  = "cloudflare/cloudflare"
       version = ">= 5.15.0"
