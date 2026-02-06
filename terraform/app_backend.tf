@@ -156,7 +156,7 @@ resource "kubernetes_horizontal_pod_autoscaler_v2" "kronos_backend_hpa" {
       api_version = "apps/v1"
     }
 
-    max_replicas = 5
+    max_replicas = 10
 
     metric {
       type = "Resource"
@@ -164,7 +164,7 @@ resource "kubernetes_horizontal_pod_autoscaler_v2" "kronos_backend_hpa" {
         name = "cpu"
         target {
           type               = "Utilization"
-          average_utilization = 100
+          average_utilization = 80
         }
       }
     }
@@ -174,7 +174,7 @@ resource "kubernetes_horizontal_pod_autoscaler_v2" "kronos_backend_hpa" {
         name = "memory"
         target {
           type               = "Utilization"
-          average_utilization = 100
+          average_utilization = 80
         }
       }
     }
