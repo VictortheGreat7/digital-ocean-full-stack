@@ -7,243 +7,169 @@ resource "helm_release" "kube_prometheus_stack" {
   atomic           = true
   cleanup_on_fail  = true
 
-  set = [
-    # Prometheus settings
-    {
-      name  = "prometheus.prometheusSpec.resources.requests.cpu"
-      value = "60m"
-    },
-    {
-      name  = "prometheus.prometheusSpec.resources.requests.memory"
-      value = "500Mi"
-    },
-    {
-      name  = "prometheus.prometheusSpec.resources.limits.cpu"
-      value = "70m"
-    },
-    {
-      name  = "prometheus.prometheusSpec.resources.limits.memory"
-      value = "600Mi"
-    },
-    {
-      name  = "prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.storageClassName"
-      value = "do-block-storage"
-    },
-    {
-      name  = "prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage"
-      value = "10Gi"
-    },
-    {
-      name  = "prometheus.prometheusSpec.enableRemoteWriteReceiver"
-      value = "true"
-    },
-    {
-      name  = "prometheus.prometheusSpec.enableFeatures[0]"
-      value = "native-histograms"
-    },
-    {
-      name  = "prometheus.prometheusSpec.enableFeatures[1]"
-      value = "exemplar-storage"
-    },
-    # Prometheus HTTPRouting
-    {
-      name  = "prometheus.route.main.enabled"
-      value = "true"
-    },
-    {
-      name  = "prometheus.route.main.parentRefs[0].name"
-      value = kubernetes_manifest.cilium_gateway.manifest["metadata"]["name"]
-    },
-    {
-      name = "prometheus.route.main.parentRefs[0].sectionName"
-      value = "https"
-    },
-    {
-      name = "prometheus.route.main.hostnames[0]"
-      value = "${var.subdomains[0]}.${var.domain}"
-    },
-    {
-      name = "prometheus.route.main.matches[0].path.type"
-      value = "PathPrefix"
-    },
-    {
-      name = "prometheus.route.main.matches[0].path.value"
-      value = "/monitoring/prometheus"
-    },
-    {
-      name = "prometheus.route.main.filters[0].type"
-      value = "URLRewrite"
-    },
-    {
-      name = "prometheus.route.main.filters[0].urlRewrite.path.type"
-      value = "ReplacePrefixMatch"
-    },
-    {
-      name = "prometheus.route.main.filters[0].urlRewrite.path.replacePrefixMatch"
-      value = "/"
-    },
-    {
-      name  = "prometheus.prometheusSpec.externalUrl"
-      value = "https://${var.subdomains[0]}.${var.domain}/monitoring/prometheus/"
-    },
-    {
-      name  = "prometheus.prometheusSpec.routePrefix"
-      value = "/"
-    },
-
-    # Alertmanager settings
-    {
-      name  = "alertmanager.enabled"
-      value = "true"
-    },
-    {
-      name  = "alertmanager.alertmanagerSpec.resources.requests.cpu"
-      value = "1m"
-    },
-    {
-      name  = "alertmanager.alertmanagerSpec.resources.requests.memory"
-      value = "50Mi"
-    },
-    {
-      name  = "alertmanager.alertmanagerSpec.resources.limits.cpu"
-      value = "2m"
-    },
-    {
-      name  = "alertmanager.alertmanagerSpec.resources.limits.memory"
-      value = "60Mi"
-    },
-    {
-      name  = "alertmanager.alertmanagerSpec.storage.volumeClaimTemplate.spec.storageClassName"
-      value = "do-block-storage"
-    },
-    {
-      name  = "alertmanager.alertmanagerSpec.storage.volumeClaimTemplate.spec.resources.requests.storage"
-      value = "10Gi"
-    },
-    # Alertmanager ingress
-    {
-      name  = "alertmanager.route.main.enabled"
-      value = "true"
-    },
-    {
-      name  = "alertmanager.route.main.parentRefs[0].name"
-      value = kubernetes_manifest.cilium_gateway.manifest["metadata"]["name"]
-    },
-    {
-      name = "alertmanager.route.main.parentRefs[0].sectionName"
-      value = "https"
-    },
-    {
-      name = "alertmanager.route.main.hostnames[0]"
-      value = "${var.subdomains[0]}.${var.domain}"
-    },
-    {
-      name = "alertmanager.route.main.matches[0].path.type"
-      value = "PathPrefix"
-    },
-    {
-      name = "alertmanager.route.main.matches[0].path.value"
-      value = "/monitoring/alertmanager"
-    },
-    {
-      name = "alertmanager.route.main.filters[0].type"
-      value = "URLRewrite"
-    },
-    {
-      name = "alertmanager.route.main.filters[0].urlRewrite.path.type"
-      value = "ReplacePrefixMatch"
-    },
-    {
-      name = "alertmanager.route.main.filters[0].urlRewrite.path.replacePrefixMatch"
-      value = "/"
-    },
-    {
-      name  = "alertmanager.alertmanagerSpec.externalUrl"
-      value = "https://${var.subdomains[0]}.${var.domain}/monitoring/alertmanager/"
-    },
-    {
-      name  = "alertmanager.alertmanagerSpec.routePrefix"
-      value = "/"
-    },
-
-    # Grafana settings
-    {
-      name  = "grafana.persistence.enabled"
-      value = "true"
-    },
-    {
-      name  = "grafana.resources.requests.cpu"
-      value = "20m"
-    },
-    {
-      name  = "grafana.resources.requests.memory"
-      value = "256Mi"
-    },
-    {
-      name  = "grafana.resources.limits.cpu"
-      value = "30m"
-    },
-    {
-      name  = "grafana.resources.limits.memory"
-      value = "320Mi"
-    },
-    {
-      name  = "grafana.persistence.storageClassName"
-      value = "do-block-storage"
-    },
-    {
-      name  = "grafana.persistence.size"
-      value = "10Gi"
-    },
-    {
-      name  = "grafana.adminPassword"
-      value = "admin"
-    },
-    # Grafana ingress
-    {
-      name  = "grafana.route.main.enabled"
-      value = "true"
-    },
-    {
-      name  = "grafana.route.main.parentRefs[0].name"
-      value = kubernetes_manifest.cilium_gateway.manifest["metadata"]["name"]
-    },
-    {
-      name = "grafana.route.main.parentRefs[0].sectionName"
-      value = "https"
-    },
-    {
-      name = "grafana.route.main.hostnames[0]"
-      value = "${var.subdomains[0]}.${var.domain}"
-    },
-    {
-      name = "grafana.route.main.matches[0].path.type"
-      value = "PathPrefix"
-    },
-    {
-      name = "grafana.route.main.matches[0].path.value"
-      value = "/monitoring/grafana"
-    },
-    {
-      name = "grafana.route.main.filters[0].type"
-      value = "URLRewrite"
-    },
-    {
-      name = "grafana.route.main.filters[0].urlRewrite.path.type"
-      value = "ReplacePrefixMatch"
-    },
-    {
-      name = "grafana.route.main.filters[0].urlRewrite.path.replacePrefixMatch"
-      value = "/"
-    },
-    {
-      name  = "grafana.grafana.ini.server.root_url"
-      value = "https://${var.subdomains[0]}.${var.domain}/monitoring/grafana/"
-    },
-    {
-      name  = "grafana.grafana.ini.server.serve_from_sub_path"
-      value = "true"
-    }
+  values = [
+    yamlencode({
+      prometheus = {
+        prometheusSpec = {
+          resources = {
+            requests = {
+              cpu    = "60m"
+              memory = "500Mi"
+            }
+            limits = {
+              cpu    = "70m"
+              memory = "600Mi"
+            }
+          }
+          storageSpec = {
+            volumeClaimTemplate = {
+              spec = {
+                storageClassName = "do-block-storage"
+                resources = {
+                  requests = {
+                    storage = "10Gi"
+                  }
+                }
+              }
+            }
+          }
+          enableRemoteWriteReceiver = true
+          enableFeatures = ["native-histograms", "exemplar-storage"]
+          # externalUrl = "https://${var.subdomains[0]}.${var.domain}/monitoring/prometheus/"
+          # routePrefix = "/"
+        }
+        route = {
+          main = {
+            enabled = true
+            parentRefs = [{
+              name        = kubernetes_manifest.cilium_gateway.manifest["metadata"]["name"]
+              sectionName = "https"
+            }]
+            hostnames = ["${var.subdomains[0]}.${var.domain}"]
+            matches = [{
+              path = {
+                type  = "PathPrefix"
+                value = "/monitoring/prometheus"
+              }
+            }]
+            filters = [{
+              type = "URLRewrite"
+              urlRewrite = {
+                path = {
+                  type                 = "ReplacePrefixMatch"
+                  replacePrefixMatch   = "/"
+                }
+              }
+            }]
+          }
+        }
+      }
+      alertmanager = {
+        enabled = true
+        alertmanagerSpec = {
+          resources = {
+            requests = {
+              cpu    = "1m"
+              memory = "50Mi"
+            }
+            limits = {
+              cpu    = "2m"
+              memory = "60Mi"
+            }
+          }
+          storage = {
+            volumeClaimTemplate = {
+              spec = {
+                storageClassName = "do-block-storage"
+                resources = {
+                  requests = {
+                    storage = "10Gi"
+                  }
+                }
+              }
+            }
+          }
+          # externalUrl = "https://${var.subdomains[0]}.${var.domain}/monitoring/alertmanager/"
+          # routePrefix = "/"
+        }
+        route = {
+          main = {
+            enabled = true
+            parentRefs = [{
+              name        = kubernetes_manifest.cilium_gateway.manifest["metadata"]["name"]
+              sectionName = "https"
+            }]
+            hostnames = ["${var.subdomains[0]}.${var.domain}"]
+            matches = [{
+              path = {
+                type  = "PathPrefix"
+                value = "/monitoring/alertmanager"
+              }
+            }]
+            filters = [{
+              type = "URLRewrite"
+              urlRewrite = {
+                path = {
+                  type               = "ReplacePrefixMatch"
+                  replacePrefixMatch = "/"
+                }
+              }
+            }]
+          }
+        }
+      }
+      grafana = {
+        persistence = {
+          enabled          = true
+          storageClassName = "do-block-storage"
+          size             = "10Gi"
+        }
+        resources = {
+          requests = {
+            cpu    = "20m"
+            memory = "256Mi"
+          }
+          limits = {
+            cpu    = "30m"
+            memory = "320Mi"
+          }
+        }
+        adminPassword = "admin"
+        # grafana = {
+        #   ini = {
+        #     server = {
+        #       root_url            = "https://${var.subdomains[0]}.${var.domain}/monitoring/grafana/"
+        #       serve_from_sub_path = true
+        #     }
+        #   }
+        # }
+        route = {
+          main = {
+            enabled = true
+            parentRefs = [{
+              name        = kubernetes_manifest.cilium_gateway.manifest["metadata"]["name"]
+              sectionName = "https"
+            }]
+            hostnames = ["${var.subdomains[0]}.${var.domain}"]
+            matches = [{
+              path = {
+                type  = "PathPrefix"
+                value = "/monitoring/grafana"
+              }
+            }]
+            filters = [{
+              type = "URLRewrite"
+              urlRewrite = {
+                path = {
+                  type               = "ReplacePrefixMatch"
+                  replacePrefixMatch = "/"
+                }
+              }
+            }]
+          }
+        }
+      }
+    })
   ]
 
   wait    = true
@@ -254,82 +180,65 @@ resource "helm_release" "kube_prometheus_stack" {
 
 resource "helm_release" "tempo" {
   name             = "tempo"
-  repository       = "https://grafana.github.io/helm-charts"
+  repository       = "https://grafana-community.github.io/helm-charts"
   chart            = "tempo"
   namespace        = helm_release.kube_prometheus_stack.namespace
   create_namespace = false
   atomic           = true
   cleanup_on_fail  = true
 
-  set = [
-    {
-      name  = "tempo.resources.requests.cpu"
-      value = "250m"
-    },
-    {
-      name  = "tempo.resources.requests.memory"
-      value = "1Gi"
-    },
-    {
-      name  = "tempo.resources.limits.cpu"
-      value = "300m"
-    },
-    {
-      name  = "tempo.resources.limits.memory"
-      value = "1.5Gi"
-    },
-    {
-      name  = "tempo.memBallastSizeMbs"
-      value = "256"
-    },
-    {
-      name  = "tempo.storage.trace.backend"
-      value = "local"
-    },
-    {
-      name  = "tempo.storage.trace.local.path"
-      value = "/var/tempo/traces"
-    },
-    {
-      name  = "tempo.receivers.otlp.protocols.grpc.endpoint"
-      value = "0.0.0.0:4317"
-    },
-    {
-      name  = "tempo.receivers.otlp.protocols.http.endpoint"
-      value = "0.0.0.0:4318"
-    },
-    {
-      name  = "tempo.metricsGenerator.enabled"
-      value = "true"
-    },
-    {
-      name  = "tempo.metricsGenerator.remoteWriteUrl"
-      value = "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
-    },
-    {
-      name  = "tempo.overrides.defaults.metrics_generator.processors[0]"
-      value = "service-graphs"
-    },
-    {
-      name  = "tempo.overrides.defaults.metrics_generator.processors[1]"
-      value = "span-metrics"
-    },
-    {
-      name  = "tempo.overrides.defaults.metrics_generator.processors[2]"
-      value = "local-blocks"
-    },
-    {
-      name  = "persistence.enabled"
-      value = "true"
-    },
-    {
-      name  = "persistence.storageClassName"
-      value = "do-block-storage"
-    },
-    {
-      name  = "persistence.size"
-      value = "10Gi"
-    }
+  values = [
+    yamlencode({
+      tempo = {
+        resources = {
+          requests = {
+            cpu    = "250m"
+            memory = "1Gi"
+          }
+          limits = {
+            cpu    = "300m"
+            memory = "1.5Gi"
+          }
+        }
+        memBallastSizeMbs = "256"
+        storage = {
+          trace = {
+            backend = "local"
+            local = {
+              path = "/var/tempo/traces"
+            }
+          }
+        }
+        receivers = {
+          otlp = {
+            protocols = {
+              grpc = {
+                endpoint = "0.0.0.0:4317"
+              }
+              http = {
+                endpoint = "0.0.0.0:4318"
+              }
+            }
+          }
+        }
+        metricsGenerator = {
+          enabled      = true
+          remoteWriteUrl = "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
+        }
+        overrides = {
+          defaults = {
+            metrics_generator = {
+              processors = ["service-graphs", "span-metrics", "local-blocks"]
+            }
+          }
+        }
+      }
+      persistence = {
+        enabled          = true
+        storageClassName = "do-block-storage"
+        size             = "10Gi"
+      }
+    })
   ]
 
   depends_on = [helm_release.kube_prometheus_stack, helm_release.cert_manager_prod_issuer]
@@ -630,91 +539,66 @@ resource "helm_release" "datadog" {
   atomic           = true
   cleanup_on_fail  = true
 
-  set = [
-    {
-      name = "datadog.apiKey"
-      value = var.datadog_api_key
-    },
-    {
-      name = "datadog.appKey"
-      value = var.datadog_app_key
-    },
-    {
-      name  = "datadog.site"
-      value = var.datadog_site
-    },
-    {
-      name  = "datadog.clusterName"
-      value = "${module.doks.name}"
-    },
-    {
-      name = "datadog.logs.enabled"
-      value = "true"
-    },
-    {
-      name = "datadog.logs.containerCollectAll"
-      value = "true"
-    },
-    {
-      name = "datadog.logs.autoMultiLineDetection"
-      value = "true"
-    },
-    {
-      name = "datadog.prometheusScrape.enabled"
-      value = "true"
-    },
-    {
-      name = "datadog.prometheusScrape.serviceEndpoints"
-      value = "true"
-    },
-    {
-      name  = "datadog.confd.cilium\\.yaml"
-      value = <<-EOT
-        ad_identifiers:
-          - cilium-agent
-        init_config:
-        instances:
-          - prometheus_url: http://%%host%%:9090/metrics
-            tags:
-              - "component:cilium-agent"
-      EOT
-    },
-    {
-      name  = "operator.apiKey"
-      value = var.datadog_api_key
-    },
-    {
-      name  = "operator.appKey"
-      value = var.datadog_app_key
-    },
-    {
-      name  = "operator.datadogCRDs.crds.datadogAgents"
-      value = "true"
-    },
-    {
-      name  = "operator.datadogCRDs.crds.datadogAgentInternals"
-      value = "true"
-    },
-    {
-      name  = "operator.datadogCRDs.crds.datadogDashboards"
-      value = "true"
-    },
-    {
-      name  = "operator.datadogAgent.enabled"
-      value = "true"
-    },
-    {
-      name  = "operator.datadogAgentInternal.enabled"
-      value = "true"
-    },
-    {
-      name  = "operator.datadogDashboard.enabled"
-      value = "true"
-    },
-    {
-      name  = "operator.watchNamespaces"
-      value = ""
-    }
+  values = [
+    yamlencode({
+      datadog = {
+        apiKey = var.datadog_api_key
+        appKey = var.datadog_app_key
+        site   = var.datadog_site
+
+        clusterName = module.doks.name
+
+        logs = {
+          enabled             = true
+          containerCollectAll = true
+          autoMultiLineDetection = true
+        }
+
+        prometheusScrape = {
+          enabled          = true
+          serviceEndpoints = true
+        }
+
+        confd = {
+          "cilium.yaml" = <<-EOT
+            ad_identifiers:
+              - cilium-agent
+            init_config:
+            instances:
+              - prometheus_url: http://%%host%%:9090/metrics
+                tags:
+                  - "component:cilium-agent"
+          EOT
+        }
+      }
+
+      operator = {
+        apiKey = var.datadog_api_key
+        appKey = var.datadog_app_key
+
+        datadogCRDs = {
+          crds = {
+            datadogAgents        = true
+            datadogAgentInternals = true
+            datadogDashboards    = true
+          }
+        }
+
+        datadogAgent = {
+          enabled = true
+        }
+
+        datadogAgentInternal = {
+          enabled = true
+        }
+
+        datadogDashboard = {
+          enabled = true
+        }
+
+        watchNamespaces = ""
+      }
+    })
   ]
 
   depends_on = [helm_release.alloy]

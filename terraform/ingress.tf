@@ -71,22 +71,11 @@ resource "kubernetes_manifest" "kronos_https_route" {
           matches = [
             {
               path = {
-                type  = "PathPrefix"
+                type  = "Exact"
                 value = "/"
               }
             }
           ]
-          # filters = [
-          #   {
-          #     type = "URLRewrite"
-          #     urlRewrite = {
-          #       path = {
-          #         type  = "ReplacePrefixMatch"
-          #         replacePrefixMatch = "/"
-          #       }
-          #     }
-          #   }
-          # ]
           backendRefs = [
             {
               name = kubernetes_service_v1.kronos_frontend.metadata[0].name
