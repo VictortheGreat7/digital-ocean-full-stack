@@ -62,6 +62,7 @@ resource "kubernetes_manifest" "kronos_http_route" {
       parentRefs = [
         {
           name = kubernetes_manifest.cilium_gateway.manifest["metadata"]["name"]
+          namespace = kubernetes_manifest.cilium_gateway.manifest["metadata"]["namespace"]
           sectionName = "http"
         }
       ]
@@ -109,6 +110,7 @@ resource "kubernetes_manifest" "kronos_https_route" {
       parentRefs = [
         {
           name = kubernetes_manifest.cilium_gateway.manifest["metadata"]["name"]
+          namespace = kubernetes_manifest.cilium_gateway.manifest["metadata"]["namespace"]
           sectionName = "https"
         }
       ]

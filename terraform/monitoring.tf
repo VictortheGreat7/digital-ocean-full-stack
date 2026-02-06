@@ -43,6 +43,7 @@ resource "helm_release" "kube_prometheus_stack" {
             enabled = true
             parentRefs = [{
               name        = kubernetes_manifest.cilium_gateway.manifest["metadata"]["name"]
+              namespace   = kubernetes_manifest.cilium_gateway.manifest["metadata"]["namespace"]
               sectionName = "https"
             }]
             hostnames = ["${var.subdomains[0]}.${var.domain}"]
@@ -97,6 +98,7 @@ resource "helm_release" "kube_prometheus_stack" {
             enabled = true
             parentRefs = [{
               name        = kubernetes_manifest.cilium_gateway.manifest["metadata"]["name"]
+              namespace   = kubernetes_manifest.cilium_gateway.manifest["metadata"]["namespace"]
               sectionName = "https"
             }]
             hostnames = ["${var.subdomains[0]}.${var.domain}"]
@@ -148,6 +150,7 @@ resource "helm_release" "kube_prometheus_stack" {
             enabled = true
             parentRefs = [{
               name        = kubernetes_manifest.cilium_gateway.manifest["metadata"]["name"]
+              namespace   = kubernetes_manifest.cilium_gateway.manifest["metadata"]["namespace"]
               sectionName = "https"
             }]
             hostnames = ["${var.subdomains[0]}.${var.domain}"]
