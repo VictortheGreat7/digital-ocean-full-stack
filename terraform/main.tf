@@ -46,11 +46,3 @@ resource "kubernetes_namespace_v1" "kronos_monitoring" {
 
   depends_on = [digitalocean_kubernetes_cluster.kronos]
 }
-
-resource "kubernetes_namespace_v1" "kronos_test" {
-  metadata {
-    name = "chaos-testing"
-  }
-
-  depends_on = [digitalocean_kubernetes_cluster.kronos]
-}
