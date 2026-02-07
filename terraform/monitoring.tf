@@ -126,16 +126,16 @@ resource "helm_release" "kube_prometheus_stack" {
           storageClassName = "do-block-storage"
           size             = "10Gi"
         }
-        resources = {
-          requests = {
-            cpu    = "20m"
-            memory = "256Mi"
-          }
-          limits = {
-            cpu    = "30m"
-            memory = "320Mi"
-          }
-        }
+        # resources = {
+        #   limits = {
+        #     cpu    = "30m"
+        #     memory = "320Mi"
+        #   }
+        #   requests = {
+        #     cpu    = "20m"
+        #     memory = "256Mi"
+        #   }
+        # }
         autoscaling = {
           enabled      = true
           maxReplicas  = 5
@@ -178,6 +178,25 @@ resource "helm_release" "kube_prometheus_stack" {
           }
         }
       }
+
+      set = [
+        {
+          name  = "grafana.resources.requests.cpu"
+          value = "20m"
+        },
+        {
+          name  = "grafana.resources.requests.memory"
+          value = "256Mi"
+        },
+        {
+          name  = "grafana.resources.limits.cpu"
+          value = "30m"
+        },
+        {
+          name  = "grafana.resources.limits.memory"
+          value = "320Mi"
+        }
+      ]
     })
   ]
 
