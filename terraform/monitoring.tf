@@ -121,43 +121,46 @@ resource "helm_release" "kube_prometheus_stack" {
         }
       }
       grafana = {
-        persistence = {
-          enabled          = true
-          storageClassName = "do-block-storage"
-          size             = "10Gi"
-        }
-        # resources = {
-        #   limits = {
-        #     cpu    = "30m"
-        #     memory = "320Mi"
-        #   }
-        #   requests = {
-        #     cpu    = "20m"
-        #     memory = "256Mi"
-        #   }
-        # }
-        autoscaling = {
-          enabled      = true
-          maxReplicas  = 5
-          targetCPU    = 80
-          targetMemory = 80
-          behavior = {
-            scaleDown = {
-              stabilizationWindowSeconds = 300
-              selectPolicy               = "Min"
-              policies = [{
-                periodSeconds = 60
-                type          = "Pods"
-                value         = 1
-              }]
+        enabled = true
+        grafanaSpec = {
+          persistence = {
+            enabled          = true
+            storageClassName = "do-block-storage"
+            size             = "10Gi"
+          }
+          resources = {
+            limits = {
+              cpu    = "30m"
+              memory = "320Mi"
+            }
+            requests = {
+              cpu    = "20m"
+              memory = "256Mi"
             }
           }
-        }
-        adminPassword = "admin"
-        "grafana.ini" = {
-          server = {
-            root_url            = "https://${var.subdomains[0]}.${var.domain}/monitoring/grafana/"
-            serve_from_sub_path = true
+          autoscaling = {
+            enabled      = true
+            maxReplicas  = 5
+            targetCPU    = 80
+            targetMemory = 80
+            behavior = {
+              scaleDown = {
+                stabilizationWindowSeconds = 300
+                selectPolicy               = "Min"
+                policies = [{
+                  periodSeconds = 60
+                  type          = "Pods"
+                  value         = 1
+                }]
+              }
+            }
+          }
+          adminPassword = "admin"
+          "grafana.ini" = {
+            server = {
+              root_url            = "https://${var.subdomains[0]}.${var.domain}/monitoring/grafana/"
+              serve_from_sub_path = true
+            }
           }
         }
         route = {
