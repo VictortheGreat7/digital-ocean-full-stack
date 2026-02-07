@@ -136,6 +136,23 @@ resource "helm_release" "kube_prometheus_stack" {
             memory = "320Mi"
           }
         }
+        autoscaling = {
+          enabled                           = true
+          maxReplicas                       = 5
+          targetCPU    = 80
+          targetMemory = 80
+          behavior = {
+            scaleDown = {
+              stabilizationWindowSeconds = 300
+              selectPolicy = "Min"
+              policies = [{
+                periodSeconds = 60
+                type          = "Pod"
+                value         = 1
+              }]
+            }
+          }
+        }
         adminPassword = "admin"
         "grafana.ini" = {
           server = {
