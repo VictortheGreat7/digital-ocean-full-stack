@@ -24,31 +24,31 @@ provider "digitalocean" {
 }
 
 provider "kubernetes" {
-  host  = module.doks.api_server_endpoint
-  token = module.doks.kubeconfig.token
+  host  = digitalocean_kubernetes_cluster.kronos.endpoint
+  token = digitalocean_kubernetes_cluster.kronos.kube_config[0].token
   client_certificate = base64decode(
-    module.doks.kubeconfig.client_certificate
+    digitalocean_kubernetes_cluster.kronos.kube_config[0].client_certificate
   )
   client_key = base64decode(
-    module.doks.kubeconfig.client_key
+    digitalocean_kubernetes_cluster.kronos.kube_config[0].client_key
   )
   cluster_ca_certificate = base64decode(
-    module.doks.kubeconfig.cluster_ca_certificate
+    digitalocean_kubernetes_cluster.kronos.kube_config[0].cluster_ca_certificate
   )
 }
 
 provider "helm" {
   kubernetes = {
-    host  = module.doks.api_server_endpoint
-    token = module.doks.kubeconfig.token
+    host  = digitalocean_kubernetes_cluster.kronos.endpoint
+    token = digitalocean_kubernetes_cluster.kronos.kube_config[0].token
     client_certificate = base64decode(
-      module.doks.kubeconfig.client_certificate
+      digitalocean_kubernetes_cluster.kronos.kube_config[0].client_certificate
     )
     client_key = base64decode(
-      module.doks.kubeconfig.client_key
+      digitalocean_kubernetes_cluster.kronos.kube_config[0].client_key
     )
     cluster_ca_certificate = base64decode(
-      module.doks.kubeconfig.cluster_ca_certificate
+      digitalocean_kubernetes_cluster.kronos.kube_config[0].cluster_ca_certificate
     )
   }
 }

@@ -6,6 +6,8 @@ resource "digitalocean_vpc" "kronos" {
 
 resource "digitalocean_tag" "kronos" {
   name = "kronos"
+
+  depends_on = [random_pet.kronos]
 }
 
 resource "digitalocean_firewall" "kronos" {

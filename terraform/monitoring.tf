@@ -167,7 +167,7 @@ resource "helm_release" "kube_prometheus_stack" {
   wait    = true
   timeout = 600
 
-  depends_on = [module.manifests, helm_release.cert_manager_prod_issuer]
+  depends_on = [kubernetes_manifest.cilium_gateway, helm_release.cert_manager_prod_issuer]
 }
 
 resource "helm_release" "tempo" {
@@ -538,7 +538,7 @@ resource "helm_release" "datadog" {
         appKey = var.datadog_app_key
         site   = var.datadog_site
 
-        clusterName = module.doks.name
+        clusterName = digitalocean_kubernetes_cluster.kronos.name
 
         logs = {
           enabled                = true

@@ -1,9 +1,9 @@
 output "doks_connect" {
-  value = "doctl kubernetes cluster kubeconfig save ${module.doks.name}"
+  value = "doctl kubernetes cluster kubeconfig save ${digitalocean_kubernetes_cluster.kronos.name}"
 }
 
 output "doks_cluster_id" {
-  value     = module.doks.cluster_id
+  value     = digitalocean_kubernetes_cluster.kronos.id
   sensitive = true
 }
 

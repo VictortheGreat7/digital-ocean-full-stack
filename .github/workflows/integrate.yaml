@@ -165,6 +165,8 @@ jobs:
         env:
           TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
         run: |
+          set -e
+
           mkdir -p ${{ github.workspace }}/.terraform.d/plugin-cache
           echo "plugin_cache_dir = \"${{ github.workspace }}/.terraform.d/plugin-cache\"" > ~/.terraformrc
 
@@ -181,8 +183,14 @@ jobs:
           terraform init
           terraform providers
           terraform validate
-          
-          terraform apply --auto-approve
+
+          DOKS_ID="$(terraform output -raw doks_cluster_id 2>/dev/null || true)"
+          if [ -n "$DOKS_ID" ]; then
+            echo "DOKS cluster exists; applying changes to existing infrastructure"
+            terraform apply -auto-approve
+          else
+            echo "DOKS cluster does not exist; run build.yaml"
+          fi
         working-directory: ./terraform
       - name: Commit Terraform Lock File
         uses: stefanzweifel/git-auto-commit-action@v5

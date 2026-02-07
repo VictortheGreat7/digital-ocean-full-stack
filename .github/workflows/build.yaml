@@ -156,7 +156,7 @@ jobs:
           key: terraform-plugin-cache-${{ runner.os }}-${{ hashFiles('terraform/.terraform.lock.hcl') }}
           restore-keys: |
             terraform-plugin-cache-${{ runner.os }}-
-      - name: Spin up Kubernetes Cluster and Deploy Application with Terraform
+      - name: Spin up Kubernetes Cluster and Create Namespaces with Terraform
         env:
           TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
         run: |
@@ -176,7 +176,7 @@ jobs:
           }
           EOF
 
-          terraform apply -target=module.doks --auto-approve
+          terraform apply -target=helm_release.k6_operator --auto-approve
 
           DOKS_ID=$(terraform output -raw doks_cluster_id)
           doctl kubernetes 1-click install $DOKS_ID --1-clicks metrics-server
@@ -201,7 +201,7 @@ jobs:
           }
           EOF
 
-          terraform apply -target=helm_release.k6_operator --auto-approve
+          terraform apply --auto-approve
 
           terraform apply --auto-approve
         working-directory: ./terraform

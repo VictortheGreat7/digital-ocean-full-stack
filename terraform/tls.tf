@@ -35,7 +35,7 @@ resource "helm_release" "cert_manager" {
 
   timeout = 600
 
-  depends_on = [module.doks]
+  depends_on = [digitalocean_kubernetes_cluster.kronos]
 }
 
 resource "helm_release" "cert_manager_prod_issuer" {

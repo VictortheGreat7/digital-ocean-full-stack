@@ -161,7 +161,7 @@ resource "kubernetes_horizontal_pod_autoscaler_v2" "kronos_backend_hpa" {
     behavior {
       scale_down {
         stabilization_window_seconds = 300
-        select_policy = "Min"
+        select_policy                = "Min"
         policy {
           period_seconds = 60
           type           = "Pods"
