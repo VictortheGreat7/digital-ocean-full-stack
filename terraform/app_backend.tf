@@ -113,7 +113,8 @@ resource "kubernetes_deployment_v1" "kronos_backend" {
   }
 
   depends_on = [
-    kubernetes_namespace_v1.kronos
+    kubernetes_namespace_v1.kronos,
+    kubernetes_service_v1.kronos_db
   ]
 }
 

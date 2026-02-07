@@ -156,7 +156,7 @@ jobs:
           key: terraform-plugin-cache-${{ runner.os }}-${{ hashFiles('terraform/.terraform.lock.hcl') }}
           restore-keys: |
             terraform-plugin-cache-${{ runner.os }}-
-      - name: Spin up Kubernetes Cluster and Create Namespaces with Terraform
+      - name: Spin up Kubernetes Cluster and Deploy Application with Terraform
         env:
           TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
         run: |
