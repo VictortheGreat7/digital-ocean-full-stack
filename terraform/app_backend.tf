@@ -150,6 +150,7 @@ resource "kubernetes_horizontal_pod_autoscaler_v2" "kronos_backend_hpa" {
   }
 
   spec {
+    min_replicas = 3
     max_replicas = 10
 
     scale_target_ref {

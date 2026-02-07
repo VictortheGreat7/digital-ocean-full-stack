@@ -137,14 +137,14 @@ resource "helm_release" "kube_prometheus_stack" {
           }
         }
         autoscaling = {
-          enabled                           = true
-          maxReplicas                       = 5
+          enabled      = true
+          maxReplicas  = 5
           targetCPU    = 80
           targetMemory = 80
           behavior = {
             scaleDown = {
               stabilizationWindowSeconds = 300
-              selectPolicy = "Min"
+              selectPolicy               = "Min"
               policies = [{
                 periodSeconds = 60
                 type          = "Pods"
