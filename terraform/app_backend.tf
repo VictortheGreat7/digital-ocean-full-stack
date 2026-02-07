@@ -11,7 +11,7 @@ resource "kubernetes_deployment_v1" "kronos_backend" {
   }
 
   spec {
-    replicas = 1
+    replicas = 3
     strategy {
       type = "RollingUpdate"
       rolling_update {

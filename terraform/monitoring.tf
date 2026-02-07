@@ -147,7 +147,7 @@ resource "helm_release" "kube_prometheus_stack" {
               selectPolicy = "Min"
               policies = [{
                 periodSeconds = 60
-                type          = "Pod"
+                type          = "Pods"
                 value         = 1
               }]
             }
