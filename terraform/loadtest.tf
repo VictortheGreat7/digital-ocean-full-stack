@@ -29,8 +29,7 @@ resource "helm_release" "k6_operator" {
   timeout = 600
 
   depends_on = [
-    digitalocean_kubernetes_cluster.kronos,
-    kubernetes_namespace_v1.kronos_test
+    digitalocean_kubernetes_cluster.kronos
   ]
 }
 
