@@ -128,12 +128,24 @@ resource "helm_release" "kube_prometheus_stack" {
         }
         resources = {
           limits = {
-            cpu    = "30m"
-            memory = "320Mi"
+            cpu    = "60m"
+            memory = "160Mi"
           }
           requests = {
-            cpu    = "20m"
-            memory = "256Mi"
+            cpu    = "50m"
+            memory = "128Mi"
+          }
+        }
+        sidecar = {
+          resources = {
+            limits   = {
+              cpu = "50m",
+              memory = "128Mi"
+            }
+            requests = {
+              cpu = "20m",
+              memory = "64Mi"
+            }
           }
         }
         autoscaling = {
@@ -178,25 +190,6 @@ resource "helm_release" "kube_prometheus_stack" {
           }
         }
       }
-
-      set = [
-        {
-          name  = "grafana.resources.requests.cpu"
-          value = "20m"
-        },
-        {
-          name  = "grafana.resources.requests.memory"
-          value = "256Mi"
-        },
-        {
-          name  = "grafana.resources.limits.cpu"
-          value = "30m"
-        },
-        {
-          name  = "grafana.resources.limits.memory"
-          value = "320Mi"
-        }
-      ]
     })
   ]
 
