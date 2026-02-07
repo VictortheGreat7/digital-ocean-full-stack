@@ -181,6 +181,7 @@ resource "kubernetes_manifest" "k6_test" {
 
   depends_on = [
     kubernetes_config_map_v1.k6_test_script,
-    kubernetes_manifest.kronos_https_route
+    kubernetes_manifest.kronos_https_route,
+    cloudflare_dns_record.kronos
   ]
 }

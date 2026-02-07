@@ -202,8 +202,6 @@ jobs:
           EOF
 
           terraform apply --auto-approve
-
-          terraform apply --auto-approve
         working-directory: ./terraform
       - name: Commit Terraform Lock File
         uses: stefanzweifel/git-auto-commit-action@v5
