@@ -11,10 +11,6 @@ jobs:
     steps:
     - name: Checkout this Github repository
       uses: actions/checkout@v4
-    - name: Login to Microsoft Azure CLI
-      uses: azure/login@v2
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
     - name: Install doctl
       uses: digitalocean/action-doctl@v2
       with:
