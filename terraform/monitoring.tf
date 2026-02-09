@@ -148,23 +148,6 @@ resource "helm_release" "kube_prometheus_stack" {
             }
           }
         }
-        autoscaling = {
-          enabled      = true
-          maxReplicas  = 1
-          targetCPU    = 80
-          targetMemory = 80
-          behavior = {
-            scaleDown = {
-              stabilizationWindowSeconds = 300
-              selectPolicy               = "Min"
-              policies = [{
-                periodSeconds = 60
-                type          = "Pods"
-                value         = 1
-              }]
-            }
-          }
-        }
         adminPassword = "admin"
         "grafana.ini" = {
           server = {
@@ -370,12 +353,6 @@ resource "helm_release" "loki" {
 
       singleBinary = {
         replicas = 1
-        autoscaling = {
-          enabled                           = true
-          maxReplicas                       = 3
-          targetCPUUtilizationPercentage    = 90
-          targetMemoryUtilizationPercentage = 90
-        }
         resources = {
           requests = {
             cpu    = "50m"
@@ -441,50 +418,108 @@ resource "helm_release" "alloy" {
             memory = "150Mi"
           }
         }
-        autoscaling = {
-          enabled                           = true
-          maxReplicas                       = 3
-          targetCPUUtilizationPercentage    = 90
-          targetMemoryUtilizationPercentage = 90
-        }
         configMap = {
           content = <<-EOT
-            // discovery.kubernetes allows you to find scrape targets from Kubernetes resources.
-            // It watches cluster state and ensures targets are continually synced with what is currently running in your cluste  
+            // ── Discover pods ──────────────────────────────────────────
             discovery.kubernetes "pods" {
               role = "pod"
             }
-            // loki.source.kubernetes tails logs from Kubernetes containers using the Kubernetes API.
+
+            // ── Relabel: promote K8s metadata into usable labels ──────
+            discovery.relabel "pod_labels" {
+              targets = discovery.kubernetes.pods.targets
+
+              // Keep namespace
+              rule {
+                source_labels = ["__meta_kubernetes_namespace"]
+                target_label  = "namespace"
+              }
+              // Keep pod name
+              rule {
+                source_labels = ["__meta_kubernetes_pod_name"]
+                target_label  = "pod"
+              }
+              // Keep container name
+              rule {
+                source_labels = ["__meta_kubernetes_pod_container_name"]
+                target_label  = "container"
+              }
+              // Keep app label
+              rule {
+                source_labels = ["__meta_kubernetes_pod_label_app"]
+                target_label  = "app"
+              }
+              // Keep component label
+              rule {
+                source_labels = ["__meta_kubernetes_pod_label_component"]
+                target_label  = "component"
+              }
+            }
+
+            // ── Tail container logs ───────────────────────────────────
             loki.source.kubernetes "pod_logs" {
-              targets    = discovery.kubernetes.pods.targets
+              targets    = discovery.relabel.pod_labels.output
               forward_to = [loki.process.pod_logs.receiver]
             }
+
+            // ── Process: extract trace_id from plain-text logs ────────
             loki.process "pod_logs" {
+              // Match your app's format: [trace_id=abc123 span_id=def456]
+              stage.regex {
+                expression = "\\[trace_id=(?P<trace_id>[0-9a-fA-F]+)\\s+span_id=(?P<span_id>[0-9a-fA-F]+)\\]"
+              }
+
+              // Drop the label if it's all zeros (no active trace)
+              stage.match {
+                selector = "{trace_id=\"0\"}"
+                stage.labels {
+                  values = {
+                    trace_id = "",
+                    span_id  = "",
+                  }
+                }
+                action = "drop"
+              }
+
+              // Also try JSON extraction for other services that log JSON
               stage.json {
                 expressions = {
                   trace_id = "trace_id",
                 }
               }
+
+              // Extract log level from your format: "- INFO -", "- ERROR -"
+              stage.regex {
+                expression = "- (?P<level>DEBUG|INFO|WARNING|ERROR|CRITICAL) -"
+              }
+
+              // Promote extracted values to labels
               stage.labels {
                 values = {
                   trace_id = "",
+                  span_id  = "",
+                  level    = "",
                 }
               }
-              forward_to = [loki.write.loki.receiver]
-            }
-            loki.source.podlogs "default" {
+
+              // Attach trace_id as structured metadata (for Loki 3.x / schema v13)
+              stage.structured_metadata {
+                values = {
+                  trace_id = "",
+                  span_id  = "",
+                }
+              }
+
               forward_to = [loki.write.loki.receiver]
             }
 
-            // loki.source.kubernetes_events tails events from the Kubernetes API and converts them
-            // into log lines to forward to other Loki components.
+            // ── Kubernetes cluster events ─────────────────────────────
             loki.source.kubernetes_events "cluster_events" {
               job_name   = "integrations/kubernetes/eventhandler"
               log_format = "logfmt"
               forward_to = [loki.process.cluster_events.receiver]
             }
-            // loki.process receives log entries from other loki components, applies one or more processing stages,
-            // and forwards the results to the list of receivers in the component's arguments.
+
             loki.process "cluster_events" {
               forward_to = [loki.write.loki.receiver]
               stage.static_labels {
@@ -499,7 +534,7 @@ resource "helm_release" "alloy" {
               }
             }
 
-            // Write logs to Loki
+            // ── Write to Loki ─────────────────────────────────────────
             loki.write "loki" {
               endpoint {
                 url = "http://loki.monitoring:3100/loki/api/v1/push"
