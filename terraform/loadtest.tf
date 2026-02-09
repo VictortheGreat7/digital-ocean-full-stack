@@ -192,7 +192,7 @@ resource "kubernetes_manifest" "k6_alerts" {
     kind       = "PrometheusRule"
     metadata = {
       name      = "k6-alerts"
-      namespace = "monitoring" # Replace with your actual namespace
+      namespace = "monitoring"
       labels = {
         release = "kube-prometheus-stack"
       }

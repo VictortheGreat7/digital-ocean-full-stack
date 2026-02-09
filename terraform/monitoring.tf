@@ -138,12 +138,12 @@ resource "helm_release" "kube_prometheus_stack" {
         }
         sidecar = {
           resources = {
-            limits   = {
-              cpu = "50m",
+            limits = {
+              cpu    = "50m",
               memory = "128Mi"
             }
             requests = {
-              cpu = "20m",
+              cpu    = "20m",
               memory = "64Mi"
             }
           }
