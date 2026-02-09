@@ -249,7 +249,7 @@ resource "helm_release" "tempo" {
 }
 
 # Configure Grafana to use Tempo as a data source
-resource "kubernetes_config_map_v1" "grafana_datasources" {
+resource "kubernetes_config_map_v1" "grafana_tempo_datasources" {
   metadata {
     name      = "grafana-tempo-datasource"
     namespace = helm_release.kube_prometheus_stack.namespace
@@ -301,95 +301,115 @@ resource "helm_release" "loki" {
 
   values = [
     yamlencode({
-      deploymentMode = "SingleBinary"
+      deploymentMode = "SimpleScalable"
 
       loki = {
-        auth_enabled = false
-        memberlistConfig = {
-          join_members = [
-            "loki-0.loki-headless.monitoring.svc.cluster.local:7946"
-          ]
-        }
-        commonConfig = {
-          replication_factor = 1
-          ring = {
-            kvstore = {
-              store = "inmemory"
-            }
-          }
-        }
-        readinessProbe = {
-          httpGet = {
-            path = "/loki/api/v1/status/buildinfo"
-          }
-          initialDelaySeconds = 20
-        }
-        storage = {
-          type = "filesystem"
-        }
+        # auth_enabled = false
+        # memberlistConfig = {
+        #   join_members = [
+        #     "loki-0.loki-headless.monitoring.svc.cluster.local:7946"
+        #   ]
+        # }
+        # commonConfig = {
+        #   replication_factor = 1
+        #   ring = {
+        #     kvstore = {
+        #       store = "inmemory"
+        #     }
+        #   }
+        # }
+        # readinessProbe = {
+        #   httpGet = {
+        #     path = "/loki/api/v1/status/buildinfo"
+        #   }
+        #   initialDelaySeconds = 20
+        # }
+        # storage = {
+        #   type = "filesystem"
+        # }
         schemaConfig = {
           configs = [{
-            from         = "2026-01-16"
+            from         = "2024-04-01"
             store        = "tsdb"
-            object_store = "filesystem"
+            object_store = "s3"
             schema       = "v13"
             index = {
-              prefix = "index_"
+              prefix = "loki_index_"
               period = "24h"
             }
           }]
         }
         limits_config = {
           allow_structured_metadata = true
+          volume_enabled = true
         }
       }
 
-      chunksCache = {
-        enabled = false
+      ingester = {
+        chunk_encoding = "snappy"
       }
-      resultsCache = {
-        enabled = false
+      querier = {
+        max_concurrent = 4
+      }
+      pattern_ingester = {
+        enabled = true
       }
 
-      singleBinary = {
-        replicas = 1
-        resources = {
-          requests = {
-            cpu    = "50m"
-            memory = "512Mi"
-          }
-          limits = {
-            cpu    = "60m"
-            memory = "640Mi"
-          }
-        }
-        persistence = {
-          enabled          = true
-          storageClassName = "do-block-storage"
-          size             = "10Gi"
-        }
-        memberlist = {
-          enabled = false
-        }
-      }
+      # chunksCache = {
+      #   enabled = false
+      # }
+      # resultsCache = {
+      #   enabled = false
+      # }
+
+      # singleBinary = {
+      #   replicas = 1
+      #   resources = {
+      #     requests = {
+      #       cpu    = "50m"
+      #       memory = "512Mi"
+      #     }
+      #     limits = {
+      #       cpu    = "60m"
+      #       memory = "640Mi"
+      #     }
+      #   }
+      #   persistence = {
+      #     enabled          = true
+      #     storageClassName = "do-block-storage"
+      #     size             = "10Gi"
+      #   }
+      #   memberlist = {
+      #     enabled = false
+      #   }
+      # }
 
       read = {
-        replicas = 0
+        replicas = 2
       }
       write = {
-        replicas = 0
+        replicas = 3
       }
       backend = {
-        replicas = 0
+        replicas = 2
       }
 
-      monitoring = {
-        selfMonitoring = {
-          grafanaAgent = {
-            installOperator = false
-          }
+      minio = {
+        enabled = true
+      }
+      gateway = {
+        service = {
+          type = "LoadBalancer"
         }
       }
+
+      # monitoring = {
+      #   selfMonitoring = {
+      #     grafanaAgent = {
+      #       installOperator = false
+      #     }
+      #   }
+      # }
     })
   ]
 
