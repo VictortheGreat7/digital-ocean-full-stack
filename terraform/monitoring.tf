@@ -217,8 +217,8 @@ resource "helm_release" "tempo" {
             memory = "1Gi"
           }
           limits = {
-            cpu    = "300m"
-            memory = "1.5Gi"
+            cpu    = "500m"
+            memory = "2Gi"
           }
         }
         memBallastSizeMbs = "256"
