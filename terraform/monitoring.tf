@@ -301,115 +301,95 @@ resource "helm_release" "loki" {
 
   values = [
     yamlencode({
-      deploymentMode = "SimpleScalable"
+      deploymentMode = "SingleBinary"
 
       loki = {
-        # auth_enabled = false
-        # memberlistConfig = {
-        #   join_members = [
-        #     "loki-0.loki-headless.monitoring.svc.cluster.local:7946"
-        #   ]
-        # }
-        # commonConfig = {
-        #   replication_factor = 1
-        #   ring = {
-        #     kvstore = {
-        #       store = "inmemory"
-        #     }
-        #   }
-        # }
-        # readinessProbe = {
-        #   httpGet = {
-        #     path = "/loki/api/v1/status/buildinfo"
-        #   }
-        #   initialDelaySeconds = 20
-        # }
-        # storage = {
-        #   type = "filesystem"
-        # }
+        auth_enabled = false
+        memberlistConfig = {
+          join_members = [
+            "loki-0.loki-headless.monitoring.svc.cluster.local:7946"
+          ]
+        }
+        commonConfig = {
+          replication_factor = 1
+          ring = {
+            kvstore = {
+              store = "inmemory"
+            }
+          }
+        }
+        readinessProbe = {
+          httpGet = {
+            path = "/loki/api/v1/status/buildinfo"
+          }
+          initialDelaySeconds = 20
+        }
+        storage = {
+          type = "filesystem"
+        }
         schemaConfig = {
           configs = [{
-            from         = "2024-04-01"
+            from         = "2026-01-16"
             store        = "tsdb"
-            object_store = "s3"
+            object_store = "filesystem"
             schema       = "v13"
             index = {
-              prefix = "loki_index_"
+              prefix = "index_"
               period = "24h"
             }
           }]
         }
         limits_config = {
           allow_structured_metadata = true
-          volume_enabled = true
         }
       }
 
-      ingester = {
-        chunk_encoding = "snappy"
+      chunksCache = {
+        enabled = false
       }
-      querier = {
-        max_concurrent = 4
-      }
-      pattern_ingester = {
-        enabled = true
+      resultsCache = {
+        enabled = false
       }
 
-      # chunksCache = {
-      #   enabled = false
-      # }
-      # resultsCache = {
-      #   enabled = false
-      # }
-
-      # singleBinary = {
-      #   replicas = 1
-      #   resources = {
-      #     requests = {
-      #       cpu    = "50m"
-      #       memory = "512Mi"
-      #     }
-      #     limits = {
-      #       cpu    = "60m"
-      #       memory = "640Mi"
-      #     }
-      #   }
-      #   persistence = {
-      #     enabled          = true
-      #     storageClassName = "do-block-storage"
-      #     size             = "10Gi"
-      #   }
-      #   memberlist = {
-      #     enabled = false
-      #   }
-      # }
+      singleBinary = {
+        replicas = 1
+        resources = {
+          requests = {
+            cpu    = "50m"
+            memory = "512Mi"
+          }
+          limits = {
+            cpu    = "60m"
+            memory = "640Mi"
+          }
+        }
+        persistence = {
+          enabled          = true
+          storageClassName = "do-block-storage"
+          size             = "10Gi"
+        }
+        memberlist = {
+          enabled = false
+        }
+      }
 
       read = {
-        replicas = 2
+        replicas = 0
       }
       write = {
-        replicas = 3
+        replicas = 0
       }
       backend = {
-        replicas = 2
+        replicas = 0
       }
 
-      minio = {
-        enabled = true
-      }
-      gateway = {
-        service = {
-          type = "LoadBalancer"
+      monitoring = {
+        selfMonitoring = {
+          grafanaAgent = {
+            installOperator = false
+          }
         }
       }
-
-      # monitoring = {
-      #   selfMonitoring = {
-      #     grafanaAgent = {
-      #       installOperator = false
-      #     }
-      #   }
-      # }
     })
   ]
 
