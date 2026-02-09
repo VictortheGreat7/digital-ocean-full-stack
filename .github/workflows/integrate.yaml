@@ -24,6 +24,7 @@ jobs:
           filters: |
             backend:
               - 'backend/**'
+              - 'backend2/**'
             frontend:
               - 'frontend/**'
             terraform:
