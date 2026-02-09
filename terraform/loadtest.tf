@@ -125,7 +125,7 @@ resource "kubernetes_manifest" "k6_test" {
       namespace = helm_release.k6_operator.namespace
     }
     spec = {
-      cleanup     = "post"
+      # cleanup     = "post"
       parallelism = 5
       runner = {
         image = "grafana/k6:latest"
