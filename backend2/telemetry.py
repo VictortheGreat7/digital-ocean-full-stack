@@ -1,0 +1,77 @@
+"""
+OpenTelemetry setup — tracer provider, exporters, and instrumentors.
+
+Call ``init_telemetry(app)`` once from the application factory.
+"""
+
+from __future__ import annotations
+
+import atexit
+import logging
+
+from opentelemetry import trace
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
+from opentelemetry.instrumentation.logging import LoggingInstrumentor
+from opentelemetry.instrumentation.psycopg2 import Psycopg2Instrumentor
+from opentelemetry.instrumentation.requests import RequestsInstrumentor
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.propagate import set_global_textmap
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
+
+from config import (
+    TEMPO_ENDPOINT,
+    SERVICE_NAME,
+    SERVICE_NAMESPACE,
+    DEPLOYMENT_ENV,
+)
+
+# ── Global propagator ──────────────────────────────────────────────────
+set_global_textmap(TraceContextTextMapPropagator())
+
+# ── Resource identity ──────────────────────────────────────────────────
+_resource = Resource(attributes={
+    "service.name": SERVICE_NAME,
+    "service.namespace": SERVICE_NAMESPACE,
+    "deployment.environment": DEPLOYMENT_ENV,
+})
+
+# ── Tracer provider + OTLP exporter ───────────────────────────────────
+tracer_provider = TracerProvider(resource=_resource)
+trace.set_tracer_provider(tracer_provider)
+
+_otlp_exporter = OTLPSpanExporter(endpoint=TEMPO_ENDPOINT, insecure=True)
+tracer_provider.add_span_processor(
+    BatchSpanProcessor(_otlp_exporter, schedule_delay_millis=2000, max_export_batch_size=512)
+)
+
+# Convenience handle used throughout the app
+tracer = trace.get_tracer(__name__)
+
+
+def init_telemetry(app) -> None:
+    """Instrument Flask, requests, psycopg2, and logging."""
+
+    # Flask auto-instrumentation (creates spans per request)
+    FlaskInstrumentor().instrument_app(app)
+    RequestsInstrumentor().instrument()
+    Psycopg2Instrumentor().instrument()
+    LoggingInstrumentor().instrument(set_logging_format=True)
+
+    # Structured log handler with trace context
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter(
+        "%(asctime)s - %(name)s - "
+        "[trace_id=%(otelTraceID)s span_id=%(otelSpanID)s] - "
+        "%(levelname)s - %(message)s"
+    ))
+    app.logger.handlers.clear()
+    app.logger.addHandler(handler)
+    app.logger.setLevel(logging.INFO)
+
+
+@atexit.register
+def _shutdown_tracer() -> None:
+    tracer_provider.shutdown()

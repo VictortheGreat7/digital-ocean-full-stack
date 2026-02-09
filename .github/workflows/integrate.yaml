@@ -47,7 +47,7 @@ jobs:
       - name: Build and load backend Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./backend
+          context: ./backend2
           load: true
           tags: kronos-backend:${{ github.sha }}
           cache-from: type=gha
@@ -85,7 +85,7 @@ jobs:
       - name: Push to Docker Hub
         uses: docker/build-push-action@v5
         with:
-          context: ./backend
+          context: ./backend2
           push: true
           tags: |
             victorthegreat7/kronos-backend:${{ github.sha }}
