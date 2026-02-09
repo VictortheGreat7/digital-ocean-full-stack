@@ -128,29 +128,29 @@ resource "helm_release" "kube_prometheus_stack" {
         }
         resources = {
           limits = {
-            cpu    = "60m"
-            memory = "160Mi"
+            cpu    = "40m"
+            memory = "256Mi"
           }
           requests = {
-            cpu    = "50m"
-            memory = "128Mi"
+            cpu    = "20m"
+            memory = "160Mi"
           }
         }
         sidecar = {
           resources = {
             limits = {
-              cpu    = "50m",
-              memory = "128Mi"
+              cpu    = "40m",
+              memory = "160Mi"
             }
             requests = {
               cpu    = "20m",
-              memory = "64Mi"
+              memory = "96Mi"
             }
           }
         }
         autoscaling = {
           enabled      = true
-          maxReplicas  = 5
+          maxReplicas  = 1
           targetCPU    = 80
           targetMemory = 80
           behavior = {
