@@ -5,6 +5,14 @@ FROM node:24-alpine AS builder
 
 WORKDIR /app
 
+# Declare build args
+ARG VITE_DD_APP_ID
+ARG VITE_DD_CLIENT_TOKEN
+
+# Make them available as env vars during build
+ENV VITE_DD_APP_ID=$DD_RUM_APP_ID
+ENV VITE_DD_CLIENT_TOKEN=$DD_RUM_CLIENT_TOKEN
+
 # Copy package files
 COPY package*.json ./
 

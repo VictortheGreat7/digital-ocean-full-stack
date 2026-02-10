@@ -104,7 +104,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Build and load backend Docker image
+      - name: Build and load frontend Docker image
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
@@ -112,6 +112,9 @@ jobs:
           tags: kronos-frontend:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            DD_RUM_APP_ID=${{ secrets.DD_RUM_APP_ID }}
+            DD_RUM_CLIENT_TOKEN=${{ secrets.DD_RUM_CLIENT_TOKEN }}
       - name: Test frontend container
         run: |
           docker run -d -p 8080:80 --name frontend-test kronos-frontend:${{ github.sha }}
