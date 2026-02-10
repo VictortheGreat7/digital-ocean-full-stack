@@ -57,6 +57,7 @@ datadogRum.init({
   trackUserInteractions: true,
   trackResources: true,
   trackLongTasks: true,
+  trackBfcacheViews: true,
   defaultPrivacyLevel: 'mask-user-input',
   // Distributed tracing — connects frontend spans to backend traces
   allowedTracingUrls: [
