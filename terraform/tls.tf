@@ -47,6 +47,9 @@ resource "helm_release" "cert_manager_prod_issuer" {
   repository = "https://charts.adfinis.com"
   namespace  = helm_release.cert_manager.namespace
 
+  atomic           = true
+  cleanup_on_fail  = true
+
   values = [
     <<-EOT
 clusterIssuers:
