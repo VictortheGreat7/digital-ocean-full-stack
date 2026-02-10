@@ -14,3 +14,5 @@ opentelemetry-instrumentation-logging==0.60b1
 opentelemetry-instrumentation-flask==0.60b1
 opentelemetry-instrumentation-requests==0.60b1
 opentelemetry-instrumentation-psycopg2==0.60b1
+
+ddtrace==4.4.0

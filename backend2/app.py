@@ -8,6 +8,8 @@ Usage:
 
 from __future__ import annotations
 
+import ddtrace.auto
+
 from flask import Flask
 from flask_cors import CORS
 
