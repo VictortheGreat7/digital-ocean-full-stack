@@ -6,6 +6,9 @@ resource "helm_release" "cert_manager" {
   create_namespace = true
   namespace        = "cert-manager"
 
+  atomic           = true
+  cleanup_on_fail  = true
+
   set = [
     {
       name  = "installCRDs"
