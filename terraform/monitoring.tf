@@ -636,7 +636,16 @@ resource "helm_release" "datadog" {
         processCollection = true
       }
 
+      clusterAgent = {
+        admissionController = {
+          agentSidecarInjection = {
+            enabled = true
+          }
+        }
+      }
+
       apm = {
+        enabled = true
         instrumentation = {
           enabled = true
           targets = [
