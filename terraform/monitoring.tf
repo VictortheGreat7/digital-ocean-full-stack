@@ -625,6 +625,17 @@ resource "helm_release" "datadog" {
         }
       }
 
+      # tags = ["env:dev"]
+
+      networkMonitoring = {
+        enabled = true
+      }
+
+      processAgent = {
+        enabled = true
+        processCollection = true
+      }
+
       apm = {
         instrumentation = {
           enabled = true
