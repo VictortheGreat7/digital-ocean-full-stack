@@ -626,7 +626,21 @@ resource "helm_release" "datadog" {
       }
 
       apm = {
-        enabled = true
+        instrumentation = {
+          enabled = true
+          targets = [
+            {
+              name = "default-target"
+              namespaceSelector = {
+                matchNames = ["kronos"]
+               }
+              ddTraceVersions = {
+                python = "4"
+                js     = "5"
+              }
+            }
+          ]
+        }
       }
 
       # kubernetesResourcesLabelsAsTags = {
