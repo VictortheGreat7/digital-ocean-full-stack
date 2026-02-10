@@ -2,9 +2,9 @@ name: Build, Provision Cloud Infrastructure for and Deploy Application
 
 # This workflow will run on pushes to the main branch and manual triggers
 on:
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
   workflow_dispatch:  
 
 jobs:
@@ -24,6 +24,7 @@ jobs:
           filters: |
             backend:
               - 'backend/**'
+              - 'backend2/**'
             frontend:
               - 'frontend/**'
   build-backend:
@@ -43,7 +44,7 @@ jobs:
       - name: Build and load backend Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./backend
+          context: ./backend2
           load: true
           tags: kronos-backend:${{ github.sha }}
           cache-from: type=gha
@@ -82,7 +83,7 @@ jobs:
       - name: Push to Docker Hub
         uses: docker/build-push-action@v5
         with:
-          context: ./backend
+          context: ./backend2
           push: true
           tags: |
             victorthegreat7/kronos-backend:${{ github.sha }}

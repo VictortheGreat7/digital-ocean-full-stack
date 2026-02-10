@@ -625,6 +625,39 @@ resource "helm_release" "datadog" {
         }
       }
 
+      apm = {
+        enabled = true
+      }
+
+      kubernetesResourcesLabelsAsTags = {
+        pods = {
+          "app.kubernetes.io/app" = "${kubernetes_namespace_v1.kronos.metadata[0].name}-app"
+          # "app.kubernetes.io/component" = "backend"
+          # "app.kubernetes.io/component" = "frontend"
+          # "app.kubernetes.io/environment" = "development"
+        }
+        namespaces = {
+          "app.kubernetes.io/metadata.name" = "${kubernetes_namespace_v1.kronos.metadata[0].name}"
+        }
+        statefulsets = {
+          "app.kubernetes.io/app" = "${kubernetes_namespace_v1.kronos.metadata[0].name}-app"
+          # "app.kubernetes.io/component" = "db"
+          # "app.kubernetes.io/environment" = "development"
+        }
+        deployments = {
+          "app.kubernetes.io/app" = "${kubernetes_namespace_v1.kronos.metadata[0].name}-app"
+          # "app.kubernetes.io/component" = "backend"
+          # "app.kubernetes.io/component" = "frontend"
+          # "app.kubernetes.io/environment" = "development"
+        }
+        replicasets = {
+          "app.kubernetes.io/app" = "${kubernetes_namespace_v1.kronos.metadata[0].name}-app"
+          # "app.kubernetes.io/component" = "backend"
+          # "app.kubernetes.io/component" = "frontend"
+          # "app.kubernetes.io/environment" = "development"
+        }
+      }
+
       operator = {
         apiKey = var.datadog_api_key
         appKey = var.datadog_app_key
