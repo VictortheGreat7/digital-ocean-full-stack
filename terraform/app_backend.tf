@@ -82,7 +82,7 @@ resource "kubernetes_deployment_v1" "kronos_backend" {
           }
           env {
             name  = "OTEL_EXPORTER_OTLP_ENDPOINT"
-            value = "http://datadog.monitoring.svc.cluster.local"
+            value = "http://datadog.monitoring.svc.cluster.local:4317"
           }
           env {
             name = "OTLP_EXPORTER_OTLP_PROTOCOL"

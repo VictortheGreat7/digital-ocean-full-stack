@@ -717,12 +717,10 @@ resource "helm_release" "datadog" {
             {
               name          = "otlp-grpc"
               containerPort = 4317
-              hostPort      = 4317
             },
             {
               name          = "otlp-http"
               containerPort = 4318
-              hostPort      = 4318
             }
           ]
 
