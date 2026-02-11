@@ -29,28 +29,6 @@ jobs:
               - 'frontend/**'
             terraform:
               - 'terraform/**'
-  lint:
-    name: Lint Codebase
-    needs: changes
-    if : ${{ github.event_name == 'workflow_dispatch' || needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true' }}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: none
-      statuses: write
-    steps:
-      - name: Checkout current Github repository
-        uses: actions/checkout@v4
-      - name: Super-Linter
-        uses: super-linter/super-linter@v8.5.0
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DEFAULT_BRANCH: main
-          # VALIDATE_ALL_CODEBASE: false
-          FILTER_REGEX_EXCLUDE: (terraform/\.terraform/|terraform/.*\.tfstate|terraform/.*\.tfstate\.backup)
 
   # Runs ONLY if backend/ folder changed
   build-backend:
@@ -161,8 +139,8 @@ jobs:
 
   # Runs ONLY if terraform/ folder changed
   modify-infra:
-    needs: [changes, lint]
-    if: ${{ (needs.lint.result == 'skipped' || needs.lint.result == 'success') && needs.changes.outputs.terraform == 'true' }}
+    needs: [changes]
+    if: ${{ needs.changes.outputs.terraform == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write

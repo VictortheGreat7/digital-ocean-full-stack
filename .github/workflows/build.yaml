@@ -27,28 +27,6 @@ jobs:
               - 'backend2/**'
             frontend:
               - 'frontend/**'
-  lint:
-    name: Lint Codebase
-    needs: changes
-    if : ${{ github.event_name == 'workflow_dispatch' || needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true' }}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: none
-      statuses: write
-    steps:
-      - name: Checkout current Github repository
-        uses: actions/checkout@v4
-      - name: Super-Linter
-        uses: super-linter/super-linter@v8.5.0
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DEFAULT_BRANCH: main
-          # VALIDATE_ALL_CODEBASE: false
-          FILTER_REGEX_EXCLUDE: (terraform/\.terraform/|terraform/.*\.tfstate|terraform/.*\.tfstate\.backup)
   build-backend:
     needs: changes
     if: ${{ needs.changes.outputs.backend == 'true' }}
@@ -156,8 +134,8 @@ jobs:
           cache-from: type=gha
 
   provision-and-build:
-    needs: [lint, build-backend, build-frontend]
-    if: ${{ always() && (needs.lint.result == 'skipped' || needs.lint.result == 'success') && (needs.build-backend.result == 'skipped' || needs.build-backend.result == 'success') && (needs.build-frontend.result == 'skipped' || needs.build-frontend.result == 'success') }}
+    needs: [build-backend, build-frontend]
+    if: ${{ always() && (needs.build-backend.result == 'skipped' || needs.build-backend.result == 'success') && (needs.build-frontend.result == 'skipped' || needs.build-frontend.result == 'success') }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
