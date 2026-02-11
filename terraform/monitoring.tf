@@ -586,6 +586,65 @@ resource "helm_release" "kube_prometheus_stack" {
 #   depends_on = [helm_release.loki]
 # }
 
+resource "kubernetes_config_map_v1" "datadog_otel_config" {
+  metadata {
+    name      = "otel-agent-config-map"
+    namespace = "monitoring"
+  }
+
+  data = {
+    "otel-config.yaml" = <<-EOT
+      receivers:
+        prometheus:
+          config:
+            scrape_configs:
+              - job_name: "datadog-agent"
+                scrape_interval: 10s
+                static_configs:
+                  - targets:
+                      - 0.0.0.0:8888
+        otlp:
+          protocols:
+            grpc:
+              endpoint: 0.0.0.0:4317
+            http:
+              endpoint: 0.0.0.0:4318
+      exporters:
+        debug:
+          verbosity: detailed
+        datadog:
+          api:
+            key: ${env:DD_API_KEY}
+            site: ${env:DD_SITE}
+          sending_queue:
+            batch:
+              flush_timeout: 10s
+      processors:
+        infraattributes:
+          cardinality: 2
+      connectors:
+        datadog/connector:
+          traces:
+      service:
+        pipelines:
+          traces:
+            receivers: [otlp]
+            processors: [infraattributes]
+            exporters: [debug, datadog, datadog/connector]
+          metrics:
+            receivers: [otlp, datadog/connector, prometheus]
+            processors: [infraattributes]
+            exporters: [debug, datadog]
+          logs:
+            receivers: [otlp]
+            processors: [infraattributes]
+            exporters: [debug, datadog]
+    EOT
+  }
+
+  depends_on = [helm_release.datadog]
+}
+
 resource "helm_release" "datadog" {
   name             = "datadog"
   repository       = "https://helm.datadoghq.com"
@@ -636,32 +695,67 @@ resource "helm_release" "datadog" {
         }
 
         apm = {
+          # enabled = true
+          # instrumentation = {
+          #   enabled = true
+          #   targets = [
+          #     {
+          #       name = "default-target"
+          #       namespaceSelector = {
+          #         matchNames = ["kronos"]
+          #       }
+          #       ddTraceVersions = {
+          #         python = "4"
+          #         js     = "5"
+          #       }
+          #     }
+          #   ]
+          # }
+          portEnabled = true
+          peerServiceAggregation = true
+        }
+
+        orchestratorExplorer = {
           enabled = true
-          instrumentation = {
-            enabled = true
-            targets = [
-              {
-                name = "default-target"
-                namespaceSelector = {
-                  matchNames = ["kronos"]
-                }
-                ddTraceVersions = {
-                  python = "4"
-                  js     = "5"
-                }
-              }
-            ]
+        }
+
+        podLabelAsTags = {
+          app         = "app"
+          component   = "component"
+          environment = "env"
+        }
+
+        otelCollector = {
+          enabled = true
+          ports = [
+            {
+              name          = "otlp-grpc"
+              containerPort = 4317
+              hostPort      = 4317
+            },
+            {
+              name          = "otlp-http"
+              containerPort = 4318
+              hostPort      = 4318
+            }
+          ]
+
+          configMap = {
+            name = kubernetes_config_map_v1.datadog_otel_config.metadata[0].name
           }
+          # logs = {
+          #   enabled = true
+          # }
         }
       }
 
-      clusterAgent = {
-        admissionController = {
-          agentSidecarInjection = {
-            enabled = true
-          }
-        }
-      }
+      # clusterAgent = {
+      #   admissionController = {
+      #     agentSidecarInjection = {
+      #       enabled = true
+      #     }
+      #   }
+      # }
 
       operator = {
         apiKey = var.datadog_api_key

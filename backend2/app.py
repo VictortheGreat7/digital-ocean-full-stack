@@ -8,15 +8,15 @@ Usage:
 
 from __future__ import annotations
 
-import ddtrace.auto
+# import ddtrace.auto
 
 from flask import Flask
 from flask_cors import CORS
 
 from db import init_db
-# from metrics import init_metrics
+from metrics import init_metrics
 from routes import register_routes
-# from telemetry import init_telemetry
+from telemetry import init_telemetry
 
 
 def create_app() -> Flask:
@@ -24,9 +24,9 @@ def create_app() -> Flask:
     app = Flask(__name__)
     CORS(app)
 
-    # # Observability
-    # init_telemetry(app)
-    # init_metrics(app)
+    # Observability
+    init_telemetry(app)
+    init_metrics(app)
 
     # Database
     init_db(app)

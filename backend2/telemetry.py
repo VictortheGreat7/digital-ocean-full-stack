@@ -22,10 +22,11 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
 
 from config import (
-    TEMPO_ENDPOINT,
+    OTEL_EXPORTER_OTLP_ENDPOINT,
     SERVICE_NAME,
     SERVICE_NAMESPACE,
     DEPLOYMENT_ENV,
+    SERVICE_VERSION,
 )
 
 # ── Global propagator ──────────────────────────────────────────────────
@@ -36,13 +37,14 @@ _resource = Resource(attributes={
     "service.name": SERVICE_NAME,
     "service.namespace": SERVICE_NAMESPACE,
     "deployment.environment": DEPLOYMENT_ENV,
+    "service.version": SERVICE_VERSION,
 })
 
 # ── Tracer provider + OTLP exporter ───────────────────────────────────
 tracer_provider = TracerProvider(resource=_resource)
 trace.set_tracer_provider(tracer_provider)
 
-_otlp_exporter = OTLPSpanExporter(endpoint=TEMPO_ENDPOINT, insecure=True)
+_otlp_exporter = OTLPSpanExporter(endpoint=OTEL_EXPORTER_OTLP_ENDPOINT, insecure=True)
 tracer_provider.add_span_processor(
     BatchSpanProcessor(_otlp_exporter, schedule_delay_millis=2000, max_export_batch_size=512)
 )

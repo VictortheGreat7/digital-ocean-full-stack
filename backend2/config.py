@@ -15,16 +15,15 @@ DB_CONFIG: dict[str, str] = {
 }
 
 # --- Telemetry ---
-TEMPO_ENDPOINT: str = os.getenv(
-    "TEMPO_ENDPOINT", "tempo.monitoring.svc.cluster.local:4317"
-)
-TEMPO_HTTP_URL: str = os.getenv(
-    "TEMPO_HTTP_URL", "http://tempo.monitoring.svc.cluster.local:4318/v1/traces"
+OTEL_EXPORTER_OTLP_ENDPOINT: str = os.getenv(
+    "OTEL_EXPORTER_OTLP_ENDPOINT",
+    "otel-collector.monitoring.svc.cluster.local:4317",
 )
 
-SERVICE_NAME: str = "kronos-backend"
-SERVICE_NAMESPACE: str = "kronos"
+SERVICE_NAME: str = os.getenv("OTEL_SERVICE_NAME", "kronos-backend")
+SERVICE_NAMESPACE: str = os.getenv("SERVICE_NAMESPACE", "kronos")
 DEPLOYMENT_ENV: str = os.getenv("DEPLOYMENT_ENV", "development")
+SERVICE_VERSION: str = os.getenv("SERVICE_VERSION", "1.0.0")
 
 # --- Metrics ---
 EXCLUDED_PATHS: set[str] = {

@@ -42,8 +42,40 @@ resource "kubernetes_deployment_v1" "kronos_backend" {
           name  = "backend"
           image = "victorthegreat7/kronos-backend:latest"
           env {
-            name  = "TEMPO_ENDPOINT"
-            value = "tempo.monitoring.svc.cluster.local:4317"
+            name = "HOST_IP"
+            value_from {
+              field_ref {
+                field_path = "status.hostIP"
+              }
+            }
+          }
+          env {
+            name  = "OTEL_EXPORTER_OTLP_ENDPOINT"
+            value = "http://$(HOST_IP):4317"
+          }
+          env {
+            name = "OTLP_EXPORTER_OTLP_PROTOCOL"
+            value = "grpc"
+          }
+          env {
+            name = "OTEL_SERVICE_NAME"
+            value = "${kubernetes_namespace_v1.kronos.metadata[0].name}-backend"
+          }
+          env {
+            name = "OTEL_RESOURCE_ATTRIBUTES"
+            value = "service.version=$(SERVICE_VERSION),deployment.environment=$(DEPLOYMENT_ENV)"
+          }
+          env {
+            name  = "DEPLOYMENT_ENV"
+            value = "dev"
+          }
+          env {
+            name  = "SERVICE_VERSION"
+            value = "1.0.0"
+          }
+          env {
+            name  = "SERVICE_NAMESPACE"
+            value = kubernetes_namespace_v1.kronos.metadata[0].name
           }
           env {
             name  = "DB_HOST"
