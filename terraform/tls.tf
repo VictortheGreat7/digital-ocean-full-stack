@@ -76,31 +76,31 @@ EOT
   ]
 }
 
-# resource "helm_release" "cert_manager_stag_issuer" {
-#   chart      = "cert-manager-issuers"
-#   name       = "cert-manager-stag-issuer"
-#   repository = "https://charts.adfinis.com"
-#   namespace  = "cert-manager"
+resource "helm_release" "cert_manager_stag_issuer" {
+  chart      = "cert-manager-issuers"
+  name       = "cert-manager-stag-issuer"
+  repository = "https://charts.adfinis.com"
+  namespace  = "cert-manager"
 
-#   values = [
-#     <<-EOT
-# clusterIssuers:
-#   - name: letsencrypt-staging
-#     spec:
-#       acme:
-#         email: "greatvictor.anjorin@gmail.com"
-#         server: "https://acme-staging-v02.api.letsencrypt.org/directory"
-#         privateKeySecretRef:
-#           name: letsencrypt-staging
-#         solvers:
-#           - dns01:
-#               cloudflare:
-#                 email: "greatvictor.anjorin@gmail.com"
-#                 apitokensecret:
-#                   name: cloudflare-api
-#                   key: api-token               
-# EOT
-#   ]
+  values = [
+    <<-EOT
+clusterIssuers:
+  - name: letsencrypt-staging
+    spec:
+      acme:
+        email: "greatvictor.anjorin@gmail.com"
+        server: "https://acme-staging-v02.api.letsencrypt.org/directory"
+        privateKeySecretRef:
+          name: letsencrypt-staging
+        solvers:
+          - dns01:
+              cloudflare:
+                email: "greatvictor.anjorin@gmail.com"
+                apitokensecret:
+                  name: cloudflare-api
+                  key: api-token               
+EOT
+  ]
 
-#   depends_on = [helm_release.cert_manager, kubernetes_secret_v1.cloudflare_api]
-# }
+  depends_on = [helm_release.cert_manager, kubernetes_secret_v1.cloudflare_api]
+}

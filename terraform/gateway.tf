@@ -6,7 +6,7 @@ resource "kubernetes_manifest" "cilium_gateway" {
       name      = "kronos"
       namespace = "kube-system"
       annotations = {
-        "cert-manager.io/cluster-issuer" = "letsencrypt-prod"
+        "cert-manager.io/cluster-issuer" = "letsencrypt-staging"
       }
     }
     spec = {
