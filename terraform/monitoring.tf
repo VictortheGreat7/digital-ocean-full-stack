@@ -614,8 +614,8 @@ resource "kubernetes_config_map_v1" "datadog_otel_config" {
           verbosity: detailed
         datadog:
           api:
-            key: ${env:DD_API_KEY}
-            site: ${env:DD_SITE}
+            key: "${var.datadog_api_key}"
+            site: "${var.datadog_site}"
           sending_queue:
             batch:
               flush_timeout: 10s
