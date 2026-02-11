@@ -96,7 +96,7 @@ clusterIssuers:
           - dns01:
               cloudflare:
                 email: "greatvictor.anjorin@gmail.com"
-                apitokensecret:
+                apiTokenSecretRef:
                   name: cloudflare-api
                   key: api-token               
 EOT
