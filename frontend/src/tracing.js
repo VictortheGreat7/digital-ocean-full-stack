@@ -50,7 +50,7 @@ datadogRum.init({
   clientToken: import.meta.env.VITE_DD_CLIENT_TOKEN,
   site: 'us5.datadoghq.com',
   service: 'kronos-frontend',
-  env: 'development',
+  env: 'dev',
   version: '1.0.0',
   sessionSampleRate: 100,
   sessionReplaySampleRate: 20, // set >0 if you want Session Replay
@@ -61,10 +61,10 @@ datadogRum.init({
   defaultPrivacyLevel: 'mask-user-input',
   // Distributed tracing — connects frontend spans to backend traces
   allowedTracingUrls: [
-    // Match your API origin; this injects trace headers on outgoing requests
-    { match: /\/api\//, propagatorTypes: ['datadog', 'tracecontext'] },
-    // If you also call the backend directly in dev:
-    { match: 'http://localhost:5000', propagatorTypes: ['datadog', 'tracecontext'] },
+    // // Match your API origin; this injects trace headers on outgoing requests
+    // { match: /\/api\//, propagatorTypes: ['datadog', 'tracecontext'] },
+    // // If you also call the backend directly in dev:
+    // { match: 'http://localhost:5000', propagatorTypes: ['datadog', 'tracecontext'] },
     window.location.origin, // if API is same-origin
   ],
   traceSampleRate: 100,    // % of requests to trace
