@@ -22,7 +22,7 @@ OTEL_EXPORTER_OTLP_ENDPOINT: str = os.getenv(
 
 SERVICE_NAME: str = os.getenv("OTEL_SERVICE_NAME", "kronos-backend")
 SERVICE_NAMESPACE: str = os.getenv("SERVICE_NAMESPACE", "kronos")
-DEPLOYMENT_ENV: str = os.getenv("DEPLOYMENT_ENV", "development")
+DEPLOYMENT_ENV: str = os.getenv("DEPLOYMENT_ENV", "dev")
 SERVICE_VERSION: str = os.getenv("SERVICE_VERSION", "1.0.0")
 
 # --- Metrics ---

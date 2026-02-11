@@ -42,28 +42,35 @@ resource "kubernetes_deployment_v1" "kronos_backend" {
           name  = "backend"
           image = "victorthegreat7/kronos-backend:latest"
           env {
-            name = "HOST_IP"
-            value_from {
-              field_ref {
-                field_path = "status.hostIP"
-              }
-            }
-          }
-          env {
-            name  = "OTEL_EXPORTER_OTLP_ENDPOINT"
-            value = "http://$(HOST_IP):4317"
-          }
-          env {
-            name = "OTLP_EXPORTER_OTLP_PROTOCOL"
-            value = "grpc"
-          }
-          env {
             name = "OTEL_SERVICE_NAME"
             value = "${kubernetes_namespace_v1.kronos.metadata[0].name}-backend"
           }
           env {
-            name = "OTEL_RESOURCE_ATTRIBUTES"
-            value = "service.version=$(SERVICE_VERSION),deployment.environment=$(DEPLOYMENT_ENV)"
+            name = "OTEL_K8S_NAMESPACE"
+            value_from {
+              field_ref {
+                api_version = "v1"
+                field_path = "metadata.namespace"
+              }
+            }
+          }
+          env {
+            name = "OTEL_K8S_POD_NAME"
+            value_from {
+              field_ref {
+                api_version = "v1"
+                field_path = "metadata.name"
+              }
+            }
+          }
+          env {
+            name = "OTEL_K8S_NODE_NAME"
+            value_from {
+              field_ref {
+                api_version = "v1"
+                field_path = "spec.nodeName"
+              }
+            }
           }
           env {
             name  = "DEPLOYMENT_ENV"
@@ -74,8 +81,17 @@ resource "kubernetes_deployment_v1" "kronos_backend" {
             value = "1.0.0"
           }
           env {
-            name  = "SERVICE_NAMESPACE"
-            value = kubernetes_namespace_v1.kronos.metadata[0].name
+            name  = "OTEL_EXPORTER_OTLP_ENDPOINT"
+            value = "http://datadog.monitoring.svc.cluster.local"
+          }
+          env {
+            name = "OTLP_EXPORTER_OTLP_PROTOCOL"
+            value = "grpc"
+          }
+          env {
+            name = "OTEL_RESOURCE_ATTRIBUTES"
+            value = "
+              service.version=$(SERVICE_VERSION),deployment.environment=$(DEPLOYMENT_ENV),service.name=$(OTEL_SERVICE_NAME),k8s.namespace.name=$(OTEL_K8S_NAMESPACE),k8s.pod.name=$(OTEL_K8S_POD_NAME),host.name=$(OTEL_K8S_NODE_NAME)"
           }
           env {
             name  = "DB_HOST"

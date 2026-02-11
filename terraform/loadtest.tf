@@ -146,7 +146,7 @@ resource "kubernetes_manifest" "k6_test" {
           },
           {
             name  = "TEST_TYPE"
-            value = "load"
+            value = "spike"
           },
           {
             name  = "K6_OUT"

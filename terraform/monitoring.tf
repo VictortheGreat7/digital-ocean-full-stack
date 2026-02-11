@@ -695,24 +695,10 @@ resource "helm_release" "datadog" {
         }
 
         apm = {
-          # enabled = true
-          # instrumentation = {
-          #   enabled = true
-          #   targets = [
-          #     {
-          #       name = "default-target"
-          #       namespaceSelector = {
-          #         matchNames = ["kronos"]
-          #       }
-          #       ddTraceVersions = {
-          #         python = "4"
-          #         js     = "5"
-          #       }
-          #     }
-          #   ]
-          # }
           portEnabled = true
           peerServiceAggregation = true
+          peerTagsAggregation = true
+          computeStatsBySpanKind = true
         }
 
         orchestratorExplorer = {
@@ -743,19 +729,8 @@ resource "helm_release" "datadog" {
           configMap = {
             name = kubernetes_config_map_v1.datadog_otel_config.metadata[0].name
           }
-          # logs = {
-          #   enabled = true
-          # }
         }
       }
-
-      # clusterAgent = {
-      #   admissionController = {
-      #     agentSidecarInjection = {
-      #       enabled = true
-      #     }
-      #   }
-      # }
 
       operator = {
         apiKey = var.datadog_api_key

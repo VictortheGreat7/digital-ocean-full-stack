@@ -56,11 +56,11 @@ const profiles = {
   // Spike Testing for sudden traffic bursts
   spike: {
     stages: [
-      { duration: '5m', target: 500 }, // Baseline
-      { duration: '10m', target: 5000 }, // Spike to 5000 users
-      { duration: '20m', target: 5000 }, // Stay at spike
-      { duration: '5m', target: 500 }, // Drop back to baseline
-      { duration: '5m', target: 500 }, // Stay at baseline
+      { duration: '1m', target: 500 }, // Baseline
+      { duration: '5m', target: 5000 }, // Spike to 5000 users
+      { duration: '10m', target: 5000 }, // Stay at spike
+      { duration: '2m', target: 500 }, // Drop back to baseline
+      { duration: '1m', target: 500 }, // Stay at baseline
       { duration: '1m', target: 0 }, // Recover
     ],
     thresholds: {
