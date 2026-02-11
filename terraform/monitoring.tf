@@ -642,7 +642,7 @@ resource "kubernetes_config_map_v1" "datadog_otel_config" {
     EOT
   }
 
-  depends_on = [helm_release.datadog]
+  depends_on = [helm_release.kube_prometheus_stack]
 }
 
 resource "helm_release" "datadog" {
