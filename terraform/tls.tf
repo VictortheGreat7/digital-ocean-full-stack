@@ -82,6 +82,9 @@ resource "helm_release" "cert_manager_stag_issuer" {
   repository = "https://charts.adfinis.com"
   namespace  = "cert-manager"
 
+  atomic           = true
+  cleanup_on_fail  = true
+
   values = [
     <<-EOT
 clusterIssuers:
