@@ -3,6 +3,7 @@
 # Stage 1: Build the React application
 FROM node:24-alpine AS builder
 
+# Set working directory
 WORKDIR /app
 
 # Copy package files
