@@ -17,7 +17,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-
 # Build wheels for all dependencies
 RUN pip wheel --wheel-dir /wheels -r requirements.txt
 

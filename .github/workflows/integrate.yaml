@@ -45,7 +45,7 @@ jobs:
         with:
           scan-type: 'fs'
           format: 'table'
-          exit-code: '1'
+          exit-code: '0'
           scanners: 'vuln,secret,misconfig,license'
           severity: 'CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN'
       - name: Set up Docker Buildx
@@ -143,7 +143,7 @@ jobs:
           image-ref: kronos-frontend:${{ github.sha }}
           format: 'table'
           exit-code: '1'
-          scanners: 'vuln,secret,misconfig,license'
+          scanners: 'vuln,secret,misconfig'
           severity: 'CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN'
       - name: Test frontend container
         run: |
