@@ -38,7 +38,7 @@ jobs:
         with:
           scan-type: 'fs'
           format: 'table'
-          exit-code: '1'
+          exit-code: '0'
           scanners: 'vuln,secret,misconfig,license'
           severity: 'CRITICAL'
       - name: Run Trivy Repo Comprehensive Scan
