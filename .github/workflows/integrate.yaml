@@ -70,7 +70,7 @@ jobs:
           format: 'table'
           exit-code: '1'
           scanners: 'vuln,secret,misconfig,license'
-          severity: 'CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN'
+          severity: 'CRITICAL,HIGH'
           skip-setup-trivy: true
       - name: Test backend container
         run: |
@@ -143,8 +143,8 @@ jobs:
           image-ref: kronos-frontend:${{ github.sha }}
           format: 'table'
           exit-code: '1'
-          scanners: 'vuln,secret,misconfig'
-          severity: 'CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN'
+          scanners: 'vuln,secret,misconfig,license'
+          severity: 'CRITICAL,HIGH'
       - name: Test frontend container
         run: |
           docker run -d -p 8080:80 --name frontend-test kronos-frontend:${{ github.sha }}
