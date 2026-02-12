@@ -38,6 +38,14 @@ jobs:
     steps:
       - name: Checkout current Github repository
         uses: actions/checkout@v4
+      - name: Run Trivy Repo Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          format: 'sarif'
+          output: 'trivy-repo-scan.sarif'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN'
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Login to DockerHub
@@ -53,6 +61,15 @@ jobs:
           tags: kronos-backend:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      - name: Run Trivy Image Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: kronos-backend:${{ github.sha }}
+          format: 'sarif'
+          output: 'trivy-image-scan.sarif'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN'
+          skip-setup-trivy: true
       - name: Test backend container
         run: |
           # Create a user-defined network (once)
@@ -116,6 +133,14 @@ jobs:
           tags: kronos-frontend:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      - name: Run Trivy Image Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: kronos-frontend:${{ github.sha }}
+          format: 'sarif'
+          output: 'trivy-image-scan.sarif'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN'
       - name: Test frontend container
         run: |
           docker run -d -p 8080:80 --name frontend-test kronos-frontend:${{ github.sha }}
@@ -201,113 +226,113 @@ jobs:
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
 
-  # Runs if either terraform/ did not change and backend/ or frontend/ changed
-  update-doks-backend-images:
-    needs: [changes, build-backend, modify-infra]
-    if: ${{ always() && (needs.modify-infra.result == 'skipped' || needs.modify-infra.result == 'success') && (needs.build-backend.result == 'success') }}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout current Github repository
-        uses: actions/checkout@v4
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
-          terraform_wrapper: false
-      - name: Install doctl
-        uses: digitalocean/action-doctl@v2
-        with:
-          token: ${{ secrets.DO_API_TOKEN }}
-      - name: Cache Terraform Plugin Dir
-        uses: actions/cache@v3
-        with:
-          path: ${{ github.workspace }}/.terraform.d/plugin-cache
-          key: terraform-plugin-cache-${{ runner.os }}-${{ hashFiles('terraform/.terraform.lock.hcl') }}
-          restore-keys: |
-            terraform-plugin-cache-${{ runner.os }}-
-      - name: Initialize Terraform (to load state)
-        env:
-          TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
-        run: |
-          mkdir -p ${{ github.workspace }}/.terraform.d/plugin-cache
-          echo "plugin_cache_dir = \"${{ github.workspace }}/.terraform.d/plugin-cache\"" > ~/.terraformrc
+  # # Runs if either terraform/ did not change and backend/ or frontend/ changed
+  # update-doks-backend-images:
+  #   needs: [changes, build-backend, modify-infra]
+  #   if: ${{ always() && (needs.modify-infra.result == 'skipped' || needs.modify-infra.result == 'success') && (needs.build-backend.result == 'success') }}
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: write
+  #   steps:
+  #     - name: Checkout current Github repository
+  #       uses: actions/checkout@v4
+  #     - name: Setup Terraform
+  #       uses: hashicorp/setup-terraform@v3
+  #       with:
+  #         cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+  #         terraform_wrapper: false
+  #     - name: Install doctl
+  #       uses: digitalocean/action-doctl@v2
+  #       with:
+  #         token: ${{ secrets.DO_API_TOKEN }}
+  #     - name: Cache Terraform Plugin Dir
+  #       uses: actions/cache@v3
+  #       with:
+  #         path: ${{ github.workspace }}/.terraform.d/plugin-cache
+  #         key: terraform-plugin-cache-${{ runner.os }}-${{ hashFiles('terraform/.terraform.lock.hcl') }}
+  #         restore-keys: |
+  #           terraform-plugin-cache-${{ runner.os }}-
+  #     - name: Initialize Terraform (to load state)
+  #       env:
+  #         TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+  #       run: |
+  #         mkdir -p ${{ github.workspace }}/.terraform.d/plugin-cache
+  #         echo "plugin_cache_dir = \"${{ github.workspace }}/.terraform.d/plugin-cache\"" > ~/.terraformrc
 
-          terraform init
-        working-directory: ./terraform
-      - name: Commit Terraform Lock File
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "chore: update terraform.lock.hcl"
-          file_pattern: "terraform/.terraform.lock.hcl"
-          commit_user_name: "github-actions[bot]"
-          commit_user_email: "github-actions[bot]@users.noreply.github.com"
-      - name: Get DOKS Credentials from Terraform Output
-        env:
-          TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
-        id: doks-info
-        run: |
-          DOKS_NAME=$(terraform output -raw doks_cluster_name)
+  #         terraform init
+  #       working-directory: ./terraform
+  #     - name: Commit Terraform Lock File
+  #       uses: stefanzweifel/git-auto-commit-action@v5
+  #       with:
+  #         commit_message: "chore: update terraform.lock.hcl"
+  #         file_pattern: "terraform/.terraform.lock.hcl"
+  #         commit_user_name: "github-actions[bot]"
+  #         commit_user_email: "github-actions[bot]@users.noreply.github.com"
+  #     - name: Get DOKS Credentials from Terraform Output
+  #       env:
+  #         TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+  #       id: doks-info
+  #       run: |
+  #         DOKS_NAME=$(terraform output -raw doks_cluster_name)
 
-          doctl kubernetes cluster kubeconfig save $DOKS_NAME
-        working-directory: ./terraform
-      - name: Update Image in DOKS
-        run: |
-          kubectl set image deployment/kronos-backend backend=victorthegreat7/kronos-backend:latest -n kronos
-          kubectl rollout restart deploy kronos-backend -n kronos
+  #         doctl kubernetes cluster kubeconfig save $DOKS_NAME
+  #       working-directory: ./terraform
+  #     - name: Update Image in DOKS
+  #       run: |
+  #         kubectl set image deployment/kronos-backend backend=victorthegreat7/kronos-backend:latest -n kronos
+  #         kubectl rollout restart deploy kronos-backend -n kronos
 
-  update-doks-frontend-image:
-    needs: [changes, build-frontend, modify-infra]
-    if: ${{ always() && (needs.modify-infra.result == 'skipped' || needs.modify-infra.result == 'success') && (needs.build-frontend.result == 'success') }}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout current Github repository
-        uses: actions/checkout@v4
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
-          terraform_wrapper: false
-      - name: Install doctl
-        uses: digitalocean/action-doctl@v2
-        with:
-          token: ${{ secrets.DO_API_TOKEN }}
-      - name: Cache Terraform Plugin Dir
-        uses: actions/cache@v3
-        with:
-          path: ${{ github.workspace }}/.terraform.d/plugin-cache
-          key: terraform-plugin-cache-${{ runner.os }}-${{ hashFiles('terraform/.terraform.lock.hcl') }}
-          restore-keys: |
-            terraform-plugin-cache-${{ runner.os }}-
-      - name: Initialize Terraform (to load state)
-        env:
-          TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
-        run: |
-          mkdir -p ${{ github.workspace }}/.terraform.d/plugin-cache
-          echo "plugin_cache_dir = \"${{ github.workspace }}/.terraform.d/plugin-cache\"" > ~/.terraformrc
+  # update-doks-frontend-image:
+  #   needs: [changes, build-frontend, modify-infra]
+  #   if: ${{ always() && (needs.modify-infra.result == 'skipped' || needs.modify-infra.result == 'success') && (needs.build-frontend.result == 'success') }}
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: write
+  #   steps:
+  #     - name: Checkout current Github repository
+  #       uses: actions/checkout@v4
+  #     - name: Setup Terraform
+  #       uses: hashicorp/setup-terraform@v3
+  #       with:
+  #         cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+  #         terraform_wrapper: false
+  #     - name: Install doctl
+  #       uses: digitalocean/action-doctl@v2
+  #       with:
+  #         token: ${{ secrets.DO_API_TOKEN }}
+  #     - name: Cache Terraform Plugin Dir
+  #       uses: actions/cache@v3
+  #       with:
+  #         path: ${{ github.workspace }}/.terraform.d/plugin-cache
+  #         key: terraform-plugin-cache-${{ runner.os }}-${{ hashFiles('terraform/.terraform.lock.hcl') }}
+  #         restore-keys: |
+  #           terraform-plugin-cache-${{ runner.os }}-
+  #     - name: Initialize Terraform (to load state)
+  #       env:
+  #         TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+  #       run: |
+  #         mkdir -p ${{ github.workspace }}/.terraform.d/plugin-cache
+  #         echo "plugin_cache_dir = \"${{ github.workspace }}/.terraform.d/plugin-cache\"" > ~/.terraformrc
 
-          terraform init
-        working-directory: ./terraform
-      - name: Commit Terraform Lock File
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "chore: update terraform.lock.hcl"
-          file_pattern: "terraform/.terraform.lock.hcl"
-          commit_user_name: "github-actions[bot]"
-          commit_user_email: "github-actions[bot]@users.noreply.github.com"
-      - name: Get DOKS Credentials from Terraform Output
-        env:
-          TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
-        id: doks-info
-        run: |
-          DOKS_NAME=$(terraform output -raw doks_cluster_name)
+  #         terraform init
+  #       working-directory: ./terraform
+  #     - name: Commit Terraform Lock File
+  #       uses: stefanzweifel/git-auto-commit-action@v5
+  #       with:
+  #         commit_message: "chore: update terraform.lock.hcl"
+  #         file_pattern: "terraform/.terraform.lock.hcl"
+  #         commit_user_name: "github-actions[bot]"
+  #         commit_user_email: "github-actions[bot]@users.noreply.github.com"
+  #     - name: Get DOKS Credentials from Terraform Output
+  #       env:
+  #         TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+  #       id: doks-info
+  #       run: |
+  #         DOKS_NAME=$(terraform output -raw doks_cluster_name)
 
-          doctl kubernetes cluster kubeconfig save $DOKS_NAME
-        working-directory: ./terraform
-      - name: Update Image in DOKS
-        run: |
-          kubectl set image deployment/kronos-frontend frontend=victorthegreat7/kronos-frontend:latest -n kronos
-          kubectl rollout restart deploy kronos-frontend -n kronos
+  #         doctl kubernetes cluster kubeconfig save $DOKS_NAME
+  #       working-directory: ./terraform
+  #     - name: Update Image in DOKS
+  #       run: |
+  #         kubectl set image deployment/kronos-frontend frontend=victorthegreat7/kronos-frontend:latest -n kronos
+  #         kubectl rollout restart deploy kronos-frontend -n kronos
