@@ -185,9 +185,9 @@ resource "helm_release" "argocd_apps" {
             prune    = true
             selfHeal = true
           }
-          syncOptions = [
-            "CreateNamespace=true"
-          ]
+          # syncOptions = [
+          #   "CreateNamespace=true"
+          # ]
         }
       }
     }
