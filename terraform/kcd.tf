@@ -90,16 +90,21 @@ resource "helm_release" "argocd_apps" {
       kube-prom-stack = {
         namespace = "knative-cd"
         project   = "default"
-        source = {
-          repoURL        = "https://github.com/VictortheGreat7/monitoring.git"
-          targetRevision = "main"
-          helm = {
-            chart      = "kube-prometheus-stack"
-            repoURL    = "https://prometheus-community.github.io/helm-charts"
+        sources = [
+          {
+            repoURL        = "https://github.com/VictortheGreat7/monitoring.git"
+            targetRevision = "main"
+            ref            = "values"
+          },
+          {
+            repoURL        = "https://prometheus-community.github.io/helm-charts"
+            chart          = "kube-prometheus-stack"
             targetRevision = "latest"
-            valueFiles = ["values.yaml"]
+            helm = {
+              valueFiles = ["$values/helm/values.yaml"]
+            }
           }
-        }
+        ]
         destination = {
           server    = "https://kubernetes.default.svc"
           namespace = "monitoring"
@@ -120,7 +125,7 @@ resource "helm_release" "argocd_apps" {
       #   source = {
       #     repoURL        = "https://github.com/VictortheGreat7/monitoring.git"
       #     targetRevision = "main"
-      #     path           = "helm-values"
+      #     path           = "helm"
       #     helm = {
       #       chart      = "datadog"
       #       repoURL    = "https://helm.datadoghq.com"
@@ -144,16 +149,18 @@ resource "helm_release" "argocd_apps" {
       chaos-operator = {
         namespace = "knative-cd"
         project   = "default"
-        source = {
-          repoURL        = "https://github.com/VictortheGreat7/chaos-testing.git"
-          targetRevision = "main"
-          path           = "helm-values"
-          helm = {
-            chart      = "k6-operator"
+        sources = [
+          {
+            repoURL        = "https://github.com/VictortheGreat7/chaos-testing.git"
+            targetRevision = "main"
+            ref            = "values"
+          },
+          {
             repoURL    = "https://grafana.github.io/helm-charts"
-            valueFiles = ["values.yaml"]
+            chart      = "k6-operator"
+            valueFiles = ["$values/helm/values.yaml"]
           }
-        }
+        ]
         destination = {
           server    = "https://kubernetes.default.svc"
           namespace = "chaos"
