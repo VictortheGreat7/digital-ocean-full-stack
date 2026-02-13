@@ -48,8 +48,9 @@ resource "kubernetes_manifest" "cilium_gateway" {
   }
 
   depends_on = [
-    kubernetes_service_v1.kronos_frontend,
-    kubernetes_service_v1.kronos_backend
+    digitalocean_kubernetes_cluster.kronos
+    # kubernetes_service_v1.kronos_frontend,
+    # kubernetes_service_v1.kronos_backend
   ]
 }
 

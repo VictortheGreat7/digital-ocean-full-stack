@@ -22,7 +22,7 @@ data "kubernetes_service_v1" "cilium_gateway" {
 
   depends_on = [
     random_pet.kronos,
-    helm_release.kube_prometheus_stack,
+    # helm_release.kube_prometheus_stack,
     data.digitalocean_kubernetes_versions.kronos
   ]
 }
