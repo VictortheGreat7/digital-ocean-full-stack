@@ -54,8 +54,8 @@ resource "helm_release" "argo_cd" {
   ]
 }
 
-resource "helm_release" "argo_cd" {
-  name             = "argocd"
+resource "helm_release" "argocd_apps" {
+  name             = "argocd-apps"
   repository       = "https://argoproj.github.io/argo-helm"
   chart            = "argocd-apps"
   namespace        = "knative-cd"
