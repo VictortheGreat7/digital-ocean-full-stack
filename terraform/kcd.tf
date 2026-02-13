@@ -99,7 +99,7 @@ resource "helm_release" "argocd_apps" {
           {
             repoURL        = "https://prometheus-community.github.io/helm-charts"
             chart          = "kube-prometheus-stack"
-            targetRevision = "latest"
+            targetRevision = "81.6.7"
             helm = {
               valueFiles = ["$values/helm/values.yaml"]
             }
@@ -156,9 +156,10 @@ resource "helm_release" "argocd_apps" {
             ref            = "values"
           },
           {
-            repoURL    = "https://grafana.github.io/helm-charts"
-            chart      = "k6-operator"
-            valueFiles = ["$values/helm/values.yaml"]
+            repoURL        = "https://grafana.github.io/helm-charts"
+            chart          = "k6-operator"
+            targetRevision = "4.2.0"
+            valueFiles     = ["$values/helm/values.yaml"]
           }
         ]
         destination = {
