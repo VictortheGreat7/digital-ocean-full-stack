@@ -2,6 +2,7 @@ resource "helm_release" "argo_cd" {
   name             = "argocd"
   repository       = "https://argoproj.github.io/argo-helm"
   chart            = "argo-cd"
+  namespace        = "knative-cd"
   create_namespace = true
   atomic           = true
   cleanup_on_fail  = true
@@ -26,19 +27,14 @@ resource "helm_release" "argo_cd" {
                 }
               }
             ]
-            filters = [
-              {
-                type = "URLRewrite"
-                urlRewrite = {
-                  path = {
-                    type               = "ReplacePrefixMatch"
-                    replacePrefixMatch = "/"
-                  }
-                }
-              }
-            ]
           }
         ]
+      }
+    }
+    config = {
+      params = {
+        "server.basehref" = "/kcd/argo"
+        "server.rootpath" = "/kcd/argo"
       }
     }
   })]
