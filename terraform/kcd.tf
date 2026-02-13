@@ -69,13 +69,116 @@ resource "helm_release" "argocd_apps" {
         namespace = "knative-cd"
         project   = "default"
         source = {
-          repoURL = "https://github.com/VictortheGreat7/kronos-app.git"
+          repoURL        = "https://github.com/VictortheGreat7/kronos-app.git"
           targetRevision = "main"
-          path = "."
+          path           = "."
         }
         destination = {
           server    = "https://kubernetes.default.svc"
           namespace = "kronos"
+        }
+        syncPolicy = {
+          automated = {
+            prune    = true
+            selfHeal = true
+          }
+          syncOptions = [
+            "CreateNamespace=true"
+          ]
+        }
+      },
+      kube-prom-stack = {
+        namespace = "knative-cd"
+        project   = "default"
+        source = {
+          repoURL        = "https://github.com/VictortheGreat7/monitoring.git"
+          targetRevision = "main"
+          path           = "helm"
+          helm = {
+            chart      = "kube-prometheus-stack"
+            repoURL    = "https://prometheus-community.github.io/helm-charts"
+            valueFiles = ["values.yaml"]
+          }
+          destination = {
+            server    = "https://kubernetes.default.svc"
+            namespace = "monitoring"
+          }
+          syncPolicy = {
+            automated = {
+              prune    = true
+              selfHeal = true
+            }
+            syncOptions = [
+              "CreateNamespace=true"
+            ]
+          }
+        }
+      },
+      # datadog = {
+      #   namespace = "knative-cd"
+      #   project   = "default"
+      #   source = {
+      #     repoURL        = "https://github.com/VictortheGreat7/monitoring.git"
+      #     targetRevision = "main"
+      #     path           = "helm"
+      #     helm = {
+      #       chart      = "datadog"
+      #       repoURL    = "https://helm.datadoghq.com"
+      #       valueFiles = ["datadog-values.yaml"]
+      #     }
+      #     destination = {
+      #       server    = "https://kubernetes.default.svc"
+      #       namespace = "datadog"
+      #     }
+      #     syncPolicy = {
+      #       automated = {
+      #         prune    = true
+      #         selfHeal = true
+      #       }
+      #       syncOptions = [
+      #         "CreateNamespace=true"
+      #       ]
+      #     }
+      #   }
+      # },
+      chaos-operator = {
+        namespace = "knative-cd"
+        project   = "default"
+        source = {
+          repoURL        = "https://github.com/VictortheGreat7/chaos-testing.git"
+          targetRevision = "main"
+          path           = "helm"
+          helm = {
+            chart      = "k6-operator"
+            repoURL    = "https://grafana.github.io/helm-charts"
+            valueFiles = ["values.yaml"]
+          }
+          destination = {
+            server    = "https://kubernetes.default.svc"
+            namespace = "chaos"
+          }
+          syncPolicy = {
+            automated = {
+              prune    = true
+              selfHeal = true
+            }
+            syncOptions = [
+              "CreateNamespace=true"
+            ]
+          }
+        }
+      },
+      chaos-test = {
+        namespace = "knative-cd"
+        project   = "default"
+        source = {
+          repoURL        = "https://github.com/VictortheGreat7/chaos-testing.git"
+          targetRevision = "main"
+          path           = "."
+        }
+        destination = {
+          server    = "https://kubernetes.default.svc"
+          namespace = "chaos"
         }
         syncPolicy = {
           automated = {
