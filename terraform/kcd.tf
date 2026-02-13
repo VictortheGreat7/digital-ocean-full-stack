@@ -65,13 +65,13 @@ resource "helm_release" "argocd_apps" {
 
   values = [yamlencode({
     applications = {
-      guestbook = {
+      kronos = {
         namespace = "knative-cd"
-        project   = "guestbook"
+        project   = "default"
         source = {
           repoURL = "https://github.com/VictortheGreat7/kronos-app.git"
           targetRevision = "main"
-          # path = "kronos-app"
+          path = "."
         }
         destination = {
           server    = "https://kubernetes.default.svc"
