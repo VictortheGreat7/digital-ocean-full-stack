@@ -39,8 +39,8 @@ resource "helm_release" "argo_cd" {
     }
     configs = {
       params = {
-        "server.basehref" = "/kcd/argo"
-        "server.rootpath" = "/kcd/argo"
+        # "server.basehref" = "/kcd/argo"
+        # "server.rootpath" = "/kcd/argo"
         "server.insecure" = "true"
       }
     }
