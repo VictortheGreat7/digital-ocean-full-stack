@@ -44,15 +44,34 @@ resource "helm_release" "argo_cd" {
         "server.insecure" = "true"
       }
     }
-    applications = {
-      my-app = {
-        namespace = "kronos"
-        project   = "default"
+  })]
 
+  wait    = true
+  timeout = 600
+
+  depends_on = [
+    digitalocean_kubernetes_cluster.kronos
+  ]
+}
+
+resource "helm_release" "argo_cd" {
+  name             = "argocd"
+  repository       = "https://argoproj.github.io/argo-helm"
+  chart            = "argocd-apps"
+  namespace        = "knative-cd"
+  create_namespace = false
+  atomic           = true
+  cleanup_on_fail  = true
+
+  values = [yamlencode({
+    applications = {
+      guestbook = {
+        namespace = "kronos"
+        project   = "guestbook"
         source = {
           repoURL = "https://github.com/VictortheGreat7/kronos-app.git"
           targetRevision = "main"
-          path = "kronos-app"
+          # path = "kronos-app"
         }
         destination = {
           server    = "https://kubernetes.default.svc"
@@ -75,6 +94,7 @@ resource "helm_release" "argo_cd" {
   timeout = 600
 
   depends_on = [
-    digitalocean_kubernetes_cluster.kronos
+    digitalocean_kubernetes_cluster.kronos,
+    helm_release.argo_cd
   ]
 }
