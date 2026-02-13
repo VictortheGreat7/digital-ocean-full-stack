@@ -25,7 +25,7 @@ resource "cloudflare_dns_record" "kronos" {
 
   depends_on = [
     # helm_release.kube_prometheus_stack,
-    helm_release.argocd_apps,
-    kubernetes_manifest.cilium_gateway
+    # kubernetes_manifest.cilium_gateway,
+    helm_release.argocd_apps
   ]
 }
