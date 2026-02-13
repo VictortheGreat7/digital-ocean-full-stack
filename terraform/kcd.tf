@@ -36,6 +36,8 @@ resource "helm_release" "argo_cd" {
         "server.basehref" = "/kcd/argo"
         "server.rootpath" = "/kcd/argo"
         "server.insecure" = "true"
+        "server.service.ports[0]" = 80
+        "server.service.ports[0].targetPort" = 8080
       }
     }
   })]
