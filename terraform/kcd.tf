@@ -93,7 +93,6 @@ resource "helm_release" "argocd_apps" {
         source = {
           repoURL        = "https://github.com/VictortheGreat7/monitoring.git"
           targetRevision = "main"
-          path           = "helm-values"
           helm = {
             chart      = "kube-prometheus-stack"
             repoURL    = "https://prometheus-community.github.io/helm-charts"
