@@ -228,13 +228,7 @@ jobs:
           terraform providers
           terraform validate
 
-          DOKS_ID="$(terraform output -raw doks_cluster_id 2>/dev/null || true)"
-          if [ -n "$DOKS_ID" ]; then
-            echo "DOKS cluster exists; applying changes to existing infrastructure"
-            terraform apply -auto-approve
-          else
-            echo "DOKS cluster does not exist; run build.yaml"
-          fi
+          terraform apply -auto-approve
         working-directory: ./terraform
       - name: Commit Terraform Lock File
         uses: stefanzweifel/git-auto-commit-action@v5
