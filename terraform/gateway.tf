@@ -53,146 +53,146 @@ resource "kubernetes_manifest" "cilium_gateway" {
   ]
 }
 
-resource "kubernetes_manifest" "kronos_http_route" {
-  manifest = {
-    apiVersion = "gateway.networking.k8s.io/v1"
-    kind       = "HTTPRoute"
-    metadata = {
-      name      = "kronos-http-route"
-      namespace = kubernetes_namespace_v1.kronos.metadata[0].name
-    }
-    spec = {
-      parentRefs = [
-        {
-          name        = "kronos"
-          namespace   = "kube-system"
-          sectionName = "http"
-        }
-      ]
-      hostnames = ["${var.subdomains[0]}.${var.domain}"]
-      rules = [
-        {
-          matches = [
-            {
-              path = {
-                type  = "PathPrefix"
-                value = "/"
-              }
-            }
-          ]
-          filters = [
-            {
-              type = "RequestRedirect"
-              requestRedirect = {
-                scheme     = "https"
-                statusCode = 301
-              }
-            }
-          ]
-        }
-      ]
-    }
-  }
+# resource "kubernetes_manifest" "kronos_http_route" {
+#   manifest = {
+#     apiVersion = "gateway.networking.k8s.io/v1"
+#     kind       = "HTTPRoute"
+#     metadata = {
+#       name      = "kronos-http-route"
+#       namespace = kubernetes_namespace_v1.kronos.metadata[0].name
+#     }
+#     spec = {
+#       parentRefs = [
+#         {
+#           name        = "kronos"
+#           namespace   = "kube-system"
+#           sectionName = "http"
+#         }
+#       ]
+#       hostnames = ["${var.subdomains[0]}.${var.domain}"]
+#       rules = [
+#         {
+#           matches = [
+#             {
+#               path = {
+#                 type  = "PathPrefix"
+#                 value = "/"
+#               }
+#             }
+#           ]
+#           filters = [
+#             {
+#               type = "RequestRedirect"
+#               requestRedirect = {
+#                 scheme     = "https"
+#                 statusCode = 301
+#               }
+#             }
+#           ]
+#         }
+#       ]
+#     }
+#   }
 
-  depends_on = [
-    kubernetes_manifest.cilium_gateway
-  ]
-}
+#   depends_on = [
+#     kubernetes_manifest.cilium_gateway
+#   ]
+# }
 
-resource "kubernetes_manifest" "kronos_https_route" {
-  manifest = {
-    apiVersion = "gateway.networking.k8s.io/v1"
-    kind       = "HTTPRoute"
-    metadata = {
-      name      = "kronos-https-route"
-      namespace = kubernetes_namespace_v1.kronos.metadata[0].name
-    }
-    spec = {
-      parentRefs = [
-        {
-          name        = "kronos"
-          namespace   = "kube-system"
-          sectionName = "https"
-        }
-      ]
-      hostnames = ["${var.subdomains[0]}.${var.domain}"]
-      rules = [
-        {
-          matches = [
-            {
-              path = {
-                type  = "PathPrefix"
-                value = "/"
-              }
-            }
-          ]
-          backendRefs = [
-            {
-              name = kubernetes_service_v1.kronos_frontend.metadata[0].name
-              port = kubernetes_service_v1.kronos_frontend.spec[0].port[0].port
-            }
-          ]
-        },
-        {
-          matches = [
-            {
-              path = {
-                type  = "PathPrefix"
-                value = "/api/metrics"
-              }
-            }
-          ]
-          filters = [
-            {
-              type = "URLRewrite"
-              urlRewrite = {
-                path = {
-                  type               = "ReplacePrefixMatch"
-                  replacePrefixMatch = "/"
-                }
-              }
-            }
-          ]
-          backendRefs = [
-            {
-              name = kubernetes_service_v1.kronos_backend.metadata[0].name
-              port = kubernetes_service_v1.kronos_backend.spec[0].port[0].port
-            }
-          ]
-        },
-        {
-          matches = [
-            {
-              path = {
-                type  = "PathPrefix"
-                value = "/api"
-              }
-            }
-          ]
-          filters = [
-            {
-              type = "URLRewrite"
-              urlRewrite = {
-                path = {
-                  type               = "ReplacePrefixMatch"
-                  replacePrefixMatch = "/"
-                }
-              }
-            }
-          ]
-          backendRefs = [
-            {
-              name = kubernetes_service_v1.kronos_backend.metadata[0].name
-              port = kubernetes_service_v1.kronos_backend.spec[0].port[0].port
-            }
-          ]
-        }
-      ]
-    }
-  }
+# resource "kubernetes_manifest" "kronos_https_route" {
+#   manifest = {
+#     apiVersion = "gateway.networking.k8s.io/v1"
+#     kind       = "HTTPRoute"
+#     metadata = {
+#       name      = "kronos-https-route"
+#       namespace = kubernetes_namespace_v1.kronos.metadata[0].name
+#     }
+#     spec = {
+#       parentRefs = [
+#         {
+#           name        = "kronos"
+#           namespace   = "kube-system"
+#           sectionName = "https"
+#         }
+#       ]
+#       hostnames = ["${var.subdomains[0]}.${var.domain}"]
+#       rules = [
+#         {
+#           matches = [
+#             {
+#               path = {
+#                 type  = "PathPrefix"
+#                 value = "/"
+#               }
+#             }
+#           ]
+#           backendRefs = [
+#             {
+#               name = kubernetes_service_v1.kronos_frontend.metadata[0].name
+#               port = kubernetes_service_v1.kronos_frontend.spec[0].port[0].port
+#             }
+#           ]
+#         },
+#         {
+#           matches = [
+#             {
+#               path = {
+#                 type  = "PathPrefix"
+#                 value = "/api/metrics"
+#               }
+#             }
+#           ]
+#           filters = [
+#             {
+#               type = "URLRewrite"
+#               urlRewrite = {
+#                 path = {
+#                   type               = "ReplacePrefixMatch"
+#                   replacePrefixMatch = "/"
+#                 }
+#               }
+#             }
+#           ]
+#           backendRefs = [
+#             {
+#               name = kubernetes_service_v1.kronos_backend.metadata[0].name
+#               port = kubernetes_service_v1.kronos_backend.spec[0].port[0].port
+#             }
+#           ]
+#         },
+#         {
+#           matches = [
+#             {
+#               path = {
+#                 type  = "PathPrefix"
+#                 value = "/api"
+#               }
+#             }
+#           ]
+#           filters = [
+#             {
+#               type = "URLRewrite"
+#               urlRewrite = {
+#                 path = {
+#                   type               = "ReplacePrefixMatch"
+#                   replacePrefixMatch = "/"
+#                 }
+#               }
+#             }
+#           ]
+#           backendRefs = [
+#             {
+#               name = kubernetes_service_v1.kronos_backend.metadata[0].name
+#               port = kubernetes_service_v1.kronos_backend.spec[0].port[0].port
+#             }
+#           ]
+#         }
+#       ]
+#     }
+#   }
 
-  depends_on = [
-    kubernetes_manifest.cilium_gateway,
-    kubernetes_manifest.kronos_http_route
-  ]
-}
+#   depends_on = [
+#     kubernetes_manifest.cilium_gateway,
+#     kubernetes_manifest.kronos_http_route
+#   ]
+# }

@@ -44,6 +44,31 @@ resource "helm_release" "argo_cd" {
         "server.insecure" = "true"
       }
     }
+    applications = {
+      my-app = {
+        namespace = "kronos"
+        project   = "default"
+
+        source = {
+          repoURL = "https://github.com/VictortheGreat7/kronos-app.git"
+          targetRevision = "main"
+          path = "kronos-app"
+        }
+        destination = {
+          server    = "https://kubernetes.default.svc"
+          namespace = "kronos"
+        }
+        syncPolicy = {
+          automated = {
+            prune    = true
+            selfHeal = true
+          }
+          syncOptions = [
+            "CreateNamespace=true"
+          ]
+        }
+      }
+    }
   })]
 
   wait    = true

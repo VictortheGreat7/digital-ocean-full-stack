@@ -31,18 +31,18 @@ resource "digitalocean_project" "kronos" {
   depends_on = [digitalocean_kubernetes_cluster.kronos]
 }
 
-resource "kubernetes_namespace_v1" "kronos" {
-  metadata {
-    name = "kronos"
-  }
+# resource "kubernetes_namespace_v1" "kronos" {
+#   metadata {
+#     name = "kronos"
+#   }
 
-  depends_on = [digitalocean_kubernetes_cluster.kronos]
-}
+#   depends_on = [digitalocean_kubernetes_cluster.kronos]
+# }
 
-resource "kubernetes_namespace_v1" "kronos_monitoring" {
-  metadata {
-    name = "monitoring"
-  }
+# resource "kubernetes_namespace_v1" "kronos_monitoring" {
+#   metadata {
+#     name = "monitoring"
+#   }
 
-  depends_on = [digitalocean_kubernetes_cluster.kronos]
-}
+#   depends_on = [digitalocean_kubernetes_cluster.kronos]
+# }
