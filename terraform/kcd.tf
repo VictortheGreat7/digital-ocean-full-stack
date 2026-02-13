@@ -66,7 +66,7 @@ resource "helm_release" "argocd_apps" {
   values = [yamlencode({
     applications = {
       guestbook = {
-        namespace = "kronos"
+        namespace = "knative-cd"
         project   = "guestbook"
         source = {
           repoURL = "https://github.com/VictortheGreat7/kronos-app.git"
