@@ -1,5 +1,5 @@
 output "doks_connect" {
-  value = "doctl kubernetes cluster kubeconfig save ${digitalocean_kubernetes_cluster.kronos.name}"
+  value     = "doctl kubernetes cluster kubeconfig save ${digitalocean_kubernetes_cluster.kronos.name}"
   sensitive = true
 }
 

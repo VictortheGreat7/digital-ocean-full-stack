@@ -6,8 +6,8 @@ resource "helm_release" "cert_manager" {
   create_namespace = true
   namespace        = "cert-manager"
 
-  atomic           = true
-  cleanup_on_fail  = true
+  atomic          = true
+  cleanup_on_fail = true
 
   set = [
     {
@@ -47,8 +47,8 @@ resource "helm_release" "cert_manager_prod_issuer" {
   repository = "https://charts.adfinis.com"
   namespace  = helm_release.cert_manager.namespace
 
-  atomic           = true
-  cleanup_on_fail  = true
+  atomic          = true
+  cleanup_on_fail = true
 
   values = [
     <<-EOT
@@ -82,8 +82,8 @@ resource "helm_release" "cert_manager_stag_issuer" {
   repository = "https://charts.adfinis.com"
   namespace  = "cert-manager"
 
-  atomic           = true
-  cleanup_on_fail  = true
+  atomic          = true
+  cleanup_on_fail = true
 
   values = [
     <<-EOT

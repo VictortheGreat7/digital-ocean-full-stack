@@ -42,7 +42,7 @@ resource "kubernetes_deployment_v1" "kronos_backend" {
           name  = "backend"
           image = "victorthegreat7/kronos-backend:latest"
           env {
-            name = "OTEL_SERVICE_NAME"
+            name  = "OTEL_SERVICE_NAME"
             value = "${kubernetes_namespace_v1.kronos.metadata[0].name}-backend"
           }
           env {
@@ -50,7 +50,7 @@ resource "kubernetes_deployment_v1" "kronos_backend" {
             value_from {
               field_ref {
                 api_version = "v1"
-                field_path = "metadata.namespace"
+                field_path  = "metadata.namespace"
               }
             }
           }
@@ -59,7 +59,7 @@ resource "kubernetes_deployment_v1" "kronos_backend" {
             value_from {
               field_ref {
                 api_version = "v1"
-                field_path = "metadata.name"
+                field_path  = "metadata.name"
               }
             }
           }
@@ -68,7 +68,7 @@ resource "kubernetes_deployment_v1" "kronos_backend" {
             value_from {
               field_ref {
                 api_version = "v1"
-                field_path = "spec.nodeName"
+                field_path  = "spec.nodeName"
               }
             }
           }
@@ -85,11 +85,11 @@ resource "kubernetes_deployment_v1" "kronos_backend" {
             value = "http://datadog.monitoring.svc.cluster.local:4317"
           }
           env {
-            name = "OTLP_EXPORTER_OTLP_PROTOCOL"
+            name  = "OTLP_EXPORTER_OTLP_PROTOCOL"
             value = "grpc"
           }
           env {
-            name = "OTEL_RESOURCE_ATTRIBUTES"
+            name  = "OTEL_RESOURCE_ATTRIBUTES"
             value = "service.version=$(SERVICE_VERSION),deployment.environment=$(DEPLOYMENT_ENV),service.name=$(OTEL_SERVICE_NAME),k8s.namespace.name=$(OTEL_K8S_NAMESPACE),k8s.pod.name=$(OTEL_K8S_POD_NAME),host.name=$(OTEL_K8S_NODE_NAME)"
           }
           env {

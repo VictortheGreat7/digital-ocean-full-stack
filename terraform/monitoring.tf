@@ -690,14 +690,14 @@ resource "helm_release" "datadog" {
         }
 
         processAgent = {
-          enabled = true
+          enabled           = true
           processCollection = true
         }
 
         apm = {
-          portEnabled = true
+          portEnabled            = true
           peerServiceAggregation = true
-          peerTagsAggregation = true
+          peerTagsAggregation    = true
           computeStatsBySpanKind = true
         }
 

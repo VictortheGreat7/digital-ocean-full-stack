@@ -137,35 +137,35 @@ resource "kubernetes_manifest" "kronos_slos" {
             # Availability SLI for /world-clocks
             {
               record = "sli:world_clocks:availability:ratio_rate5m"
-              expr = "1 - (sum(rate(frontend_http_request_errors_total{path=\"/world-clocks\"}[5m])) / clamp_min(sum(rate(frontend_http_request_duration_seconds_count{path=\"/world-clocks\"}[5m])), 1))"
+              expr   = "1 - (sum(rate(frontend_http_request_errors_total{path=\"/world-clocks\"}[5m])) / clamp_min(sum(rate(frontend_http_request_duration_seconds_count{path=\"/world-clocks\"}[5m])), 1))"
             },
             # Latency SLI: % of requests <= 0.5s for /world-clocks
             {
               record = "sli:world_clocks:latency_500ms:ratio_rate5m"
-              expr = "sum(rate(frontend_http_request_duration_seconds_bucket{path=\"/world-clocks\",le=\"0.5\"}[5m])) / clamp_min(sum(rate(frontend_http_request_duration_seconds_count{path=\"/world-clocks\"}[5m])), 1)"
+              expr   = "sum(rate(frontend_http_request_duration_seconds_bucket{path=\"/world-clocks\",le=\"0.5\"}[5m])) / clamp_min(sum(rate(frontend_http_request_duration_seconds_count{path=\"/world-clocks\"}[5m])), 1)"
             },
             # Error-budget burn rate (99.9% availability budget = 0.001)
             {
               record = "burn:world_clocks:availability:1h"
-              expr = "(1 - sli:world_clocks:availability:ratio_rate5m) / 0.001"
+              expr   = "(1 - sli:world_clocks:availability:ratio_rate5m) / 0.001"
             },
             {
               record = "burn:world_clocks:availability:6h"
-              expr = "(1 - sli:world_clocks:availability:ratio_rate5m) / 0.001"
+              expr   = "(1 - sli:world_clocks:availability:ratio_rate5m) / 0.001"
             },
             # Error-budget burn rate (99% latency budget = 0.01)
             {
               record = "burn:world_clocks:latency:1h"
-              expr = "(1 - sli:world_clocks:latency_500ms:ratio_rate5m) / 0.01"
+              expr   = "(1 - sli:world_clocks:latency_500ms:ratio_rate5m) / 0.01"
             },
             {
               record = "burn:world_clocks:latency:6h"
-              expr = "(1 - sli:world_clocks:latency_500ms:ratio_rate5m) / 0.01"
+              expr   = "(1 - sli:world_clocks:latency_500ms:ratio_rate5m) / 0.01"
             },
             # Readiness availability SLI (/ready)
             {
               record = "sli:ready:availability:ratio_rate5m"
-              expr = "1 - (sum(rate(frontend_http_request_errors_total{path=\"/ready\"}[5m])) / clamp_min(sum(rate(frontend_http_request_duration_seconds_count{path=\"/ready\"}[5m])), 1))"
+              expr   = "1 - (sum(rate(frontend_http_request_errors_total{path=\"/ready\"}[5m])) / clamp_min(sum(rate(frontend_http_request_duration_seconds_count{path=\"/ready\"}[5m])), 1))"
             }
           ]
         },
@@ -174,25 +174,25 @@ resource "kubernetes_manifest" "kronos_slos" {
           rules = [
             {
               alert = "WorldClocksAvailabilityBurnRateHigh"
-              expr = "burn:world_clocks:availability:1h > 14.4 and burn:world_clocks:availability:6h > 6"
-              for = "5m"
+              expr  = "burn:world_clocks:availability:1h > 14.4 and burn:world_clocks:availability:6h > 6"
+              for   = "5m"
               labels = {
                 severity = "page"
               }
               annotations = {
-                summary = "World-clocks availability SLO burn rate high"
+                summary     = "World-clocks availability SLO burn rate high"
                 description = "Error budget burn rate indicates a likely SLO violation if sustained."
               }
             },
             {
               alert = "WorldClocksLatencyBurnRateHigh"
-              expr = "burn:world_clocks:latency:1h > 14.4 and burn:world_clocks:latency:6h > 6"
-              for = "5m"
+              expr  = "burn:world_clocks:latency:1h > 14.4 and burn:world_clocks:latency:6h > 6"
+              for   = "5m"
               labels = {
                 severity = "page"
               }
               annotations = {
-                summary = "World-clocks latency SLO burn rate high"
+                summary     = "World-clocks latency SLO burn rate high"
                 description = "Latency budget is being consumed too quickly."
               }
             }
