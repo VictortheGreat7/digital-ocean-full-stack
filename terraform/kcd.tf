@@ -65,6 +65,25 @@ resource "helm_release" "argocd_apps" {
 
   values = [yamlencode({
     applications = {
+      gateway = {
+        namespace = "knative-cd"
+        project   = "default"
+        source = {
+          repoURL = "https://github.com/VictortheGreat7/monitoring.git"
+          targetRevision = "main"
+          path = "gateway"
+        }
+        destination = {
+          server    = "https://kubernetes.default.svc"
+          namespace = "kube-system"
+        }
+        syncPolicy = {
+          automated = {
+            prune    = true
+            selfHeal = true
+          }
+        }
+      },
       kronos = {
         namespace = "knative-cd"
         project   = "default"

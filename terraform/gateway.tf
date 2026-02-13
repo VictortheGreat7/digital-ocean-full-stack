@@ -1,58 +1,58 @@
-resource "kubernetes_manifest" "cilium_gateway" {
-  manifest = {
-    apiVersion = "gateway.networking.k8s.io/v1"
-    kind       = "Gateway"
-    metadata = {
-      name      = "kronos"
-      namespace = "kube-system"
-      annotations = {
-        "cert-manager.io/cluster-issuer" = "letsencrypt-staging"
-      }
-    }
-    spec = {
-      gatewayClassName = "cilium"
-      listeners = [
-        {
-          name     = "http"
-          protocol = "HTTP"
-          port     = 80
-          hostname = "${var.subdomains[0]}.${var.domain}"
-          allowedRoutes = {
-            namespaces = {
-              from = "All"
-            }
-          }
-        },
-        {
-          name     = "https"
-          protocol = "HTTPS"
-          port     = 443
-          hostname = "${var.subdomains[0]}.${var.domain}"
-          tls = {
-            mode = "Terminate"
-            certificateRefs = [
-              {
-                name = "kronos-tls"
-                kind = "Secret"
-              }
-            ]
-          }
-          allowedRoutes = {
-            namespaces = {
-              from = "All"
-            }
-          }
-        }
-      ]
-    }
-  }
+# resource "kubernetes_manifest" "cilium_gateway" {
+#   manifest = {
+#     apiVersion = "gateway.networking.k8s.io/v1"
+#     kind       = "Gateway"
+#     metadata = {
+#       name      = "kronos"
+#       namespace = "kube-system"
+#       annotations = {
+#         "cert-manager.io/cluster-issuer" = "letsencrypt-staging"
+#       }
+#     }
+#     spec = {
+#       gatewayClassName = "cilium"
+#       listeners = [
+#         {
+#           name     = "http"
+#           protocol = "HTTP"
+#           port     = 80
+#           hostname = "${var.subdomains[0]}.${var.domain}"
+#           allowedRoutes = {
+#             namespaces = {
+#               from = "All"
+#             }
+#           }
+#         },
+#         {
+#           name     = "https"
+#           protocol = "HTTPS"
+#           port     = 443
+#           hostname = "${var.subdomains[0]}.${var.domain}"
+#           tls = {
+#             mode = "Terminate"
+#             certificateRefs = [
+#               {
+#                 name = "kronos-tls"
+#                 kind = "Secret"
+#               }
+#             ]
+#           }
+#           allowedRoutes = {
+#             namespaces = {
+#               from = "All"
+#             }
+#           }
+#         }
+#       ]
+#     }
+#   }
 
-  depends_on = [
-    digitalocean_kubernetes_cluster.kronos
-    # kubernetes_service_v1.kronos_frontend,
-    # kubernetes_service_v1.kronos_backend
-  ]
-}
+#   depends_on = [
+#     digitalocean_kubernetes_cluster.kronos
+#     # kubernetes_service_v1.kronos_frontend,
+#     # kubernetes_service_v1.kronos_backend
+#   ]
+# }
 
 # resource "kubernetes_manifest" "kronos_http_route" {
 #   manifest = {
