@@ -93,10 +93,11 @@ resource "helm_release" "argocd_apps" {
         source = {
           repoURL        = "https://github.com/VictortheGreat7/monitoring.git"
           targetRevision = "main"
-          path           = "helm"
+          path           = "helm-values"
           helm = {
             chart      = "kube-prometheus-stack"
             repoURL    = "https://prometheus-community.github.io/helm-charts"
+            targetRevision = "latest"
             valueFiles = ["values.yaml"]
           }
         }
@@ -120,7 +121,7 @@ resource "helm_release" "argocd_apps" {
       #   source = {
       #     repoURL        = "https://github.com/VictortheGreat7/monitoring.git"
       #     targetRevision = "main"
-      #     path           = "helm"
+      #     path           = "helm-values"
       #     helm = {
       #       chart      = "datadog"
       #       repoURL    = "https://helm.datadoghq.com"
@@ -147,7 +148,7 @@ resource "helm_release" "argocd_apps" {
         source = {
           repoURL        = "https://github.com/VictortheGreat7/chaos-testing.git"
           targetRevision = "main"
-          path           = "helm"
+          path           = "helm-values"
           helm = {
             chart      = "k6-operator"
             repoURL    = "https://grafana.github.io/helm-charts"
