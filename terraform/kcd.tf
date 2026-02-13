@@ -19,18 +19,18 @@ resource "helm_release" "argo_cd" {
         hostnames = ["${var.subdomains[0]}.${var.domain}"]
         rules = [
           {
+            backendRefs = [
+              {
+                name = "argocd-server"
+                port = 80
+              }
+            ]
             matches = [
               {
                 path = {
                   type  = "PathPrefix"
                   value = "/kcd/argo"
                 }
-              }
-            ]
-            backendRefs = [
-              {
-                name = "argocd-server"
-                port = 80
               }
             ]
           }
@@ -41,6 +41,7 @@ resource "helm_release" "argo_cd" {
       params = {
         "server.basehref" = "/kcd/argo"
         "server.rootpath" = "/kcd/argo"
+        "server.insecure" = "true"
       }
     }
   })]
