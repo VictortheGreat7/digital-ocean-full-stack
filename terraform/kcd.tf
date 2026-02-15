@@ -186,6 +186,9 @@ resource "helm_release" "argocd_apps" {
           server    = "https://kubernetes.default.svc"
           namespace = "cert-manager"
         }
+        annotations = {
+          "argocd.argoproj.io/depends-on" = "cert-manager"
+        }
         syncPolicy = {
           automated = {
             # prune    = true
@@ -234,6 +237,31 @@ resource "helm_release" "argocd_apps" {
           ]
         }
       },
+      kube-prom-crds = {
+        namespace = "knative-cd"
+        project   = "default"
+        source = {
+          repoURL        = "https://github.com/prometheus-operator/kube-prometheus"
+          targetRevision = "main"
+          path = "manifests/setup"
+        }
+        destination = {
+          server    = "https://kubernetes.default.svc"
+          namespace = "monitoring"
+        }
+        annotations = {
+          "argocd.argoproj.io/depends-on" = "monitoring"
+        }
+        syncPolicy = {
+          automated = {
+            # prune    = true
+            selfHeal = true
+          }
+          syncOptions = [
+            "ServerSideApply=false"
+          ]
+        }
+      },
       kube-prom-stack = {
         namespace = "knative-cd"
         project   = "default"
@@ -249,12 +277,16 @@ resource "helm_release" "argocd_apps" {
             targetRevision = "81.6.7"
             helm = {
               valueFiles = ["$values/manifests/monitoring/kube-prom-stack/helm/values.yaml"]
+              skipCrds = true
             }
           }
         ]
         destination = {
           server    = "https://kubernetes.default.svc"
           namespace = "monitoring"
+        }
+        annotations = {
+          "argocd.argoproj.io/depends-on" = "monitoring,kube-prom-crds"
         }
         syncPolicy = {
           automated = {
@@ -282,6 +314,9 @@ resource "helm_release" "argocd_apps" {
         destination = {
           server    = "https://kubernetes.default.svc"
           namespace = "monitoring"
+        }
+        annotations = {
+          "argocd.argoproj.io/depends-on" = "monitoring"
         }
         syncPolicy = {
           automated = {
@@ -331,6 +366,9 @@ resource "helm_release" "argocd_apps" {
         destination = {
           server    = "https://kubernetes.default.svc"
           namespace = "chaos"
+        }
+        annotations = {
+          "argocd.argoproj.io/depends-on" = "chaos-operator"
         }
         syncPolicy = {
           automated = {
