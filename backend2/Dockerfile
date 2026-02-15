@@ -30,6 +30,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
+    wget \
     && rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user to run the application
@@ -52,7 +53,7 @@ EXPOSE 5000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:5000/health').read()" || exit 1
+  CMD wget --quiet --tries=1 --spider http://localhost/health || exit 1
 
 ENV FLASK_APP=app.py
 CMD ["flask", "run", "--host=0.0.0.0"]
