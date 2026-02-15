@@ -1,6 +1,4 @@
 datadog:
-  apiKey: YOUR_DATADOG_API_KEY
-  appKey: YOUR_DATADOG_APP_KEY
   apiKeyExistingSecret: datadog-api-key
   appKeyExistingSecret: datadog-app-key
   site: us5.datadoghq.com
@@ -59,8 +57,6 @@ datadog:
       name: otel-agent-config-map
 
 operator:
-  apiKey: YOUR_DATADOG_API_KEY
-  appKey: YOUR_DATADOG_APP_KEY
   apiKeyExistingSecret: datadog-api-key
   appKeyExistingSecret: datadog-app-key
 
