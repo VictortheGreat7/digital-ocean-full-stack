@@ -174,7 +174,7 @@ resource "helm_release" "argocd_apps" {
           ]
         }
       },
-      cluster_issuer = {
+      cluster-issuer = {
         namespace = "knative-cd"
         project   = "default"
         source = {

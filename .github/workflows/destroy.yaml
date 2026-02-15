@@ -38,7 +38,6 @@ jobs:
 
         cat <<EOF > terraform.tfvars.json
         {
-          "github_token": "${{ secrets.GH_TOKEN }}",
           "do_token": "${{ secrets.DO_API_TOKEN }}",
           "cloudflare_api_token": "${{ secrets.CLOUDFLARE_TOKEN }}",
           "cloudflare_zone_id": "${{ secrets.CLOUDFLARE_ZONE_ID }}",
