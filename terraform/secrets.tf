@@ -11,7 +11,7 @@ resource "kubernetes_secret_v1" "datadog_api" {
     name      = "datadog-api-key"
     namespace = "secrets"
     annotations = {
-      "reflector.v1.k8s.emberstack.com/reflection-allowed" = "true"
+      "reflector.v1.k8s.emberstack.com/reflection-allowed"            = "true"
       "reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces" = "monitoring"
     }
   }
@@ -30,7 +30,7 @@ resource "kubernetes_secret_v1" "datadog_app" {
     name      = "datadog-app-key"
     namespace = "secrets"
     annotations = {
-      "reflector.v1.k8s.emberstack.com/reflection-allowed" = "true"
+      "reflector.v1.k8s.emberstack.com/reflection-allowed"            = "true"
       "reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces" = "monitoring"
     }
   }
@@ -49,7 +49,7 @@ resource "kubernetes_secret_v1" "postgres_pass" {
     name      = "postgres-secret"
     namespace = "secrets"
     annotations = {
-      "reflector.v1.k8s.emberstack.com/reflection-allowed" = "true"
+      "reflector.v1.k8s.emberstack.com/reflection-allowed"            = "true"
       "reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces" = "kronos"
     }
   }
@@ -68,7 +68,7 @@ resource "kubernetes_secret_v1" "cloudflare_api" {
     name      = "cloudflare-api"
     namespace = "secrets"
     annotations = {
-      "reflector.v1.k8s.emberstack.com/reflection-allowed" = "true"
+      "reflector.v1.k8s.emberstack.com/reflection-allowed"            = "true"
       "reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces" = "cert-manager"
     }
   }

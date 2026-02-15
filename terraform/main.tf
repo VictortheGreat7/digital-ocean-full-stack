@@ -21,15 +21,15 @@ resource "digitalocean_kubernetes_cluster" "kronos" {
   tags = [digitalocean_tag.kronos.name]
 }
 
-resource "digitalocean_project" "kronos" {
-  name        = "kronos"
-  description = "Kronos World Clock Project"
-  purpose     = "Class project / Educational purposes"
-  environment = "Development"
-  resources   = [digitalocean_kubernetes_cluster.kronos.urn]
+# resource "digitalocean_project" "kronos" {
+#   name        = "kronos"
+#   description = "Kronos World Clock Project"
+#   purpose     = "Class project / Educational purposes"
+#   environment = "Development"
+#   resources   = [digitalocean_kubernetes_cluster.kronos.urn]
 
-  depends_on = [digitalocean_kubernetes_cluster.kronos]
-}
+#   depends_on = [digitalocean_kubernetes_cluster.kronos]
+# }
 
 # resource "kubernetes_namespace_v1" "kronos" {
 #   metadata {

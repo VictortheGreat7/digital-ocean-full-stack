@@ -197,9 +197,9 @@ resource "helm_release" "argocd_apps" {
         namespace = "knative-cd"
         project   = "default"
         source = {
-          repoURL = "https://github.com/VictortheGreat7/digital-ocean-full-stack.git"
+          repoURL        = "https://github.com/VictortheGreat7/digital-ocean-full-stack.git"
           targetRevision = "main"
-          path = "manifests/ingress/gateway"
+          path           = "manifests/ingress/gateway"
         }
         destination = {
           server    = "https://kubernetes.default.svc"
@@ -270,13 +270,13 @@ resource "helm_release" "argocd_apps" {
           {
             repoURL        = "https://github.com/VictortheGreat7/digital-ocean-full-stack.git"
             targetRevision = "main"
-            ref           = "values"
+            ref            = "values"
           },
           {
-            repoURL    = "https://helm.datadoghq.com"
-            chart      = "datadog"
+            repoURL        = "https://helm.datadoghq.com"
+            chart          = "datadog"
             targetRevision = "3.170.1"
-            valueFiles = ["$values/manifest/monitoring/datadog/helm/values.yaml"]
+            valueFiles     = ["$values/manifest/monitoring/datadog/helm/values.yaml"]
           }
         ]
         destination = {
