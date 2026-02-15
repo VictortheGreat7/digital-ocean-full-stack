@@ -1,0 +1,44 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: kronos-https-route
+  namespace: kronos
+spec:
+  parentRefs:
+    - name: kronos
+      namespace: kube-system
+      sectionName: https
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: kronos-frontend-svc
+          port: 80
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/metrics
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+      backendRefs:
+        - name: kronos-backend-svc
+          port: 80
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+      backendRefs:
+        - name: kronos-backend-svc
+          port: 80

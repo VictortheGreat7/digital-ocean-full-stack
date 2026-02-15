@@ -1,0 +1,44 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: kronos-slos
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: slo.world_clocks
+      interval: 30s
+      rules:
+        - record: sli:world_clocks:availability:ratio_rate5m
+          expr: 1 - (sum(rate(frontend_http_request_errors_total{path="/world-clocks"}[5m])) / clamp_min(sum(rate(frontend_http_request_duration_seconds_count{path="/world-clocks"}[5m])), 1))
+        - record: sli:world_clocks:latency_500ms:ratio_rate5m
+          expr: sum(rate(frontend_http_request_duration_seconds_bucket{path="/world-clocks",le="0.5"}[5m])) / clamp_min(sum(rate(frontend_http_request_duration_seconds_count{path="/world-clocks"}[5m])), 1)
+        - record: burn:world_clocks:availability:1h
+          expr: (1 - sli:world_clocks:availability:ratio_rate5m) / 0.001
+        - record: burn:world_clocks:availability:6h
+          expr: (1 - sli:world_clocks:availability:ratio_rate5m) / 0.001
+        - record: burn:world_clocks:latency:1h
+          expr: (1 - sli:world_clocks:latency_500ms:ratio_rate5m) / 0.01
+        - record: burn:world_clocks:latency:6h
+          expr: (1 - sli:world_clocks:latency_500ms:ratio_rate5m) / 0.01
+        - record: sli:ready:availability:ratio_rate5m
+          expr: 1 - (sum(rate(frontend_http_request_errors_total{path="/ready"}[5m])) / clamp_min(sum(rate(frontend_http_request_duration_seconds_count{path="/ready"}[5m])), 1))
+    - name: slo.alerts
+      rules:
+        - alert: WorldClocksAvailabilityBurnRateHigh
+          expr: burn:world_clocks:availability:1h > 14.4 and burn:world_clocks:availability:6h > 6
+          for: 5m
+          labels:
+            severity: page
+          annotations:
+            summary: World-clocks availability SLO burn rate high
+            description: Error budget burn rate indicates a likely SLO violation if sustained.
+        - alert: WorldClocksLatencyBurnRateHigh
+          expr: burn:world_clocks:latency:1h > 14.4 and burn:world_clocks:latency:6h > 6
+          for: 5m
+          labels:
+            severity: page
+          annotations:
+            summary: World-clocks latency SLO burn rate high
+            description: Latency budget is being consumed too quickly.

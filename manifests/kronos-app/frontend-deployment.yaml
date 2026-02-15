@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kronos-frontend
+  namespace: kronos
+  labels:
+    app: kronos-app
+    component: frontend
+    environment: development
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  selector:
+    matchLabels:
+      app: kronos-app
+      component: frontend
+      environment: development
+  template:
+    metadata:
+      labels:
+        app: kronos-app
+        component: frontend
+        environment: development
+    spec:
+      containers:
+        - name: frontend
+          image: victorthegreat7/kronos-frontend:latest
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: 50Mi
+              cpu: 40m
+            limits:
+              memory: 100Mi
+              cpu: 50m
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 3

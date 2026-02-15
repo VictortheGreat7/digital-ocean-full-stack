@@ -65,13 +65,141 @@ resource "helm_release" "argocd_apps" {
 
   values = [yamlencode({
     applications = {
+      # secret-operator = {
+      #   namespace = "knative-cd"
+      #   project   = "default"
+      #   sources = [
+      #     {
+      #       repoURL        = "https://github.com/VictortheGreat7/digital-ocean-full-stack.git"
+      #       targetRevision = "main"
+      #       ref           = "values"
+      #     },
+      #     {
+      #       repoURL        = "https://charts.external-secrets.io/"
+      #       chart          = "external-secrets"
+      #       targetRevision = "2.0.0"
+      #       helm = {
+      #         valueFiles = ["$values/manifests/eso/helm/values.yaml"]
+      #       }
+      #     }
+      #   ]
+      #   destination = {
+      #     server    = "https://kubernetes.default.svc"
+      #     namespace = "secrets"
+      #   }
+      #   syncPolicy = {
+      #     automated = {
+      #       # prune    = true
+      #       selfHeal = true
+      #     }
+      #   }
+      # },
+      # secret-store = {
+      #   namespace = "knative-cd"
+      #   project   = "default"
+      #   source = {
+      #     repoURL        = "https://github.com/VictortheGreat7/digital-ocean-full-stack.git"
+      #     targetRevision = "main"
+      #     path           = "manifests/eso"
+      #   }
+      #   destination = {
+      #     server    = "https://kubernetes.default.svc"
+      #     namespace = "secrets"
+      #   }
+      #   syncPolicy = {
+      #     automated = {
+      #       # prune    = true
+      #       selfHeal = true
+      #     }
+      #   }
+      # },
+      reflector = {
+        namespace = "knative-cd"
+        project   = "default"
+        sources = [
+          {
+            repoURL        = "https://github.com/VictortheGreat7/digital-ocean-full-stack.git"
+            targetRevision = "main"
+            ref            = "values"
+          },
+          {
+            repoURL        = "https://emberstack.github.io/helm-charts"
+            chart          = "reflector"
+            targetRevision = "10.0.8"
+            helm = {
+              valueFiles = ["$values/manifests/reflector/values.yaml"]
+            }
+          }
+        ]
+        destination = {
+          server    = "https://kubernetes.default.svc"
+          namespace = "secrets"
+        }
+        syncPolicy = {
+          automated = {
+            # prune    = true
+            selfHeal = true
+          }
+        }
+      },
+      cert-manager = {
+        namespace = "knative-cd"
+        project   = "default"
+        sources = [
+          {
+            repoURL        = "https://github.com/VictortheGreat7/digital-ocean-full-stack.git"
+            targetRevision = "main"
+            ref            = "values"
+          },
+          {
+            repoURL        = "https://charts.jetstack.io"
+            chart          = "cert-manager"
+            targetRevision = "1.19.3"
+            helm = {
+              valueFiles = ["$values/manifests/ingress/cert-manager/values.yaml"]
+            }
+          }
+        ]
+        destination = {
+          server    = "https://kubernetes.default.svc"
+          namespace = "cert-manager"
+        }
+        syncPolicy = {
+          automated = {
+            # prune    = true
+            selfHeal = true
+          }
+          syncOptions = [
+            "CreateNamespace=true"
+          ]
+        }
+      },
+      cluster_issuer = {
+        namespace = "knative-cd"
+        project   = "default"
+        source = {
+          repoURL        = "https://github.com/VictortheGreat7/digital-ocean-full-stack.git"
+          targetRevision = "main"
+          path           = "manifests/ingress"
+        }
+        destination = {
+          server    = "https://kubernetes.default.svc"
+          namespace = "cert-manager"
+        }
+        syncPolicy = {
+          automated = {
+            # prune    = true
+            selfHeal = true
+          }
+        }
+      },
       gateway = {
         namespace = "knative-cd"
         project   = "default"
         source = {
-          repoURL = "https://github.com/VictortheGreat7/monitoring.git"
+          repoURL = "https://github.com/VictortheGreat7/digital-ocean-full-stack.git"
           targetRevision = "main"
-          path = "gateway"
+          path = "manifests/ingress/gateway"
         }
         destination = {
           server    = "https://kubernetes.default.svc"
@@ -79,26 +207,26 @@ resource "helm_release" "argocd_apps" {
         }
         syncPolicy = {
           automated = {
-            prune    = true
+            # prune    = true
             selfHeal = true
           }
         }
       },
-      kronos = {
+      monitoring = {
         namespace = "knative-cd"
         project   = "default"
         source = {
-          repoURL        = "https://github.com/VictortheGreat7/kronos-app.git"
+          repoURL        = "https://github.com/VictortheGreat7/digital-ocean-full-stack.git"
           targetRevision = "main"
-          path           = "."
+          path           = "manifests/monitoring/"
         }
         destination = {
           server    = "https://kubernetes.default.svc"
-          namespace = "kronos"
+          namespace = "monitoring"
         }
         syncPolicy = {
           automated = {
-            prune    = true
+            # prune    = true
             selfHeal = true
           }
           syncOptions = [
@@ -111,7 +239,7 @@ resource "helm_release" "argocd_apps" {
         project   = "default"
         sources = [
           {
-            repoURL        = "https://github.com/VictortheGreat7/monitoring.git"
+            repoURL        = "https://github.com/VictortheGreat7/digital-ocean-full-stack.git"
             targetRevision = "main"
             ref            = "values"
           },
@@ -120,7 +248,7 @@ resource "helm_release" "argocd_apps" {
             chart          = "kube-prometheus-stack"
             targetRevision = "81.6.7"
             helm = {
-              valueFiles = ["$values/helm/values.yaml"]
+              valueFiles = ["$values/manifests/monitoring/kube-prom-stack/helm/values.yaml"]
             }
           }
         ]
@@ -130,47 +258,44 @@ resource "helm_release" "argocd_apps" {
         }
         syncPolicy = {
           automated = {
-            prune    = true
+            # prune    = true
             selfHeal = true
           }
-          syncOptions = [
-            "CreateNamespace=true"
-          ]
         }
       },
-      # datadog = {
-      #   namespace = "knative-cd"
-      #   project   = "default"
-      #   source = {
-      #     repoURL        = "https://github.com/VictortheGreat7/monitoring.git"
-      #     targetRevision = "main"
-      #     path           = "helm"
-      #     helm = {
-      #       chart      = "datadog"
-      #       repoURL    = "https://helm.datadoghq.com"
-      #       valueFiles = ["datadog-values.yaml"]
-      #     }
-      #     destination = {
-      #       server    = "https://kubernetes.default.svc"
-      #       namespace = "datadog"
-      #     }
-      #     syncPolicy = {
-      #       automated = {
-      #         prune    = true
-      #         selfHeal = true
-      #       }
-      #       syncOptions = [
-      #         "CreateNamespace=true"
-      #       ]
-      #     }
-      #   }
-      # },
+      datadog = {
+        namespace = "knative-cd"
+        project   = "default"
+        sources = [
+          {
+            repoURL        = "https://github.com/VictortheGreat7/digital-ocean-full-stack.git"
+            targetRevision = "main"
+            ref           = "values"
+          },
+          {
+            repoURL    = "https://helm.datadoghq.com"
+            chart      = "datadog"
+            targetRevision = "3.170.1"
+            valueFiles = ["$values/manifest/monitoring/datadog/helm/values.yaml"]
+          }
+        ]
+        destination = {
+          server    = "https://kubernetes.default.svc"
+          namespace = "monitoring"
+        }
+        syncPolicy = {
+          automated = {
+            # prune    = true
+            selfHeal = true
+          }
+        }
+      },
       chaos-operator = {
         namespace = "knative-cd"
         project   = "default"
         sources = [
           {
-            repoURL        = "https://github.com/VictortheGreat7/chaos-testing.git"
+            repoURL        = "https://github.com/VictortheGreat7/digital-ocean-full-stack.git"
             targetRevision = "main"
             ref            = "values"
           },
@@ -178,7 +303,7 @@ resource "helm_release" "argocd_apps" {
             repoURL        = "https://grafana.github.io/helm-charts"
             chart          = "k6-operator"
             targetRevision = "4.2.0"
-            valueFiles     = ["$values/helm/values.yaml"]
+            valueFiles     = ["$values/manifests/chaos-testing/helm/values.yaml"]
           }
         ]
         destination = {
@@ -187,7 +312,7 @@ resource "helm_release" "argocd_apps" {
         }
         syncPolicy = {
           automated = {
-            prune    = true
+            # prune    = true
             selfHeal = true
           }
           syncOptions = [
@@ -199,9 +324,9 @@ resource "helm_release" "argocd_apps" {
         namespace = "knative-cd"
         project   = "default"
         source = {
-          repoURL        = "https://github.com/VictortheGreat7/chaos-testing.git"
+          repoURL        = "https://github.com/VictortheGreat7/digital-ocean-full-stack.git"
           targetRevision = "main"
-          path           = "."
+          path           = "manifests/chaos-testing"
         }
         destination = {
           server    = "https://kubernetes.default.svc"
@@ -209,7 +334,26 @@ resource "helm_release" "argocd_apps" {
         }
         syncPolicy = {
           automated = {
-            prune    = true
+            # prune    = true
+            selfHeal = true
+          }
+        }
+      },
+      kronos = {
+        namespace = "knative-cd"
+        project   = "default"
+        source = {
+          repoURL        = "https://github.com/VictortheGreat7/digital-ocean-full-stack.git"
+          targetRevision = "main"
+          path           = "manifests/kronos-app"
+        }
+        destination = {
+          server    = "https://kubernetes.default.svc"
+          namespace = "kronos"
+        }
+        syncPolicy = {
+          automated = {
+            # prune    = true
             selfHeal = true
           }
           syncOptions = [
@@ -225,6 +369,7 @@ resource "helm_release" "argocd_apps" {
 
   depends_on = [
     digitalocean_kubernetes_cluster.kronos,
-    helm_release.argo_cd
+    helm_release.argo_cd,
+    kubernetes_secret_v1.cloudflare_api
   ]
 }

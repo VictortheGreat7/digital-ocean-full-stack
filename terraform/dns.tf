@@ -1,18 +1,3 @@
-resource "kubernetes_secret_v1" "cloudflare_api" {
-  metadata {
-    name      = "cloudflare-api"
-    namespace = helm_release.cert_manager.namespace
-  }
-
-  data = {
-    api-token = var.cloudflare_api_token
-  }
-
-  type = "Opaque"
-
-  depends_on = [helm_release.cert_manager]
-}
-
 resource "cloudflare_dns_record" "kronos" {
   for_each = toset(var.subdomains)
 
@@ -24,8 +9,6 @@ resource "cloudflare_dns_record" "kronos" {
   proxied = true
 
   depends_on = [
-    # helm_release.kube_prometheus_stack,
-    # kubernetes_manifest.cilium_gateway,
     helm_release.argocd_apps
   ]
 }

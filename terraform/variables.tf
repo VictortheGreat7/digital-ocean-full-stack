@@ -10,12 +10,6 @@ variable "do_token" {
   sensitive   = true
 }
 
-variable "cloudflare_api_token" {
-  description = "Cloudflare API token for managing DNS records"
-  type        = string
-  sensitive   = true
-}
-
 variable "cloudflare_zone_id" {
   description = "Cloudflare Zone ID for the domain"
   type        = string
@@ -43,13 +37,19 @@ variable "datadog_api_key" {
 }
 
 variable "datadog_app_key" {
-  description = "Datadog Application key for monitoring"
+  description = "Datadog application key for monitoring"
   type        = string
   sensitive   = true
 }
 
-variable "datadog_site" {
-  description = "Datadog site (e.g., datadoghq.com, datadoghq.eu)"
+variable "postgres_pass" {
+  description = "PostgreSQL password for the world clock application"
   type        = string
-  default     = "us5.datadoghq.com"
+  sensitive   = true
+}
+
+variable "cloudflare_api_token" {
+  description = "Cloudflare API token for managing DNS records"
+  type        = string
+  sensitive   = true
 }

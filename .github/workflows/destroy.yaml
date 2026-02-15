@@ -38,11 +38,13 @@ jobs:
 
         cat <<EOF > terraform.tfvars.json
         {
-          "do_token": "${{ secrets.DO_API_TOKEN }}",  
+          "github_token": "${{ secrets.GH_TOKEN }}",
+          "do_token": "${{ secrets.DO_API_TOKEN }}",
           "cloudflare_api_token": "${{ secrets.CLOUDFLARE_TOKEN }}",
           "cloudflare_zone_id": "${{ secrets.CLOUDFLARE_ZONE_ID }}",
           "datadog_api_key": "${{ secrets.DATADOG_API_KEY }}",
-          "datadog_app_key": "${{ secrets.DATADOG_APP_KEY }}"
+          "datadog_app_key": "${{ secrets.DATADOG_APP_KEY }}",
+          "postgres_pass": "${{ secrets.POSTGRES_PASS }}"
         }
         EOF
 
