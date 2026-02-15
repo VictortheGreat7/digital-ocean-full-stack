@@ -51,9 +51,9 @@ USER app
 
 EXPOSE 5000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-  CMD wget --quiet --tries=1 --spider http://localhost/health || exit 1
+# # Health check
+# HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+#   CMD wget --quiet --tries=1 --spider http://localhost/health || exit 1
 
 ENV FLASK_APP=app.py
 CMD ["flask", "run", "--host=0.0.0.0"]
