@@ -273,6 +273,22 @@ resource "helm_release" "argocd_apps" {
               {
                 name  = "datadog.clusterName"
                 value = "${digitalocean_kubernetes_cluster.kronos.name}"
+              },
+              {
+                name  = "datadog.apiKey"
+                value = "${var.datadog_api_key}"
+              },
+              {
+                name  = "datadog.appKey"
+                value = "${var.datadog_app_key}"
+              },
+              {
+                name  = "operator.apiKey"
+                value = "${var.datadog_api_key}"
+              },
+              {
+                name  = "operator.appKey"
+                value = "${var.datadog_app_key}"
               }
             ]
           }

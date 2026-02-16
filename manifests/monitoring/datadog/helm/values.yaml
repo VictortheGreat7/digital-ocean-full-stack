@@ -1,68 +1,59 @@
-# agents:
-#   enabled: false
-# clusterAgent:
-#   enabled: false
-# datadog:
-#   apiKeyExistingSecret: datadog-secret
-#   appKeyExistingSecret: datadog-secret
-#   site: us5.datadoghq.com
+datadog:
+  site: us5.datadoghq.com
 
-#   logs:
-#     enabled: true
-#     containerCollectAll: true
-#     autoMultiLineDetection: true
+  logs:
+    enabled: true
+    containerCollectAll: true
+    autoMultiLineDetection: true
 
-#   ignoreAutoConfig:
-#     - cilium
+  ignoreAutoConfig:
+    - cilium
 
-#   confd:
-#     cilium.yaml: |
-#       ad_identifiers:
-#         - cilium-agent
-#       init_config:
-#       instances:
-#         - prometheus_url: http://%%host%%:9090/metrics
-#           tags:
-#             - "component:cilium-agent"
+  confd:
+    cilium.yaml: |
+      ad_identifiers:
+        - cilium-agent
+      init_config:
+      instances:
+        - prometheus_url: http://%%host%%:9090/metrics
+          tags:
+            - "component:cilium-agent"
 
-#   tags:
-#     - "env:dev"
+  tags:
+    - "env:dev"
 
-#   networkMonitoring:
-#     enabled: true
+  networkMonitoring:
+    enabled: true
 
-#   processAgent:
-#     enabled: true
-#     processCollection: true
+  processAgent:
+    enabled: true
+    processCollection: true
 
-#   apm:
-#     portEnabled: true
-#     peerServiceAggregation: true
-#     peerTagsAggregation: true
-#     computeStatsBySpanKind: true
+  apm:
+    portEnabled: true
+    peerServiceAggregation: true
+    peerTagsAggregation: true
+    computeStatsBySpanKind: true
 
-#   orchestratorExplorer:
-#     enabled: true
+  orchestratorExplorer:
+    enabled: true
 
-#   podLabelAsTags:
-#     app: app
-#     component: component
-#     environment: env
+  podLabelAsTags:
+    app: app
+    component: component
+    environment: env
 
-#   otelCollector:
-#     enabled: true
-#     ports:
-#       - name: otlp-grpc
-#         containerPort: 4317
-#       - name: otlp-http
-#         containerPort: 4318
-#     configMap:
-#       name: otel-agent-config-map
+  otelCollector:
+    enabled: true
+    ports:
+      - name: otlp-grpc
+        containerPort: 4317
+      - name: otlp-http
+        containerPort: 4318
+    configMap:
+      name: otel-agent-config-map
 
 operator:
-  apiKeyExistingSecret: datadog-secret
-  appKeyExistingSecret: datadog-secret
-
   datadogCRDs:
     crds:
       datadogAgents: true
