@@ -59,19 +59,19 @@ operator:
   apiKeyExistingSecret: datadog-secret
   appKeyExistingSecret: datadog-secret
 
-  datadogCRDs:
-    crds:
-      datadogAgents: true
-      datadogAgentInternals: true
-      datadogDashboards: true
+  # datadogCRDs:
+  #   crds:
+  #     datadogAgents: true
+  #     datadogAgentInternals: true
+  #     datadogDashboards: true
 
-  datadogAgent:
-    enabled: true
+  # datadogAgent:
+  #   enabled: true
 
-  datadogAgentInternal:
-    enabled: true
+  # datadogAgentInternal:
+  #   enabled: true
 
-  datadogDashboard:
-    enabled: true
+  # datadogDashboard:
+  #   enabled: true
 
   watchNamespaces: ""

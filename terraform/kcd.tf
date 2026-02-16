@@ -255,7 +255,7 @@ resource "helm_release" "argocd_apps" {
           }
         }
       },
-      datadog = {
+      datadog-crds = {
         namespace = "knative-cd"
         project   = "default"
         sources = [
@@ -266,10 +266,10 @@ resource "helm_release" "argocd_apps" {
           },
           {
             repoURL        = "https://helm.datadoghq.com"
-            chart          = "datadog"
-            targetRevision = "3.170.1"
+            chart          = "datadog-crds"
+            targetRevision = "2.16.0"
             helm = {
-              valueFiles     = ["$values/manifests/monitoring/datadog/helm/values.yaml"]
+              valueFiles     = ["$values/manifests/monitoring/datadog/helm/crds/values.yaml"]
               parameters = [
                 {
                   name  = "datadog.clusterName"
@@ -285,6 +285,48 @@ resource "helm_release" "argocd_apps" {
         }
         annotations = {
           "argocd.argoproj.io/depends-on" = "monitoring"
+        }
+        syncPolicy = {
+          automated = {
+            # prune    = true
+            selfHeal = true
+          }
+          syncOptions = [
+            "ServerSideApply=true"
+          ]
+        }
+      },
+      datadog = {
+        namespace = "knative-cd"
+        project   = "default"
+        sources = [
+          {
+            repoURL        = "https://github.com/VictortheGreat7/digital-ocean-full-stack.git"
+            targetRevision = "main"
+            ref            = "values"
+          },
+          {
+            repoURL        = "https://helm.datadoghq.com"
+            chart          = "datadog"
+            targetRevision = "3.170.1"
+            helm = {
+              valueFiles     = ["$values/manifests/monitoring/datadog/helm/values.yaml"]
+              skipCrds = true
+              parameters = [
+                {
+                  name  = "datadog.clusterName"
+                  value = "${digitalocean_kubernetes_cluster.kronos.name}"
+                }
+              ]
+            }
+          }
+        ]
+        destination = {
+          server    = "https://kubernetes.default.svc"
+          namespace = "monitoring"
+        }
+        annotations = {
+          "argocd.argoproj.io/depends-on" = "monitoring,datadog-crds"
           "argocd.argoproj.io/sync-wave" = "4"
         }
         syncPolicy = {
