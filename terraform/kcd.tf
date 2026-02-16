@@ -268,13 +268,15 @@ resource "helm_release" "argocd_apps" {
             repoURL        = "https://helm.datadoghq.com"
             chart          = "datadog"
             targetRevision = "3.170.1"
-            valueFiles     = ["$values/manifests/monitoring/datadog/helm/values.yaml"]
-            parameters = [
-              {
-                name  = "datadog.clusterName"
-                value = "${digitalocean_kubernetes_cluster.kronos.name}"
-              }
-            ]
+            helm = {
+              valueFiles     = ["$values/manifests/monitoring/datadog/helm/values.yaml"]
+              parameters = [
+                {
+                  name  = "datadog.clusterName"
+                  value = "${digitalocean_kubernetes_cluster.kronos.name}"
+                }
+              ]
+            }
           }
         ]
         destination = {
@@ -305,7 +307,9 @@ resource "helm_release" "argocd_apps" {
             repoURL        = "https://grafana.github.io/helm-charts"
             chart          = "k6-operator"
             targetRevision = "4.2.0"
-            valueFiles     = ["$values/manifests/chaos-testing/helm/values.yaml"]
+            helm = {
+              valueFiles     = ["$values/manifests/chaos-testing/helm/values.yaml"]
+            }
           }
         ]
         destination = {
