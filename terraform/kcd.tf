@@ -268,27 +268,11 @@ resource "helm_release" "argocd_apps" {
             repoURL        = "https://helm.datadoghq.com"
             chart          = "datadog"
             targetRevision = "3.170.1"
-            valueFiles     = ["$values/manifest/monitoring/datadog/helm/values.yaml"]
+            valueFiles     = ["$values/manifests/monitoring/datadog/helm/values.yaml"]
             parameters = [
               {
                 name  = "datadog.clusterName"
                 value = "${digitalocean_kubernetes_cluster.kronos.name}"
-              },
-              {
-                name  = "datadog.apiKey"
-                value = "${var.datadog_api_key}"
-              },
-              {
-                name  = "datadog.appKey"
-                value = "${var.datadog_app_key}"
-              },
-              {
-                name  = "operator.apiKey"
-                value = "${var.datadog_api_key}"
-              },
-              {
-                name  = "operator.appKey"
-                value = "${var.datadog_app_key}"
               }
             ]
           }

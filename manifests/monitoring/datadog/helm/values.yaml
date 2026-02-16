@@ -1,4 +1,6 @@
 datadog:
+  apiKeyExistingSecret: datadog-secret
+  appKeyExistingSecret: datadog-secret
   site: us5.datadoghq.com
 
   logs:
@@ -54,6 +56,9 @@ datadog:
       name: otel-agent-config-map
 
 operator:
+  apiKeyExistingSecret: datadog-secret
+  appKeyExistingSecret: datadog-secret
+
   datadogCRDs:
     crds:
       datadogAgents: true
