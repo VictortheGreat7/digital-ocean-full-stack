@@ -258,7 +258,7 @@ resource "helm_release" "argocd_apps" {
             selfHeal = true
           }
           syncOptions = [
-            "ServerSideApply=false"
+            "ServerSideApply=true"
           ]
         }
       },

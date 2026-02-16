@@ -58,7 +58,7 @@ spec:
             - name: OTEL_RESOURCE_ATTRIBUTES
               value: service.version=$(SERVICE_VERSION),deployment.environment=$(DEPLOYMENT_ENV),service.name=$(OTEL_SERVICE_NAME),k8s.namespace.name=$(OTEL_K8S_NAMESPACE),k8s.pod.name=$(OTEL_K8S_POD_NAME),host.name=$(OTEL_K8S_NODE_NAME)
             - name: DB_HOST
-              value: kronos-postgres-0.kronos-postgres-svc.kronos.svc.cluster.local
+              value: kronos-postgres-svc.kronos.svc.cluster.local
             - name: DB_PORT
               value: "5432"
             - name: DB_NAME
