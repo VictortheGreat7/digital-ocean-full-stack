@@ -4,7 +4,7 @@ metadata:
   name: kronos-postgres
   namespace: kronos
 spec:
-  serviceName: kronos-postgres-svc
+  serviceName: postgres
   replicas: 1
   selector:
     matchLabels:
