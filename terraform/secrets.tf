@@ -6,9 +6,9 @@ resource "kubernetes_namespace_v1" "secrets" {
   depends_on = [digitalocean_kubernetes_cluster.kronos]
 }
 
-resource "kubernetes_secret_v1" "datadog_api" {
+resource "kubernetes_secret_v1" "datadog_secret" {
   metadata {
-    name      = "datadog-api-key"
+    name      = "datadog-secret"
     namespace = "secrets"
     annotations = {
       "reflector.v1.k8s.emberstack.com/reflection-auto-enabled"       = "true"
@@ -20,32 +20,12 @@ resource "kubernetes_secret_v1" "datadog_api" {
 
   data = {
     api-key = var.datadog_api_key
-  }
-
-  type = "Opaque"
-
-  depends_on = [kubernetes_namespace_v1.secrets]
-}
-
-resource "kubernetes_secret_v1" "datadog_app" {
-  metadata {
-    name      = "datadog-app-key"
-    namespace = "secrets"
-    annotations = {
-      "reflector.v1.k8s.emberstack.com/reflection-auto-enabled"       = "true"
-      "reflector.v1.k8s.emberstack.com/reflection-auto-namespaces"    = "monitoring"
-      "reflector.v1.k8s.emberstack.com/reflection-allowed"            = "true"
-      "reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces" = "monitoring"
-    }
-  }
-
-  data = {
     app-key = var.datadog_app_key
   }
 
   type = "Opaque"
 
-  depends_on = [kubernetes_secret_v1.datadog_api]
+  depends_on = [kubernetes_namespace_v1.secrets]
 }
 
 resource "kubernetes_secret_v1" "postgres_pass" {
@@ -66,7 +46,7 @@ resource "kubernetes_secret_v1" "postgres_pass" {
 
   type = "Opaque"
 
-  depends_on = [kubernetes_secret_v1.datadog_app]
+  depends_on = [kubernetes_secret_v1.datadog_secret]
 }
 
 resource "kubernetes_secret_v1" "cloudflare_api" {

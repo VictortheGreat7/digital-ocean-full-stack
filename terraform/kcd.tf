@@ -65,54 +65,6 @@ resource "helm_release" "argocd_apps" {
 
   values = [yamlencode({
     applications = {
-      # secret-operator = {
-      #   namespace = "knative-cd"
-      #   project   = "default"
-      #   sources = [
-      #     {
-      #       repoURL        = "https://github.com/VictortheGreat7/digital-ocean-full-stack.git"
-      #       targetRevision = "main"
-      #       ref           = "values"
-      #     },
-      #     {
-      #       repoURL        = "https://charts.external-secrets.io/"
-      #       chart          = "external-secrets"
-      #       targetRevision = "2.0.0"
-      #       helm = {
-      #         valueFiles = ["$values/manifests/eso/helm/values.yaml"]
-      #       }
-      #     }
-      #   ]
-      #   destination = {
-      #     server    = "https://kubernetes.default.svc"
-      #     namespace = "secrets"
-      #   }
-      #   syncPolicy = {
-      #     automated = {
-      #       # prune    = true
-      #       selfHeal = true
-      #     }
-      #   }
-      # },
-      # secret-store = {
-      #   namespace = "knative-cd"
-      #   project   = "default"
-      #   source = {
-      #     repoURL        = "https://github.com/VictortheGreat7/digital-ocean-full-stack.git"
-      #     targetRevision = "main"
-      #     path           = "manifests/eso"
-      #   }
-      #   destination = {
-      #     server    = "https://kubernetes.default.svc"
-      #     namespace = "secrets"
-      #   }
-      #   syncPolicy = {
-      #     automated = {
-      #       # prune    = true
-      #       selfHeal = true
-      #     }
-      #   }
-      # },
       reflector = {
         namespace = "knative-cd"
         project   = "default"
@@ -164,6 +116,9 @@ resource "helm_release" "argocd_apps" {
           server    = "https://kubernetes.default.svc"
           namespace = "cert-manager"
         }
+        annotations = {
+          "argocd.argoproj.io/sync-wave" = "1"
+        }
         syncPolicy = {
           automated = {
             # prune    = true
@@ -188,6 +143,7 @@ resource "helm_release" "argocd_apps" {
         }
         annotations = {
           "argocd.argoproj.io/depends-on" = "cert-manager"
+          "argocd.argoproj.io/sync-wave" = "2"
         }
         syncPolicy = {
           automated = {
@@ -288,6 +244,10 @@ resource "helm_release" "argocd_apps" {
         annotations = {
           "argocd.argoproj.io/depends-on" = "monitoring,kube-prom-crds"
         }
+        annotations = {
+          "argocd.argoproj.io/depends-on" = "cert-manager"
+          "argocd.argoproj.io/sync-wave" = "3"
+        }
         syncPolicy = {
           automated = {
             # prune    = true
@@ -309,6 +269,12 @@ resource "helm_release" "argocd_apps" {
             chart          = "datadog"
             targetRevision = "3.170.1"
             valueFiles     = ["$values/manifest/monitoring/datadog/helm/values.yaml"]
+            parameters = [
+              {
+                name  = "datadog.clusterName"
+                value = "${digitalocean_kubernetes_cluster.kronos.name}"
+              }
+            ]
           }
         ]
         destination = {
@@ -317,6 +283,7 @@ resource "helm_release" "argocd_apps" {
         }
         annotations = {
           "argocd.argoproj.io/depends-on" = "monitoring"
+          "argocd.argoproj.io/sync-wave" = "4"
         }
         syncPolicy = {
           automated = {
@@ -345,6 +312,10 @@ resource "helm_release" "argocd_apps" {
           server    = "https://kubernetes.default.svc"
           namespace = "chaos"
         }
+        annotations = {
+          "argocd.argoproj.io/depends-on" = "cert-manager"
+          "argocd.argoproj.io/sync-wave" = "6"
+        }
         syncPolicy = {
           automated = {
             # prune    = true
@@ -369,6 +340,7 @@ resource "helm_release" "argocd_apps" {
         }
         annotations = {
           "argocd.argoproj.io/depends-on" = "chaos-operator"
+          "argocd.argoproj.io/sync-wave" = "7"
         }
         syncPolicy = {
           automated = {
@@ -388,6 +360,10 @@ resource "helm_release" "argocd_apps" {
         destination = {
           server    = "https://kubernetes.default.svc"
           namespace = "kronos"
+        }
+        annotations = {
+          "argocd.argoproj.io/depends-on" = "cert-manager"
+          "argocd.argoproj.io/sync-wave" = "5"
         }
         syncPolicy = {
           automated = {
