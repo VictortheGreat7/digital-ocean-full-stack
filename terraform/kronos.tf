@@ -7,7 +7,7 @@ resource "helm_release" "kronos_argocd" {
   atomic           = true
   cleanup_on_fail  = true
 
-  values = [file("../helm/argocd/argocd-apps/app-values.yaml")]
+  values = [file("${path.module}/../helm/argocd/argocd-apps/app-values.yaml")]
 
   wait    = true
   timeout = 600

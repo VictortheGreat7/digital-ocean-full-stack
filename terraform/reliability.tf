@@ -8,7 +8,7 @@ resource "helm_release" "monitoring_argocd" {
   cleanup_on_fail  = true
 
   values = [
-    templatefile("../helm/argocd/argocd-apps/monitoring-values.yaml", {
+    templatefile("${path.module}/../helm/argocd/argocd-apps/monitoring-values.yaml", {
       cluster_name = digitalocean_kubernetes_cluster.kronos.name
     })
   ]
@@ -31,7 +31,7 @@ resource "helm_release" "chaos_argocd" {
   atomic           = true
   cleanup_on_fail  = true
 
-  values = [file("../helm/argocd/argocd-apps/chaos-values.yaml")]
+  values = [file("${path.module}/../helm/argocd/argocd-apps/chaos-values.yaml")]
 
   wait    = true
   timeout = 600

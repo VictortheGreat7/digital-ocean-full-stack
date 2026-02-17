@@ -5,6 +5,8 @@ server:
       - name: kronos
         namespace: kube-system
         sectionName: https
+    hostnames:
+      - "${kronos_domain}"
     rules:
       - matches:
         - path:

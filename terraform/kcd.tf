@@ -7,13 +7,9 @@ resource "helm_release" "argo_cd" {
   atomic           = true
   cleanup_on_fail  = true
 
-  values = [file("../helm/argocd/values.yaml"),
-    yamlencode({
-      server = {
-        httproute = {
-          hostnames = ["${var.subdomains[0]}.${var.domain}"]
-        }
-      }
+  values = [
+    templatefile("${path.module}/../helm/argocd/values.yaml", {
+      kronos_domain = "${var.subdomains[0]}.${var.domain}"
     })
   ]
 

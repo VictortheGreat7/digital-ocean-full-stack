@@ -9,7 +9,7 @@ resource "helm_release" "cert_manager" {
   atomic          = true
   cleanup_on_fail = true
 
-  values = [file("../helm/cert-manager/values.yaml")]
+  values = [file("${path.module}/../helm/cert-manager/values.yaml")]
 
   timeout = 600
 
@@ -25,7 +25,7 @@ resource "helm_release" "cert_manager_prod_issuer" {
   atomic          = true
   cleanup_on_fail = true
 
-  values = [file("../helm/cert-manager/prod-issuer-values.yaml")]
+  values = [file("${path.module}/../helm/cert-manager/prod-issuer-values.yaml")]
 
   depends_on = [
     helm_release.cert_manager,
@@ -42,7 +42,7 @@ resource "helm_release" "cert_manager_stag_issuer" {
   atomic          = true
   cleanup_on_fail = true
 
-  values = [file("../helm/cert-manager/staging-issuer-values.yaml")]
+  values = [file("${path.module}/../helm/cert-manager/staging-issuer-values.yaml")]
 
   depends_on = [
     helm_release.cert_manager,
@@ -59,7 +59,7 @@ resource "helm_release" "gateway_argocd" {
   atomic           = true
   cleanup_on_fail  = true
 
-  values = [file("../helm/argocd/argocd-apps/gateway-values.yaml")]
+  values = [file("${path.module}/../helm/argocd/argocd-apps/gateway-values.yaml")]
 
   wait    = true
   timeout = 600
