@@ -43,7 +43,7 @@ applications:
         - ServerSideApply=true
     source:
       repoURL: https://github.com/prometheus-operator/kube-prometheus
-      targetRevision: main
+      targetRevision: HEAD
       path: manifests/setup
     destination:
       server: https://kubernetes.default.svc
