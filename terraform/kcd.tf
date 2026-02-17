@@ -8,7 +8,7 @@ resource "helm_release" "argo_cd" {
   cleanup_on_fail  = true
 
   values = [
-    templatefile("${path.module}/../helm/argocd/values.yaml", {
+    templatefile("${path.root}/../helm/argocd/values.yaml", {
       kronos_domain = "${var.subdomains[0]}.${var.domain}"
     })
   ]

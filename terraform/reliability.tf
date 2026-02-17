@@ -8,7 +8,7 @@ resource "helm_release" "monitoring_argocd" {
   cleanup_on_fail  = true
 
   values = [
-    templatefile("${path.module}/../helm/argocd/argocd-apps/monitoring-values.yaml", {
+    templatefile("${path.root}/../helm/argocd/argocd-apps/monitoring-values.yaml", {
       cluster_name = digitalocean_kubernetes_cluster.kronos.name
     })
   ]
@@ -22,22 +22,22 @@ resource "helm_release" "monitoring_argocd" {
   ]
 }
 
-resource "helm_release" "chaos_argocd" {
-  name             = "chaos-argocd"
-  repository       = "https://argoproj.github.io/argo-helm"
-  chart            = "argocd-apps"
-  namespace        = "knative-cd"
-  create_namespace = false
-  atomic           = true
-  cleanup_on_fail  = true
+# resource "helm_release" "chaos_argocd" {
+#   name             = "chaos-argocd"
+#   repository       = "https://argoproj.github.io/argo-helm"
+#   chart            = "argocd-apps"
+#   namespace        = "knative-cd"
+#   create_namespace = false
+#   atomic           = true
+#   cleanup_on_fail  = true
 
-  values = [file("${path.module}/../helm/argocd/argocd-apps/chaos-values.yaml")]
+#   values = [file("${path.root}/../helm/argocd/argocd-apps/chaos-values.yaml")]
 
-  wait    = true
-  timeout = 600
+#   wait    = true
+#   timeout = 600
 
-  depends_on = [
-    helm_release.kronos_argocd,
-    helm_release.monitoring_argocd
-  ]
-}
+#   depends_on = [
+#     helm_release.kronos_argocd,
+#     helm_release.monitoring_argocd
+#   ]
+# }
