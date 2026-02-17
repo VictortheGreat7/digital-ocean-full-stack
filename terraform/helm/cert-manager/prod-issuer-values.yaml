@@ -1,0 +1,15 @@
+clusterIssuers:
+  - name: letsencrypt-prod
+    spec:
+      acme:
+        email: "greatvictor.anjorin@gmail.com"
+        server: "https://acme-v02.api.letsencrypt.org/directory"
+        privateKeySecretRef:
+          name: letsencrypt-prod
+        solvers:
+          - dns01:
+              cloudflare:
+                email: "greatvictor.anjorin@gmail.com"
+                apiTokenSecretRef:
+                  name: cloudflare-api
+                  key: api-token 

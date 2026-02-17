@@ -1,0 +1,23 @@
+server:
+  httproute:
+    enabled: true
+    parentRefs: 
+      - name: kronos
+        namespace: kube-system
+        sectionName: https
+    hostnames:
+      - "${kronos_domain}"
+    rules:
+      - matches:
+        - path:
+            type: PathPrefix
+            value: /kcd/argo
+        backendRefs:
+          - name: argocd-server
+            port: 80
+configs:
+  params:
+    server.basehref: /kcd/argo
+    server.rootpath: /kcd/argo
+    server.insecure: true
+

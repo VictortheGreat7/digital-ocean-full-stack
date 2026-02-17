@@ -1,0 +1,7 @@
+crds:
+  datadogAgents:
+    enabled: true
+  datadogAgentInternals:
+    enabled: true
+  datadogDashboards:
+    enabled: true

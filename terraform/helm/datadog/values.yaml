@@ -1,0 +1,77 @@
+datadog:
+  apiKeyExistingSecret: datadog-secret
+  appKeyExistingSecret: datadog-secret
+  site: us5.datadoghq.com
+
+  logs:
+    enabled: true
+    containerCollectAll: true
+    autoMultiLineDetection: true
+
+  ignoreAutoConfig:
+    - cilium
+
+  confd:
+    cilium.yaml: |
+      ad_identifiers:
+        - cilium-agent
+      init_config:
+      instances:
+        - prometheus_url: http://%%host%%:9090/metrics
+          tags:
+            - "component:cilium-agent"
+
+  tags:
+    - "env:dev"
+
+  networkMonitoring:
+    enabled: true
+
+  processAgent:
+    enabled: true
+    processCollection: true
+
+  apm:
+    portEnabled: true
+    peerServiceAggregation: true
+    peerTagsAggregation: true
+    computeStatsBySpanKind: true
+
+  orchestratorExplorer:
+    enabled: true
+
+  podLabelAsTags:
+    app: app
+    component: component
+    environment: env
+
+  otelCollector:
+    enabled: true
+    ports:
+      - name: otlp-grpc
+        containerPort: 4317
+      - name: otlp-http
+        containerPort: 4318
+    configMap:
+      name: otel-agent-config-map
+
+operator:
+  apiKeyExistingSecret: datadog-secret
+  appKeyExistingSecret: datadog-secret
+
+  # datadogCRDs:
+  #   crds:
+  #     datadogAgents: true
+  #     datadogAgentInternals: true
+  #     datadogDashboards: true
+
+  # datadogAgent:
+  #   enabled: true
+
+  # datadogAgentInternal:
+  #   enabled: true
+
+  # datadogDashboard:
+  #   enabled: true
+
+  watchNamespaces: ""
