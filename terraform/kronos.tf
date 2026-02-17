@@ -1,5 +1,5 @@
 resource "helm_release" "kronos_argocd" {
-  name             = "kronos_argocd"
+  name             = "kronos-argocd"
   repository       = "https://argoproj.github.io/argo-helm"
   chart            = "argocd-apps"
   namespace        = "knative-cd"
