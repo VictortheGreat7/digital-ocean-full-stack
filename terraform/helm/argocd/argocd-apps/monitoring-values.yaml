@@ -13,6 +13,8 @@ projects:
       - server: https://kubernetes.default.svc
         namespace: kube-system
     clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
     - group: '*'
       kind: CustomResourceDefinition
     - group: '*'
