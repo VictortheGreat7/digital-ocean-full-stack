@@ -10,6 +10,19 @@ projects:
     destinations:
       - server: https://kubernetes.default.svc
         namespace: monitoring
+      - server: https://kubernetes.default.svc
+        namespace: kube-system
+    clusterResourceWhitelist:
+    - group: '*'
+      kind: CustomResourceDefinition
+    - group: '*'
+      kind: ClusterRole
+    - group: '*'
+      kind: ClusterRoleBinding
+    - group: '*'
+      kind: ValidatingWebhookConfiguration
+    - group: '*'
+      kind: MutatingWebhookConfiguration
 
 applications:
   otel-config:
