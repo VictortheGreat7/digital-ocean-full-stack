@@ -5,7 +5,7 @@ resource "cloudflare_dns_record" "kronos" {
   name    = each.value
   type    = "A"
   ttl     = 1
-  content = "164.90.255.237"
+  content = data.kubernetes_service_v1.cilium_gateway.status[0].load_balancer[0].ingress[0].ip
   proxied = true
 
   depends_on = [

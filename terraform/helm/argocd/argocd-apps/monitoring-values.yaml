@@ -85,7 +85,6 @@ applications:
         helm:
           valueFiles:
             - $values/helm/kube-prom-stack/values.yaml
-          # skipCrds: true
     destination:
       server: https://kubernetes.default.svc
       namespace: monitoring
