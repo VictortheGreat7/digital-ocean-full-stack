@@ -30,7 +30,26 @@ applications:
       server: https://kubernetes.default.svc
       namespace: monitoring
 
-  kube-prom-crds:
+  # kube-prom-crds:
+  #   namespace: knative-cd
+  #   project: monitoring
+  #   annotations:
+  #     argocd.argoproj.io/depends-on: "otel-config"
+  #     argocd.argoproj.io/sync-wave: "1"
+  #   syncPolicy:
+  #     automated:
+  #       selfHeal: true
+  #     syncOptions:
+  #       - ServerSideApply=true
+  #   source:
+  #     repoURL: https://github.com/prometheus-operator/kube-prometheus
+  #     targetRevision: v0.16.0
+  #     path: manifests/setup
+  #   destination:
+  #     server: https://kubernetes.default.svc
+  #     namespace: monitoring
+
+  kube-prom-stack:
     namespace: knative-cd
     project: monitoring
     annotations:
@@ -41,23 +60,6 @@ applications:
         selfHeal: true
       syncOptions:
         - ServerSideApply=true
-    source:
-      repoURL: https://github.com/prometheus-operator/kube-prometheus
-      targetRevision: v0.16.0
-      path: manifests/setup
-    destination:
-      server: https://kubernetes.default.svc
-      namespace: monitoring
-
-  kube-prom-stack:
-    namespace: knative-cd
-    project: monitoring
-    annotations:
-      argocd.argoproj.io/depends-on: "otel-config,kube-prom-crds"
-      argocd.argoproj.io/sync-wave: "2"
-    syncPolicy:
-      automated:
-        selfHeal: true
     sources:
       - repoURL: https://github.com/VictortheGreat7/digital-ocean-full-stack.git
         targetRevision: main
@@ -68,7 +70,7 @@ applications:
         helm:
           valueFiles:
             - $values/helm/kube-prom-stack/values.yaml
-          skipCrds: true
+          # skipCrds: true
     destination:
       server: https://kubernetes.default.svc
       namespace: monitoring
@@ -78,7 +80,7 @@ applications:
     project: monitoring
     annotations:
       argocd.argoproj.io/depends-on: "otel-config"
-      argocd.argoproj.io/sync-wave: "3"
+      argocd.argoproj.io/sync-wave: "2"
     syncPolicy:
       automated:
         selfHeal: true
@@ -106,7 +108,7 @@ applications:
     project: monitoring
     annotations:
       argocd.argoproj.io/depends-on: "otel-config,datadog-crds"
-      argocd.argoproj.io/sync-wave: "4"
+      argocd.argoproj.io/sync-wave: "3"
     syncPolicy:
       automated:
         selfHeal: true
