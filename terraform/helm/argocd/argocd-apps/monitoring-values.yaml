@@ -45,25 +45,6 @@ applications:
       server: https://kubernetes.default.svc
       namespace: monitoring
 
-  # kube-prom-crds:
-  #   namespace: knative-cd
-  #   project: monitoring
-  #   annotations:
-  #     argocd.argoproj.io/depends-on: "otel-config"
-  #     argocd.argoproj.io/sync-wave: "1"
-  #   syncPolicy:
-  #     automated:
-  #       selfHeal: true
-  #     syncOptions:
-  #       - ServerSideApply=true
-  #   source:
-  #     repoURL: https://github.com/prometheus-operator/kube-prometheus
-  #     targetRevision: v0.16.0
-  #     path: manifests/setup
-  #   destination:
-  #     server: https://kubernetes.default.svc
-  #     namespace: monitoring
-
   kube-prom-stack:
     namespace: knative-cd
     project: monitoring
