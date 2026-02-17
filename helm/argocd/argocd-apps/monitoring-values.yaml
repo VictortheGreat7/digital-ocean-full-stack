@@ -1,0 +1,128 @@
+projects:
+  monitoring:
+    namespace: knative-cd
+    description: Project for monitoring applications
+    sourceRepos:
+      - "https://github.com/VictortheGreat7/digital-ocean-full-stack.git"
+      - "https://prometheus-community.github.io/helm-charts"
+      - "https://helm.datadoghq.com"
+    destinations:
+      - server: https://kubernetes.default.svc
+        namespace: monitoring
+
+applications:
+  otel-config:
+    namespace: knative-cd
+    project: monitoring
+    annotations:
+      argocd.argoproj.io/sync-wave: "0"
+    syncPolicy:
+      automated:
+        selfHeal: true
+      syncOptions:
+        - CreateNamespace=true
+    source:
+      repoURL: https://github.com/VictortheGreat7/digital-ocean-full-stack.git
+      targetRevision: main
+      path: manifests/monitoring/
+    destination:
+      server: https://kubernetes.default.svc
+      namespace: monitoring
+
+  kube-prom-crds:
+    namespace: knative-cd
+    project: monitoring
+    annotations:
+      argocd.argoproj.io/depends-on: "otel-config"
+      argocd.argoproj.io/sync-wave: "1"
+    syncPolicy:
+      automated:
+        selfHeal: true
+      syncOptions:
+        - ServerSideApply=true
+    source:
+      repoURL: https://github.com/prometheus-operator/kube-prometheus
+      targetRevision: main
+      path: manifests/setup
+    destination:
+      server: https://kubernetes.default.svc
+      namespace: monitoring
+
+  kube-prom-stack:
+    namespace: knative-cd
+    project: monitoring
+    annotations:
+      argocd.argoproj.io/depends-on: "otel-config,kube-prom-crds"
+      argocd.argoproj.io/sync-wave: "2"
+    syncPolicy:
+      automated:
+        selfHeal: true
+    sources:
+      - repoURL: https://github.com/VictortheGreat7/digital-ocean-full-stack.git
+        targetRevision: main
+        ref: values
+      - repoURL: https://prometheus-community.github.io/helm-charts
+        chart: kube-prometheus-stack
+        targetRevision: 81.6.7
+        helm:
+          valueFiles:
+            - $values/helm/kube-prom-stack/values.yaml
+          skipCrds: true
+    destination:
+      server: https://kubernetes.default.svc
+      namespace: monitoring
+
+  datadog-crds:
+    namespace: knative-cd
+    project: monitoring
+    annotations:
+      argocd.argoproj.io/depends-on: "otel-config"
+      argocd.argoproj.io/sync-wave: "3"
+    syncPolicy:
+      automated:
+        selfHeal: true
+      syncOptions:
+        - ServerSideApply=true
+    sources:
+      - repoURL: https://github.com/VictortheGreat7/digital-ocean-full-stack.git
+        targetRevision: main
+        ref: values
+      - repoURL: https://helm.datadoghq.com
+        chart: datadog-crds
+        targetRevision: 2.16.0
+        helm:
+          valueFiles:
+            - $values/helm/datadog/crds/values.yaml
+          parameters:
+            - name: datadog.clusterName
+              value: ${cluster_name} # Terraform-set cluster name
+    destination:
+      server: https://kubernetes.default.svc
+      namespace: monitoring
+
+  datadog:
+    namespace: knative-cd
+    project: monitoring
+    annotations:
+      argocd.argoproj.io/depends-on: "otel-config,datadog-crds"
+      argocd.argoproj.io/sync-wave: "4"
+    syncPolicy:
+      automated:
+        selfHeal: true
+    sources:
+      - repoURL: https://github.com/VictortheGreat7/digital-ocean-full-stack.git
+        targetRevision: main
+        ref: values
+      - repoURL: https://helm.datadoghq.com
+        chart: datadog
+        targetRevision: 3.170.1
+        helm:
+          valueFiles:
+            - $values/helm/datadog/values.yaml
+          skipCrds: true
+          parameters:
+            - name: datadog.clusterName
+              value: ${cluster_name} # Terraform-set cluster name
+    destination:
+      server: https://kubernetes.default.svc
+      namespace: monitoring

@@ -9,6 +9,6 @@ resource "cloudflare_dns_record" "kronos" {
   proxied = true
 
   depends_on = [
-    helm_release.argocd_apps
+    helm_release.gateway_argocd
   ]
 }

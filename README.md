@@ -217,75 +217,122 @@ To destroy all Terraform resources:
 ```txt
 digital-ocean-full-stack/
 ├── .github/
-│   └── workflows/                                        # GitHub Actions CI/CD workflows
-│       ├── build.yaml                                    # Workflow for building from scratch
-│       ├── destroy.yaml                                  # Cleanup workflow
-│       └── integrate.yaml                                # Workflow for subsequent infrastructure/deployment changes
-├── backend/                                              # Flask Time API backend
-│   ├── app.py                                            # Flask Time API logic
-│   ├── Dockerfile                                        # Backend container image definition
-│   └── requirements.txt                                  # Python dependencies
-├── frontend/                                             # Vite React frontend
-│   ├── public/                                           # Static assets
-│   │   └── vite.svg                                      # Vite logo
-│   ├── src/                                              # React source code
-│   │   ├── assets/                                       # Images and other assets
-│   │   │   └── react.svg                                 # React logo
-│   │   ├── components/                                   # React components
-│   │   │   ├── CityCard.css                              # City card styles
-│   │   │   ├── CityCard.jsx                              # City card component
-│   │   │   ├── ClockOrbit.css                            # Clock orbit animation styles
-│   │   │   ├── ClockOrbit.jsx                            # Clock orbit component
-│   │   │   ├── Dashboard.css                             # Dashboard styles
-│   │   │   └── Dashboard.jsx                             # Dashboard component
-│   │   ├── App.css                                       # Application styles
-│   │   ├── App.jsx                                       # Main App component
-│   │   ├── index.css                                     # Global styles
-│   │   ├── main.jsx                                      # Application entry point
-│   │   └── tracing.js                                    # OpenTelemetry frontend tracing setup
-│   ├── .env                                              # Local environment variables
-│   ├── .env.production                                   # Production environment variables
-│   ├── .gitignore                                        # Frontend-specific Git ignore rules
-│   ├── Dockerfile                                        # Frontend container image definition
-│   ├── eslint.config.js                                  # ESLint configuration
-│   ├── index.html                                        # HTML template
-│   ├── nginx.conf                                        # NGINX configuration for production
-│   ├── package.json                                      # Node.js dependencies and scripts
-│   ├── README.md                                         # Frontend documentation
-│   └── vite.config.js                                    # Vite build configuration
-├── screenshots/                                          # Project screenshots and documentation images
-├── terraform/                                            # Infrastructure as Code (IaC) and automation
-│   ├── charts/                                           # Helm charts for application components
-│   │   └── k6-test/                                      # K6 load testing Helm chart folder
-│   │       ├── templates/                                # Helm chart templates
-│   │       │    ├── k6-custom-resource.yaml              # K6 custom resource definition
-│   │       │    └── prometheus-rule.yaml                 # Prometheus rule for K6
-│   │       ├── Chart.yaml                                # Helm chart metadata
-│   │       └── values.yaml                               # Default Helm chart values
-│   ├── scripts/                                          # Helper automation scripts
-│   │   ├── gh_secret.sh                                  # GitHub secrets management script
-│   │   ├── loadtest.js                                   # K6 load testing script
-│   │   └── loadtest.py                                   # Python load testing script
-│   ├── .terraform.lock.hcl                               # Terraform dependency lock file
-│   ├── app_backend.tf                                    # Backend application deployment resources
-│   ├── backend.tf                                        # Terraform remote state backend configuration
-│   ├── data.tf                                           # Data sources for existing resources
-│   ├── db.tf                                             # Database deployment resources
-│   ├── dns.tf                                            # DNS configuration using Cloudflare
-│   ├── frontend.tf                                       # Frontend application deployment resources
-│   ├── ingress.tf                                        # Ingress controller and routing configuration
-│   ├── loadtest.tf                                       # Load testing resources using K6
-│   ├── main.tf                                           # Main Terraform entry point (AKS cluster, resource groups, runner VM)
-│   ├── monitoring.tf                                     # Monitoring and observability stack (Prometheus/Grafana)
-│   ├── netpolicy.tf                                      # Kubernetes network policies
-│   ├── network.tf                                        # Azure networking configuration (VNet, subnets, NSG)
-│   ├── outputs.tf                                        # Terraform output definitions
-│   ├── providers.tf                                      # Terraform provider configurations
-│   ├── terraform.tfvars.json                             # Terraform variable values (auto-generated from GitHub secrets)
-│   ├── tls.tf                                            # TLS certificate management using Cert Manager
-│   └── variables.tf                                      # Terraform variable definitions
-├── .gitignore                                            # Root Git ignore rules
-└── README.md                                             # Project documentation
+│   └── workflows/                                    # GitHub Actions CI/CD workflows
+│       ├── build.yaml                                # Workflow for building from scratch
+│       ├── destroy.yaml                              # Cleanup workflow
+│       └── integrate.yaml                            # Workflow for subsequent infrastructure/deployment changes
+├── backend/                                          # Flask Time API backend
+│   ├── routes/                                       # API route definitions
+│   │    ├── __init__.py                              # Blueprint initialization
+│   │    ├── health.py                                # Health check endpoint
+│   │    ├── time.py                                  # Blueprint initialization
+│   │    └── traces.py                                # Blueprint initialization
+│   ├── app.py                                        # Flask Time API logic
+│   ├── config.py                                     # Configuration management
+│   ├── db.py                                         # Database connection and models (if needed)
+│   ├── Dockerfile                                    # Backend container image definition
+│   ├── helpers.py                                    # Helper functions for the API
+│   ├── metrics.py                                    # Prometheus metrics definitions
+│   ├── requirements.txt                              # Python dependencies
+│   └── telemetry.py                                  # OpenTelemetry backend tracing setup
+├── frontend/                                         # Vite React frontend
+│   ├── public/                                       # Static assets
+│   │   └── vite.svg                                  # Vite logo
+│   ├── src/                                          # React source code
+│   │   ├── assets/                                   # Images and other assets
+│   │   │   └── react.svg                             # React logo
+│   │   ├── components/                               # React components
+│   │   │   ├── CityCard.css                          # City card styles
+│   │   │   ├── CityCard.jsx                          # City card component
+│   │   │   ├── ClockOrbit.css                        # Clock orbit animation styles
+│   │   │   ├── ClockOrbit.jsx                        # Clock orbit component
+│   │   │   ├── Dashboard.css                         # Dashboard styles
+│   │   │   └── Dashboard.jsx                         # Dashboard component
+│   │   ├── App.css                                   # Application styles
+│   │   ├── App.jsx                                   # Main App component
+│   │   ├── index.css                                 # Global styles
+│   │   ├── main.jsx                                  # Application entry point
+│   │   └── tracing.js                                # OpenTelemetry frontend tracing setup
+│   ├── .env                                          # Local environment variables
+│   ├── .env.production                               # Production environment variables
+│   ├── .gitignore                                    # Frontend-specific Git ignore rules
+│   ├── Dockerfile                                    # Frontend container image definition
+│   ├── eslint.config.js                              # ESLint configuration
+│   ├── index.html                                    # HTML template
+│   ├── nginx.conf                                    # NGINX configuration for production
+│   ├── package-lock.json                             # Node.js dependencies lock file
+│   ├── package.json                                  # Node.js dependencies and scripts
+│   ├── README.md                                     # Frontend documentation
+│   └── vite.config.js                                # Vite build configuration
+├── manifests/                                        # Kubernetes manifests
+│   ├── chaos-testing/                                # Chaos testing resources (K6 load testing)
+│   │   ├── helm/                                     # Helm folder for K6 load testing
+│   │   │   └── values.yaml                           # Helm values for K6 load testing
+│   │   ├── scripts/                                  # Helper scripts for chaos testing
+│   │   │   └── loadtest.js                           # K6 load testing script
+│   │   ├── k6-test-script.yaml                       # K6 custom resource definition for load testing
+│   │   ├── k6-testrun.yaml                           # K6 test run definition
+│   │   └── kronos-slos-prometheusrule.yaml           # Prometheus SLOs and alerting rules for the World Clock application
+│   ├── ingress/                                      # Ingress controller resources (NGINX Ingress Controller)
+│   │   ├── cert-manager/                             # Cert Manager resources for TLS certificate management
+│   │   │   └── values.yaml                           # Helm values for Cert Manager
+│   │   ├── gateway/                                  # Kubernetes Gateway API resources for ingress routing
+│   │   │   └── gateway.yaml                          # Helm values for Gateway API
+│   │   ├── clusterissuer-letsencrypt-prod.yaml       # ClusterIssuer resource for Let's Encrypt production certificates
+│   │   └── clusterissuer-letsencrypt-staging.yaml    # ClusterIssuer resource for Let's Encrypt staging certificates
+│   ├── kronos-app/                                   # World Clock application Kubernetes resources
+│   │   ├── backend-deployment.yaml                   # Kubernetes Deployment for the backend API
+│   │   ├── backend-hpa.yaml                          # Kubernetes Horizontal Pod Autoscaler for the backend API
+│   │   ├── backend-service.yaml                      # Kubernetes Service for the backend API
+│   │   ├── db-configmap.yaml                         # Kubernetes ConfigMap for database configuration (if needed)
+│   │   ├── db-service.yaml                           # Kubernetes Service for the database (if needed)
+│   │   ├── db-statefulset.yaml                       # Kubernetes StatefulSet for the database (if needed)
+│   │   ├── frontend-deployment.yaml                  # Kubernetes Deployment for the frontend
+│   │   ├── frontend-hpa.yaml                         # Kubernetes Horizontal Pod Autoscaler for the frontend
+│   │   ├── frontend-service.yaml                     # Kubernetes Service for the frontend
+│   │   ├── httproute-http.yaml                       # Kubernetes HTTPRoute for ingress routing to the application
+│   │   └── httproute-https.yaml                      # Kubernetes HTTPRoute for ingress routing to the application with TLS
+│   ├── monitoring/                                   # Monitoring stack Kubernetes resources
+│   │   ├── datadog/                                  # Datadog agent resources (if using Datadog for monitoring)
+│   │   │   ├── helm/                                 # Helm folder for Datadog agent
+│   │   │   │   ├── crds/                             # Custom resource definitions for Datadog agent
+│   │   │   │   │   └── values.yaml                   # Helm values for Datadog CRDS
+│   │   │   │   └── values.yaml                       # Helm values for Datadog agent
+│   │   ├── kube-prometheus-stack/                    # kube-prometheus-stack resources for monitoring and alerting
+│   │   │   ├── helm/                                 # Helm folder for kube-prometheus-stack
+│   │   │   │   └── values.yaml                       # Helm values for kube-prometheus-stack
+│   │   └── otel-configmap.yaml                       # ConfigMap for OpenTelemetry Collector configuration
+│   └── reflector/                                    # Kubernetes resources for the Reflector component (if needed)
+│       └── values.yaml                               # Helm values for the Reflector component
+├── screenshots/                                      # Project screenshots and documentation images
+├── terraform/                                        # Infrastructure as Code (IaC) and automation
+│   ├── migrated/                                     # Terraform K8s resources migrated to ArgoCD
+│   │   ├── app_backend.tf                            # Backend application deployment resources (ArgoCD migrated)
+│   │   ├── db.tf                                     # Database deployment resources (ArgoCD migrated)
+│   │   ├── frontend.tf                               # Frontend application deployment resources (ArgoCD migrated)
+│   │   ├── gateway.tf                                # Gateway API resources for ingress routing (ArgoCD migrated)
+│   │   ├── loadtest.tf                               # Load testing resources using K6 (ArgoCD migrated)
+│   │   ├── monitoring.tf                             # Monitoring and observability stack (ArgoCD migrated)
+│   │   └── tls.tf                                    # TLS certificate management using Cert Manager (ArgoCD migrated)
+│   ├── scripts/                                      # Helper automation scripts
+│   │   ├── gh_secret.sh                              # GitHub secrets management script
+│   │   ├── loadtest.js                               # K6 load testing script
+│   │   └── loadtest.py                               # Python load testing script
+│   ├── .terraform.lock.hcl                           # Terraform dependency lock file
+│   ├── backend.tf                                    # Terraform remote state backend configuration
+│   ├── data.tf                                       # Data sources for existing resources
+│   ├── dns.tf                                        # DNS configuration using Cloudflare
+│   ├── kcd.tf                                        # ArgoCD application definitions for Kubernetes resource management
+│   ├── main.tf                                       # Main Terraform entry point (AKS cluster, resource groups, etc.)
+│   ├── netpolicy.tf                                  # Kubernetes network policies
+│   ├── network.tf                                    # Cloud networking configuration (VNet, Firewalls)
+│   ├── outputs.tf                                    # Terraform output definitions
+│   ├── providers.tf                                  # Terraform provider configurations
+│   ├── secrets.tf                                    # Terraform configuration for managing secrets
+│   ├── terraform.tfvars.json                         # Terraform variable values (auto-generated from GitHub secrets)
+│   └── variables.tf                                  # Terraform variable definitions
+├── .gitignore                                        # Root Git ignore rules
+└── README.md                                         # Project documentation
 ```
 
 ## 🤝 Contributing

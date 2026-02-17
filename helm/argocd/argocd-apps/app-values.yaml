@@ -1,0 +1,25 @@
+projects:
+  kronos:
+    namespace: knative-cd
+    description: Project for Kronos World Clock application
+    sourceRepos:
+      - "https://github.com/VictortheGreat7/digital-ocean-full-stack.git"
+    destinations:
+      - server: https://kubernetes.default.svc
+        namespace: kronos
+applications:
+  kronos:
+    namespace: knative-cd
+    project: kronos
+    syncPolicy:
+      automated:
+        selfHeal: true
+      syncOptions:
+        - CreateNamespace=true
+    source:
+      repoURL: https://github.com/VictortheGreat7/digital-ocean-full-stack.git
+      targetRevision: main
+      path: manifests/kronos-app
+    destination:
+      server: https://kubernetes.default.svc
+      namespace: kronos

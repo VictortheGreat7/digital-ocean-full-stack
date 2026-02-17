@@ -6,47 +6,21 @@ resource "kubernetes_namespace_v1" "secrets" {
   depends_on = [digitalocean_kubernetes_cluster.kronos]
 }
 
-resource "kubernetes_secret_v1" "datadog_secret" {
-  metadata {
-    name      = "datadog-secret"
-    namespace = "secrets"
-    annotations = {
-      "reflector.v1.k8s.emberstack.com/reflection-auto-enabled"       = "true"
-      "reflector.v1.k8s.emberstack.com/reflection-auto-namespaces"    = "monitoring"
-      "reflector.v1.k8s.emberstack.com/reflection-allowed"            = "true"
-      "reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces" = "monitoring"
-    }
-  }
+resource "helm_release" "reflector" {
+  name             = "reflector"
+  repository       = "https://emberstack.github.io/helm-charts"
+  chart            = "reflector"
+  namespace        = kubernetes_namespace_v1.secrets.metadata[0].name
+  create_namespace = false
+  atomic           = true
+  cleanup_on_fail  = true
 
-  data = {
-    api-key = var.datadog_api_key
-    app-key = var.datadog_app_key
-  }
+  wait    = true
+  timeout = 600
 
-  type = "Opaque"
-
-  depends_on = [kubernetes_namespace_v1.secrets]
-}
-
-resource "kubernetes_secret_v1" "postgres_pass" {
-  metadata {
-    name      = "postgres-secret"
-    namespace = "secrets"
-    annotations = {
-      "reflector.v1.k8s.emberstack.com/reflection-auto-enabled"       = "true"
-      "reflector.v1.k8s.emberstack.com/reflection-auto-namespaces"    = "kronos"
-      "reflector.v1.k8s.emberstack.com/reflection-allowed"            = "true"
-      "reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces" = "kronos"
-    }
-  }
-
-  data = {
-    password = var.postgres_pass
-  }
-
-  type = "Opaque"
-
-  depends_on = [kubernetes_secret_v1.datadog_secret]
+  depends_on = [
+    digitalocean_kubernetes_cluster.kronos
+  ]
 }
 
 resource "kubernetes_secret_v1" "cloudflare_api" {
@@ -67,5 +41,48 @@ resource "kubernetes_secret_v1" "cloudflare_api" {
 
   type = "Opaque"
 
-  depends_on = [kubernetes_secret_v1.postgres_pass]
+  depends_on = [helm_release.reflector]
+}
+
+resource "kubernetes_secret_v1" "datadog_secret" {
+  metadata {
+    name      = "datadog-secret"
+    namespace = "secrets"
+    annotations = {
+      "reflector.v1.k8s.emberstack.com/reflection-auto-enabled"       = "true"
+      "reflector.v1.k8s.emberstack.com/reflection-auto-namespaces"    = "monitoring"
+      "reflector.v1.k8s.emberstack.com/reflection-allowed"            = "true"
+      "reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces" = "monitoring"
+    }
+  }
+
+  data = {
+    api-key = var.datadog_api_key
+    app-key = var.datadog_app_key
+  }
+
+  type = "Opaque"
+
+  depends_on = [helm_release.reflector]
+}
+
+resource "kubernetes_secret_v1" "postgres_pass" {
+  metadata {
+    name      = "postgres-secret"
+    namespace = "secrets"
+    annotations = {
+      "reflector.v1.k8s.emberstack.com/reflection-auto-enabled"       = "true"
+      "reflector.v1.k8s.emberstack.com/reflection-auto-namespaces"    = "kronos"
+      "reflector.v1.k8s.emberstack.com/reflection-allowed"            = "true"
+      "reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces" = "kronos"
+    }
+  }
+
+  data = {
+    password = var.postgres_pass
+  }
+
+  type = "Opaque"
+
+  depends_on = [helm_release.reflector]
 }
