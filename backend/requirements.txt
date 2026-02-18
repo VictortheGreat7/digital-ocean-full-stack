@@ -1,8 +1,9 @@
-pytz==2025.2
-Flask==3.1.2
-requests==2.32.5
+flask==3.1.2
+gunicorn==25.1.0
 flask-cors==6.0.2
+requests==2.32.5
 psycopg2-binary==2.9.11
+tzdata>=2024.1
 
 prometheus-client==0.24.1
 prometheus-flask-exporter==0.23.2
