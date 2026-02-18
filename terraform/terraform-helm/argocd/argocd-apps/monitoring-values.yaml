@@ -56,6 +56,12 @@ applications:
         selfHeal: true
       syncOptions:
         - ServerSideApply=true
+    ignoreDifferences:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      jsonPointers:
+      - /spec/parentRefs
+      - /status
     sources:
       - repoURL: https://github.com/VictortheGreat7/digital-ocean-full-stack.git
         targetRevision: main
@@ -107,6 +113,29 @@ applications:
     syncPolicy:
       automated:
         selfHeal: true
+    ignoreDifferences:
+    - group: ""
+      kind: Secret
+      name: datadog-cluster-agent
+      jsonPointers:
+      - /data
+    - group: ""
+      kind: ConfigMap
+      name: datadog-kpi-telemetry-configmap
+      jsonPointers:
+      - /data
+    - group: apps
+      kind: DaemonSet
+      name: datadog
+      jsonPointers:
+      - /spec/template/metadata/annotations/checksum~1config
+      - /spec/template/metadata/annotations/checksum~1install_info
+    - group: apps
+      kind: Deployment
+      name: datadog-cluster-agent
+      jsonPointers:
+      - /spec/template/metadata/annotations/checksum~1config
+      - /spec/template/metadata/annotations/checksum~1install_info
     sources:
       - repoURL: https://github.com/VictortheGreat7/digital-ocean-full-stack.git
         targetRevision: main
