@@ -51,7 +51,7 @@ applications:
       argocd.argoproj.io/depends-on: chaos-operator
     syncPolicy:
       automated:
-        selfHeal: true
+        selfHeal: false
     source:
       repoURL: https://github.com/VictortheGreat7/digital-ocean-full-stack.git
       targetRevision: main
