@@ -1,13 +1,5 @@
 gateway:
   className: "cilium"
-  # https:
-  #  - host: kronos.mywonderworks.tech
-  #    allowedRoutes:
-  #      namespaces:
-  #        from: All
-  #    tls:
-  #      mode: Terminate
-  #      certRef: kronos-tls
   listeners:
     - name: http
       protocol: HTTP

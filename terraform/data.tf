@@ -16,7 +16,7 @@ data "digitalocean_kubernetes_cluster" "kronos" {
 
 data "kubernetes_service_v1" "cilium_gateway" {
   metadata {
-    name      = "cilium-gateway-kronos"
+    name      = "cilium-gateway-kronos-gateway"
     namespace = "kube-system"
   }
 
