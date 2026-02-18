@@ -12,10 +12,6 @@ terraform {
       source  = "hashicorp/helm"
       version = ">= 3.1.1"
     }
-    cloudflare = {
-      source  = "cloudflare/cloudflare"
-      version = ">= 5.15.0"
-    }
   }
 }
 
@@ -51,8 +47,4 @@ provider "helm" {
       digitalocean_kubernetes_cluster.kronos.kube_config[0].cluster_ca_certificate
     )
   }
-}
-
-provider "cloudflare" {
-  api_token = var.cloudflare_api_token
 }
