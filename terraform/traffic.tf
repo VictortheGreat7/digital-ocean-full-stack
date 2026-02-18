@@ -65,7 +65,6 @@ resource "helm_release" "gateway" {
   timeout = 600
 
   depends_on = [
-    helm_release.argo_cd,
     helm_release.cert_manager_prod_issuer,
     helm_release.cert_manager_stag_issuer
   ]
