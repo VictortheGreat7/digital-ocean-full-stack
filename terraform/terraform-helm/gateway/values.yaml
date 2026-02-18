@@ -1,13 +1,13 @@
 gateway:
   className: "cilium"
-  https:
-   - host: kronos.mywonderworks.tech
-     allowedRoutes:
-       namespaces:
-         from: All
-     tls:
-       mode: Terminate
-       certRef: kronos-tls
+  # https:
+  #  - host: kronos.mywonderworks.tech
+  #    allowedRoutes:
+  #      namespaces:
+  #        from: All
+  #    tls:
+  #      mode: Terminate
+  #      certRef: kronos-tls
   listeners:
     - name: http
       protocol: HTTP
@@ -16,17 +16,17 @@ gateway:
       allowedRoutes:
         namespaces:
           from: All
-    # - name: https
-    #   protocol: HTTPS
-    #   port: 443
-    #   hostname: kronos.mywonderworks.tech
-    #   tls:
-    #     mode: Terminate
-    #     certificateRefs:
-    #       - name: kronos-tls
-    #         kind: Secret
-    #   allowedRoutes:
-    #     namespaces:
-    #       from: All
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: kronos.mywonderworks.tech
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: kronos-tls
+            kind: Secret
+      allowedRoutes:
+        namespaces:
+          from: All
 certManager:
  cluster-issuer: letsencrypt-staging
