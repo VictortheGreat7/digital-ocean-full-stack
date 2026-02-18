@@ -2,7 +2,7 @@ server:
   httproute:
     enabled: true
     parentRefs: 
-      - name: kronos
+      - name: kronos-gateway
         namespace: kube-system
         sectionName: https
     hostnames:
