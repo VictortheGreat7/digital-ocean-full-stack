@@ -75,8 +75,14 @@ resource "helm_release" "external_dns" {
   repository = "https://kubernetes-sigs.github.io/external-dns/"
   chart      = "external-dns"
   namespace  = "kube-system"
+  create_namespace = false
+  atomic           = true
+  cleanup_on_fail  = true
 
   values = [file("${path.root}/terraform-helm/traffic/external-dns/values.yaml")]
+
+  wait    = true
+  timeout = 600
 
   depends_on = [
     helm_release.gateway,
