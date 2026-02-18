@@ -29,9 +29,9 @@ resource "kubernetes_secret_v1" "cloudflare_api" {
     namespace = "secrets"
     annotations = {
       "reflector.v1.k8s.emberstack.com/reflection-auto-enabled"       = "true"
-      "reflector.v1.k8s.emberstack.com/reflection-auto-namespaces"    = "cert-manager"
+      "reflector.v1.k8s.emberstack.com/reflection-auto-namespaces"    = "cert-manager,kube-system"
       "reflector.v1.k8s.emberstack.com/reflection-allowed"            = "true"
-      "reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces" = "cert-manager"
+      "reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces" = "cert-manager,kube-system"
     }
   }
 
