@@ -59,7 +59,7 @@ resource "helm_release" "gateway" {
   atomic           = true
   cleanup_on_fail  = true
 
-  values = [file("${path.root}/terraform-helm/gateway/values.yaml")]
+  values = [file("${path.root}/terraform-helm/traffic/gateway/values.yaml")]
 
   wait    = true
   timeout = 600
@@ -70,23 +70,16 @@ resource "helm_release" "gateway" {
   ]
 }
 
-# resource "helm_release" "gateway_argocd" {
-#   name             = "gateway-argocd"
-#   repository       = "https://argoproj.github.io/argo-helm"
-#   chart            = "argocd-apps"
-#   namespace        = "knative-cd"
-#   create_namespace = false
-#   atomic           = true
-#   cleanup_on_fail  = true
+resource "helm_release" "external_dns" {
+  name       = "external-dns"
+  repository = "https://kubernetes-sigs.github.io/external-dns/"
+  chart      = "external-dns"
+  namespace  = "kube-system"
 
-#   values = [file("${path.root}/terraform-helm/argocd/argocd-apps/gateway-values.yaml")]
+  values = [file("${path.root}/terraform-helm/traffic/external-dns/values.yaml")]
 
-#   wait    = true
-#   timeout = 600
-
-#   depends_on = [
-#     helm_release.argo_cd,
-#     helm_release.cert_manager_prod_issuer,
-#     helm_release.cert_manager_stag_issuer
-#   ]
-# }
+  depends_on = [
+    helm_release.gateway,
+    kubernetes_secret_v1.cloudflare_api
+  ]
+}

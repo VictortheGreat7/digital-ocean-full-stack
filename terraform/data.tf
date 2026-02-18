@@ -14,15 +14,13 @@ data "digitalocean_kubernetes_cluster" "kronos" {
   ]
 }
 
-data "kubernetes_service_v1" "cilium_gateway" {
-  metadata {
-    name      = "cilium-gateway-kronos-gateway"
-    namespace = "kube-system"
-  }
+# data "kubernetes_service_v1" "cilium_gateway" {
+#   metadata {
+#     name      = "cilium-gateway-kronos-gateway"
+#     namespace = "kube-system"
+#   }
 
-  depends_on = [
-    random_pet.kronos,
-    helm_release.gateway,
-    data.digitalocean_kubernetes_versions.kronos
-  ]
-}
+#   depends_on = [
+#     helm_release.gateway,
+#   ]
+# }
