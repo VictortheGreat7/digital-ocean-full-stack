@@ -17,7 +17,7 @@ resource "helm_release" "monitoring_argocd" {
   timeout = 600
 
   depends_on = [
-    helm_release.gateway_argocd,
+    helm_release.gateway,
     kubernetes_secret_v1.datadog_secret
   ]
 }

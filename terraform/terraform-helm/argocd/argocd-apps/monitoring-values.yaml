@@ -30,8 +30,6 @@ applications:
   otel-config:
     namespace: knative-cd
     project: monitoring
-    annotations:
-      argocd.argoproj.io/sync-wave: "0"
     syncPolicy:
       automated:
         selfHeal: true
