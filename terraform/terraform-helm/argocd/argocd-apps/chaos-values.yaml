@@ -8,6 +8,10 @@ projects:
     destinations:
       - server: https://kubernetes.default.svc
         namespace: chaos
+      - server: https://kubernetes.default.svc
+        namespace: default
+      - server: https://kubernetes.default.svc
+        namespace: monitoring
     clusterResourceWhitelist:
     - group: ''
       kind: Namespace
