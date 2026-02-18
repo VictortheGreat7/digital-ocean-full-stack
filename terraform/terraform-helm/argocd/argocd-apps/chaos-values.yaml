@@ -8,6 +8,15 @@ projects:
     destinations:
       - server: https://kubernetes.default.svc
         namespace: chaos
+    clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+    - group: '*'
+      kind: CustomResourceDefinition
+    - group: '*'
+      kind: ClusterRole
+    - group: '*'
+      kind: ClusterRoleBinding
 applications:
   chaos-operator:
     namespace: knative-cd
