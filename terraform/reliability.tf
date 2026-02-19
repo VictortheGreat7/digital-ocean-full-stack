@@ -9,7 +9,8 @@ resource "helm_release" "monitoring_argocd" {
 
   values = [
     templatefile("${path.root}/terraform-helm/argocd/argocd-apps/monitoring-values.yaml", {
-      cluster_name = digitalocean_kubernetes_cluster.kronos.name
+      cluster_name = digitalocean_kubernetes_cluster.kronos.name,
+      hostname     = "${var.subdomains[0]}.${var.domain}"
     })
   ]
 

@@ -10,24 +10,16 @@ variable "do_token" {
   sensitive   = true
 }
 
-variable "cloudflare_zone_id" {
-  description = "Cloudflare Zone ID for the domain"
+variable "cloudflare_api_token" {
+  description = "Cloudflare API token for managing DNS records"
   type        = string
   sensitive   = true
 }
 
-variable "subdomains" {
-  description = "List of subdomains to create"
-  type        = list(string)
-  default = [
-    "kronos"
-  ]
-}
-
-variable "domain" {
-  description = "The root domain for the world clock application"
+variable "cloudflare_zone_id" {
+  description = "Cloudflare Zone ID for the domain"
   type        = string
-  default     = "mywonderworks.tech"
+  sensitive   = true
 }
 
 variable "datadog_api_key" {
@@ -48,8 +40,22 @@ variable "postgres_pass" {
   sensitive   = true
 }
 
-variable "cloudflare_api_token" {
-  description = "Cloudflare API token for managing DNS records"
+variable "subdomains" {
+  description = "List of subdomains to create"
+  type        = list(string)
+  default = [
+    "kronos"
+  ]
+}
+
+variable "domain" {
+  description = "The root domain for the world clock application"
   type        = string
-  sensitive   = true
+  default     = "mywonderworks.tech"
+}
+
+variable "email" {
+  description = "Email address for ACME certificate issuers"
+  type        = string
+  default     = "greatvictor.anjorin@gmail.com"
 }

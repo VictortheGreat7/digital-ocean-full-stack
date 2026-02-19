@@ -2,14 +2,14 @@ clusterIssuers:
   - name: letsencrypt-staging
     spec:
       acme:
-        email: "greatvictor.anjorin@gmail.com"
+        email: "${issuer_email}"
         server: https://acme-staging-v02.api.letsencrypt.org/directory
         privateKeySecretRef:
           name: letsencrypt-staging
         solvers:
           - dns01:
               cloudflare:
-                email: "greatvictor.anjorin@gmail.com"
+                email: "${issuer_email}"
                 apiTokenSecretRef:
                   name: cloudflare-api
                   key: api-token

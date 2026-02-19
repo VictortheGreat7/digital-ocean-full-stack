@@ -9,7 +9,7 @@ env:
         name: cloudflare-api
         key: api-token
 policy: sync
-txtOwnerId: "kronos"
+txtOwnerId: "${subdomain}"
 extraArgs:
   - --gateway-namespace=kube-system
   - --cloudflare-proxied

@@ -63,7 +63,20 @@ applications:
         targetRevision: 81.6.7
         helm:
           valueFiles:
-            - $values/helm/kube-prom-stack/values.yaml
+            - $values/argocd-helm/kube-prom-stack/values.yaml
+          parameters:
+            - name: prometheus.prometheusSpec.externalUrl
+              value: "https://${hostname}/monitoring/prometheus/"
+            - name: prometheus.route.main.hostnames[0]
+              value: ${hostname}
+            - name: alertmanager.alertmanagerSpec.externalUrl
+              value: "https://${hostname}/monitoring/alertmanager/"
+            - name: alertmanager.route.main.hostnames[0]
+              value: ${hostname}
+            - name: grafana.grafana.ini.server.root_url
+              value: "https://${hostname}/monitoring/grafana/"
+            - name: grafana.route.main.hostnames[0]
+              value: ${hostname}
     destination:
       server: https://kubernetes.default.svc
       namespace: monitoring
@@ -88,7 +101,7 @@ applications:
         targetRevision: 2.16.0
         helm:
           valueFiles:
-            - $values/helm/datadog/crds/values.yaml
+            - $values/argocd-helm/datadog/crds/values.yaml
           parameters:
             - name: datadog.clusterName
               value: ${cluster_name} # Terraform-set cluster name
@@ -114,7 +127,7 @@ applications:
         targetRevision: 3.170.1
         helm:
           valueFiles:
-            - $values/helm/datadog/values.yaml
+            - $values/argocd-helm/datadog/values.yaml
           skipCrds: true
           parameters:
             - name: datadog.clusterName

@@ -25,7 +25,11 @@ resource "helm_release" "cert_manager_prod_issuer" {
   atomic          = true
   cleanup_on_fail = true
 
-  values = [file("${path.root}/terraform-helm/cert-manager/prod-issuer-values.yaml")]
+  values = [
+    templatefile("${path.root}/terraform-helm/cert-manager/prod-issuer-values.yaml", {
+      issuer_email = var.email
+    })
+  ]
 
   depends_on = [
     helm_release.cert_manager,
@@ -42,7 +46,11 @@ resource "helm_release" "cert_manager_stag_issuer" {
   atomic          = true
   cleanup_on_fail = true
 
-  values = [file("${path.root}/terraform-helm/cert-manager/staging-issuer-values.yaml")]
+  values = [
+    templatefile("${path.root}/terraform-helm/cert-manager/staging-issuer-values.yaml", {
+      issuer_email = var.email
+    })
+  ]
 
   depends_on = [
     helm_release.cert_manager,
@@ -51,7 +59,7 @@ resource "helm_release" "cert_manager_stag_issuer" {
 }
 
 resource "helm_release" "gateway" {
-  name             = "kronos-gateway"
+  name             = "main"
   repository       = "https://subshell.github.io/helm-charts"
   chart            = "gateway"
   namespace        = "kube-system"
@@ -59,7 +67,11 @@ resource "helm_release" "gateway" {
   atomic           = true
   cleanup_on_fail  = true
 
-  values = [file("${path.root}/terraform-helm/traffic/gateway/values.yaml")]
+  values = [
+    templatefile("${path.root}/terraform-helm/traffic/gateway/values.yaml", {
+      hostname = "${var.subdomains[0]}.${var.domain}"
+    })
+  ]
 
   wait    = true
   timeout = 600
@@ -79,7 +91,11 @@ resource "helm_release" "external_dns" {
   atomic           = true
   cleanup_on_fail  = true
 
-  values = [file("${path.root}/terraform-helm/traffic/external-dns/values.yaml")]
+  values = [
+    templatefile("${path.root}/terraform-helm/traffic/external-dns/values.yaml", {
+      subdomain = var.subdomains[0]
+    })
+  ]
 
   wait    = true
   timeout = 600
