@@ -24,7 +24,7 @@ prometheus:
     main:
       enabled: true
       parentRefs:
-        - name: main
+        - name: main-gateway
           namespace: kube-system
           sectionName: https
       hostnames:
@@ -63,7 +63,7 @@ alertmanager:
     main:
       enabled: true
       parentRefs:
-        - name: main
+        - name: main-gateway
           namespace: kube-system
           sectionName: https
       hostnames:
@@ -108,7 +108,7 @@ grafana:
     main:
       enabled: true
       parentRefs:
-        - name: main
+        - name: main-gateway
           namespace: kube-system
           sectionName: https
       hostnames:
