@@ -173,5 +173,6 @@ The build workflow will:
 - Display all available clocks on the dashboard.
 - Set up useful alerts and notifications.
 - Optimize costs with auto-scaling.
+- Secrets are currently stored in GitHub secrets and injected into Terraform, which is not ideal. A better approach would be to use a dedicated secrets manager like Azure Key Vault or AWS Secrets Manager, and integrate it with External Secret Operator on Kubernetes for secure secret management.
 
 ### Lessons
