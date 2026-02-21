@@ -28,7 +28,7 @@ prometheus:
           namespace: kube-system
           sectionName: https
       hostnames:
-        - ${hostname}
+        - "${hostname}"
       matches:
         - path:
             type: PathPrefix
@@ -67,7 +67,7 @@ alertmanager:
           namespace: kube-system
           sectionName: https
       hostnames:
-        - ${hostname}
+        - "${hostname}"
       matches:
         - path:
             type: PathPrefix
@@ -112,7 +112,7 @@ grafana:
           namespace: kube-system
           sectionName: https
       hostnames:
-        - ${hostname}
+        - "${hostname}"
       matches:
         - path:
             type: PathPrefix
