@@ -22,5 +22,3 @@ gateway:
       allowedRoutes:
         namespaces:
           from: All
-certManager:
-  cluster-issuer: letsencrypt-staging
