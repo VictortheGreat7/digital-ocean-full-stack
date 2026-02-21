@@ -18,6 +18,7 @@ prometheus:
     enableFeatures:
       - native-histograms
       - exemplar-storage
+    externalUrl: "https://${hostname}/monitoring/prometheus/"
     routePrefix: "/"
   route:
     main:
@@ -26,6 +27,8 @@ prometheus:
         - name: main-gateway
           namespace: kube-system
           sectionName: https
+      hostnames:
+        - ${hostname}
       matches:
         - path:
             type: PathPrefix
@@ -54,6 +57,7 @@ alertmanager:
           resources:
             requests:
               storage: 10Gi
+    externalUrl: "https://${hostname}/monitoring/alertmanager/"
     routePrefix: "/"
   route:
     main:
@@ -62,6 +66,8 @@ alertmanager:
         - name: main-gateway
           namespace: kube-system
           sectionName: https
+      hostnames:
+        - ${hostname}
       matches:
         - path:
             type: PathPrefix
@@ -96,6 +102,7 @@ grafana:
   adminPassword: admin
   grafana.ini:
     server:
+      root_url: "https://${hostname}/monitoring/grafana/"
       serve_from_sub_path: true
   route:
     main:
@@ -104,6 +111,8 @@ grafana:
         - name: main-gateway
           namespace: kube-system
           sectionName: https
+      hostnames:
+        - ${hostname}
       matches:
         - path:
             type: PathPrefix
