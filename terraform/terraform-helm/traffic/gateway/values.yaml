@@ -1,5 +1,7 @@
 gateway:
   className: "cilium"
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-staging
   listeners:
     - name: http
       protocol: HTTP
@@ -14,6 +16,9 @@ gateway:
       hostname: "${hostname}"
       tls:
         mode: Terminate
+        certificateRefs:
+          - name: gateway-tls
+            kind: Secret
       allowedRoutes:
         namespaces:
           from: All
