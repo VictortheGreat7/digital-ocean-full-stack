@@ -25,8 +25,8 @@ data:
         verbosity: detailed
       datadog:
         api:
-          key: "${DD_API_KEY}"
-          site: us5.datadoghq.com
+          key: "${env:DD_API_KEY}"
+          site: ${env:DD_SITE}
         sending_queue:
           batch:
             flush_timeout: 10s
