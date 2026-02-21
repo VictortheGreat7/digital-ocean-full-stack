@@ -21,4 +21,4 @@ gateway:
         namespaces:
           from: All
 certManager:
- cluster-issuer: letsencrypt-staging
+  cluster-issuer: letsencrypt-staging
