@@ -51,7 +51,7 @@ applications:
       argocd.argoproj.io/sync-wave: "1"
     syncPolicy:
       automated:
-        selfHeal: false
+        selfHeal: true
       syncOptions:
         - ServerSideApply=true
     sources:
@@ -89,7 +89,7 @@ applications:
       argocd.argoproj.io/sync-wave: "2"
     syncPolicy:
       automated:
-        selfHeal: false
+        selfHeal: true
       syncOptions:
         - ServerSideApply=true
     sources:
