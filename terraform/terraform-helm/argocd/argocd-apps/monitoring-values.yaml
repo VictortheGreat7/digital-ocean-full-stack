@@ -81,7 +81,35 @@ applications:
       server: https://kubernetes.default.svc
       namespace: monitoring
 
-  datadog-crds:
+  # datadog-crds:
+  #   namespace: knative-cd
+  #   project: monitoring
+  #   annotations:
+  #     argocd.argoproj.io/depends-on: "otel-config"
+  #     argocd.argoproj.io/sync-wave: "2"
+  #   syncPolicy:
+  #     automated:
+  #       selfHeal: true
+  #     syncOptions:
+  #       - ServerSideApply=true
+  #   sources:
+  #     - repoURL: https://github.com/VictortheGreat7/digital-ocean-full-stack.git
+  #       targetRevision: main
+  #       ref: values
+  #     - repoURL: https://helm.datadoghq.com
+  #       chart: datadog-crds
+  #       targetRevision: 2.16.0
+  #       helm:
+  #         valueFiles:
+  #           - $values/argocd-helm/datadog/crds/values.yaml
+  #         parameters:
+  #           - name: datadog.clusterName
+  #             value: ${cluster_name} # Terraform-set cluster name
+  #   destination:
+  #     server: https://kubernetes.default.svc
+  #     namespace: monitoring
+
+  datadog:
     namespace: knative-cd
     project: monitoring
     annotations:
@@ -89,35 +117,9 @@ applications:
       argocd.argoproj.io/sync-wave: "2"
     syncPolicy:
       automated:
-        selfHeal: true
+        selfHeal: false
       syncOptions:
         - ServerSideApply=true
-    sources:
-      - repoURL: https://github.com/VictortheGreat7/digital-ocean-full-stack.git
-        targetRevision: main
-        ref: values
-      - repoURL: https://helm.datadoghq.com
-        chart: datadog-crds
-        targetRevision: 2.16.0
-        helm:
-          valueFiles:
-            - $values/argocd-helm/datadog/crds/values.yaml
-          parameters:
-            - name: datadog.clusterName
-              value: ${cluster_name} # Terraform-set cluster name
-    destination:
-      server: https://kubernetes.default.svc
-      namespace: monitoring
-
-  datadog:
-    namespace: knative-cd
-    project: monitoring
-    annotations:
-      argocd.argoproj.io/depends-on: "otel-config,datadog-crds"
-      argocd.argoproj.io/sync-wave: "3"
-    syncPolicy:
-      automated:
-        selfHeal: false
     sources:
       - repoURL: https://github.com/VictortheGreat7/digital-ocean-full-stack.git
         targetRevision: main
@@ -128,7 +130,7 @@ applications:
         helm:
           valueFiles:
             - $values/argocd-helm/datadog/values.yaml
-          skipCrds: true
+          # skipCrds: true
           parameters:
             - name: datadog.clusterName
               value: ${cluster_name} # Terraform-set cluster name
