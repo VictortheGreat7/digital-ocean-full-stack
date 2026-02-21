@@ -45,9 +45,6 @@ RUN pip install --no-cache-dir --no-index --find-links /wheels -r requirements.t
 
 # Copy application code and set ownership to the non-root user
 COPY --chown=app:app . .
-# Create a directory for Prometheus multiprocess metrics and set permissions
-RUN mkdir -p /app/tmp && chown -R app:app /app/tmp
-ENV PROMETHEUS_MULTIPROC_DIR=/app/tmp
 # Switch to the non-root user
 USER app
 
