@@ -9,12 +9,13 @@ from __future__ import annotations
 
 import atexit
 import logging
-from queue import Queue, Empty
+from queue import Queue, Empty, Full
 from threading import Thread
 from typing import Any
 
 import psycopg2
 from psycopg2 import pool
+from psycopg2.extras import execute_values
 from opentelemetry import trace, context
 from opentelemetry.trace import format_trace_id, SpanContext
 
@@ -55,7 +56,8 @@ def init_db(app=None) -> None:
 
 
 # ── Async request-log queue + worker ───────────────────────────────────
-_log_queue: Queue = Queue()
+# Bounded queue to prevent memory leaks during heavy load
+_log_queue: Queue = Queue(maxsize=5000)
 _SENTINEL = object()  # signals the worker to exit
 
 
@@ -72,64 +74,86 @@ def enqueue_request_log(
 ) -> None:
     """Put a request-log record on the queue (non-blocking)."""
     ctx = context.get_current()
-    _log_queue.put((
+    item = (
         (path, method, status, latency_ms, timezone, city, trace_id),
         span_context,
         ctx,
-    ))
+    )
+    
+    try:
+        # Use put_nowait so we don't block the Gunicorn worker thread.
+        _log_queue.put_nowait(item)
+    except Full:
+        # DROP THE LOG: The database worker is overwhelmed.
+        # Silently discard to protect application memory.
+        pass
 
 
 def _db_worker() -> None:
-    """Background thread that drains *_log_queue* into the ``requests`` table."""
+    """Background thread that drains *_log_queue* in batches."""
     from telemetry import tracer  # deferred to avoid circular import
 
+    BATCH_SIZE = 100
+
     while True:
-        item = _log_queue.get()
-        if item is _SENTINEL:
-            break
+        batch_records = []
+        exit_signaled = False
 
-        record, span_ctx, ctx = item
+        # 1. Collect up to BATCH_SIZE items from the queue
+        while len(batch_records) < BATCH_SIZE:
+            try:
+                # Wait up to 1 second for new logs to avoid a tight CPU loop
+                item = _log_queue.get(timeout=1.0)
+                
+                if item is _SENTINEL:
+                    exit_signaled = True
+                    break
+                    
+                record, span_ctx, ctx = item
+                batch_records.append(record)
+                
+            except Empty:
+                # 1 second passed with no new items; break to flush what we have
+                break
 
-        # Attach parent context if available
-        token = context.attach(ctx) if ctx else None
-
-        try:
-            parent_span = trace.NonRecordingSpan(span_ctx) if span_ctx else None
-            parent_ctx = (
-                trace.set_span_in_context(parent_span)
-                if parent_span
-                else None
-            )
-            with tracer.start_as_current_span("db.insert_request_log", context=parent_ctx) as span:
+        # 2. If we have records, batch-insert them
+        if batch_records:
+            # We trace the batch insert as a single background span
+            with tracer.start_as_current_span("db.batch_insert_request_logs") as span:
                 span.set_attribute("db.operation", "insert")
                 span.set_attribute("db.table", "requests")
+                span.set_attribute("db.batch_size", len(batch_records))
 
-                conn = get_connection()
                 try:
-                    with conn.cursor() as cur:
-                        cur.execute(
-                            """
-                            INSERT INTO requests
-                                (path, method, status, latency_ms, timezone, city, trace_id)
-                            VALUES (%s, %s, %s, %s, %s, %s, %s)
-                            """,
-                            record,
-                        )
-                    conn.commit()
-                except Exception as exc:
-                    logger.error("DB write error: %s", exc)
+                    conn = get_connection()
                     try:
-                        conn.rollback()
-                    except Exception:
-                        pass
-                finally:
-                    put_connection(conn)
-        except Exception as exc:
-            # Pool may be unavailable — log and move on
-            logger.error("DB worker error (pool): %s", exc)
-        finally:
-            if token is not None:
-                context.detach(token)
+                        with conn.cursor() as cur:
+                            # Use execute_values for massive performance gains
+                            execute_values(
+                                cur,
+                                """
+                                INSERT INTO requests
+                                    (path, method, status, latency_ms, timezone, city, trace_id)
+                                VALUES %s
+                                """,
+                                batch_records
+                            )
+                        conn.commit()
+                    except Exception as exc:
+                        logger.error("DB batch write error: %s", exc)
+                        try:
+                            conn.rollback()
+                        except Exception:
+                            pass
+                    finally:
+                        put_connection(conn)
+                except Exception as exc:
+                    # Pool may be unavailable
+                    logger.error("DB worker error (pool): %s", exc)
+                    
+        # 3. Exit gracefully if sentinel was received
+        if exit_signaled:
+            break
 
 
 _db_thread = Thread(target=_db_worker, daemon=True, name="db-log-writer")
