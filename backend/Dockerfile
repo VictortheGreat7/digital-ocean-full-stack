@@ -24,7 +24,9 @@ RUN pip wheel --wheel-dir /wheels -r requirements.txt
 # Stage 2: Create the final runtime image
 FROM python:3.12-slim
 
-ENV PYTHONDONTWRITEBYTECODE=1 \
+ENV PROMETHEUS_MULTIPROC_DIR=/tmp/prometheus_multiproc \
+    GRPC_ENABLE_FORK_SUPPORT=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
 # Install runtime dependencies
@@ -35,8 +37,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Create a non-root user to run the application
 RUN addgroup --system app && adduser --system --ingroup app app
 
-# Enable Prometheus client to use the multiprocess mode
-ENV PROMETHEUS_MULTIPROC_DIR=/tmp/prometheus_multiproc
 # Create the directory and give ownership to the 'app' user
 RUN mkdir -p /tmp/prometheus_multiproc && chown app:app /tmp/prometheus_multiproc
 
