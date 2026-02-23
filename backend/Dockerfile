@@ -35,6 +35,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Create a non-root user to run the application
 RUN addgroup --system app && adduser --system --ingroup app app
 
+# Enable Prometheus client to use the multiprocess mode
+ENV PROMETHEUS_MULTIPROC_DIR=/tmp/prometheus_multiproc
+# Create the directory and give ownership to the 'app' user
+RUN mkdir -p /tmp/prometheus_multiproc && chown app:app /tmp/prometheus_multiproc
+
 WORKDIR /app
 
 # Install dependencies from the built wheels
@@ -45,14 +50,19 @@ RUN pip install --no-cache-dir --no-index --find-links /wheels -r requirements.t
 
 # Copy application code and set ownership to the non-root user
 COPY --chown=app:app . .
+
+# Make the entrypoint executable
+RUN chmod +x entrypoint.sh
+
 # Switch to the non-root user
 USER app
 
+# Expose the application port
 EXPOSE 5000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
   CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost/health').read()" || exit 1
 
-ENV FLASK_APP=app.py
-CMD ["flask", "run", "--host=0.0.0.0"]
+# Start the application using the entrypoint script
+CMD ["entrypoint.sh"]

@@ -41,13 +41,13 @@ _resource = Resource(attributes={
 })
 
 # ── Tracer provider + OTLP exporter ───────────────────────────────────
-tracer_provider = TracerProvider(resource=_resource)
-trace.set_tracer_provider(tracer_provider)
+# tracer_provider = TracerProvider(resource=_resource)
+# trace.set_tracer_provider(tracer_provider)
 
-_otlp_exporter = OTLPSpanExporter(endpoint=OTEL_EXPORTER_OTLP_ENDPOINT, insecure=True)
-tracer_provider.add_span_processor(
-    BatchSpanProcessor(_otlp_exporter, schedule_delay_millis=2000, max_export_batch_size=512)
-)
+# _otlp_exporter = OTLPSpanExporter(endpoint=OTEL_EXPORTER_OTLP_ENDPOINT, insecure=True)
+# tracer_provider.add_span_processor(
+#     BatchSpanProcessor(_otlp_exporter, schedule_delay_millis=2000, max_export_batch_size=512)
+# )
 
 # Convenience handle used throughout the app
 tracer = trace.get_tracer(__name__)
@@ -55,6 +55,14 @@ tracer = trace.get_tracer(__name__)
 
 def init_telemetry(app) -> None:
     """Instrument Flask, requests, psycopg2, and logging."""
+
+    tracer_provider = TracerProvider(resource=_resource)
+    trace.set_tracer_provider(tracer_provider)
+
+    _otlp_exporter = OTLPSpanExporter(endpoint=OTEL_EXPORTER_OTLP_ENDPOINT, insecure=True)
+    tracer_provider.add_span_processor(
+        BatchSpanProcessor(_otlp_exporter, schedule_delay_millis=2000, max_export_batch_size=512)
+    )
 
     # Flask auto-instrumentation (creates spans per request)
     FlaskInstrumentor().instrument_app(app)
@@ -73,7 +81,10 @@ def init_telemetry(app) -> None:
     app.logger.addHandler(handler)
     app.logger.setLevel(logging.INFO)
 
+    # Shutdown handler to flush spans on exit
+    atexit.register(tracer_provider.shutdown)
 
-@atexit.register
-def _shutdown_tracer() -> None:
-    tracer_provider.shutdown()
+
+# @atexit.register
+# def _shutdown_tracer() -> None:
+#     tracer_provider.shutdown()
