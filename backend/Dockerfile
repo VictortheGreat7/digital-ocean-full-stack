@@ -65,4 +65,4 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
   CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost/health').read()" || exit 1
 
 # Start the application using the entrypoint script
-CMD ["entrypoint.sh"]
+CMD ["./entrypoint.sh"]
