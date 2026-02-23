@@ -50,12 +50,8 @@ spec:
               value: dev
             - name: SERVICE_VERSION
               value: 1.0.0
-            - name: HOST_IP
-              valueFrom:
-                fieldRef:
-                  fieldPath: status.hostIP
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: http://$(HOST_IP):4317
+              value: datadog.monitoring.svc.cluster.local:4317
             - name: OTLP_EXPORTER_OTLP_PROTOCOL
               value: grpc
             - name: OTEL_RESOURCE_ATTRIBUTES
@@ -98,3 +94,7 @@ spec:
             periodSeconds: 5
             timeoutSeconds: 3
             failureThreshold: 3
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 15"]  # give the app time to finish processing in-flight requests and flush telemetry before SIGTERM
