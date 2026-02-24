@@ -42,11 +42,11 @@ alertmanager:
   alertmanagerSpec:
     resources:
       requests:
-        cpu: "1m"
-        memory: "50Mi"
-      limits:
         cpu: "2m"
-        memory: "60Mi"
+        memory: "64Mi"
+      limits:
+        cpu: "3m"
+        memory: "96Mi"
     storage:
       volumeClaimTemplate:
         spec:

@@ -30,6 +30,13 @@ datadog:
           username: "datadog"
           password: "datadog"
           dbname: "kronos"
+          dbm: true
+          database_autodiscovery:
+            enabled: true
+          collect_schemas:
+            enabled: true
+          relations:
+            - relation_regex: .*
 
   tags:
     - "env:dev"
