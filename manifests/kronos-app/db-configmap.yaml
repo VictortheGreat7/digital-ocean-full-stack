@@ -20,3 +20,8 @@ data:
     CREATE INDEX idx_created_at ON requests(created_at DESC);
     CREATE INDEX idx_status ON requests(status);
     CREATE INDEX idx_path ON requests(path);
+
+    -- Datadog monitoring user setup:
+    CREATE USER datadog WITH PASSWORD 'datadog';
+    GRANT pg_monitor TO datadog;
+    GRANT SELECT ON pg_stat_database TO datadog;

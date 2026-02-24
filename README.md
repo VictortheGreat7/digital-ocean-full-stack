@@ -174,5 +174,7 @@ The build workflow will:
 - Set up useful alerts and notifications.
 - Optimize costs with auto-scaling.
 - Secrets are currently stored in GitHub secrets and injected into Terraform, which is not ideal. A better approach would be to use a dedicated secrets manager like Azure Key Vault or AWS Secrets Manager, and integrate it with External Secret Operator on Kubernetes for secure secret management.
+- Gunicorn workers having issues with exporting traces to Datadog svc for the first few minutes.
+- Missing prometheus metrics? Some imported k8s can't get some queries.
 
 ### Lessons

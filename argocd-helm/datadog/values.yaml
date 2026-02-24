@@ -20,6 +20,16 @@ datadog:
         - prometheus_url: http://%%host%%:9090/metrics
           tags:
             - "component:cilium-agent"
+    postgres.yaml: |
+      ad_identifiers:
+        - postgres
+      init_config:
+      instances:
+        - host: "%%host%%"
+          port: 5432
+          username: "datadog"
+          password: "datadog"
+          dbname: "kronos"
 
   tags:
     - "env:dev"
