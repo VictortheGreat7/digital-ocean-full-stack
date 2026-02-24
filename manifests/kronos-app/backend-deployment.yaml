@@ -24,6 +24,18 @@ spec:
         app: kronos-app
         component: backend
         environment: development
+      annotations: # ADD THESE ANNOTATIONS
+        ad.datadoghq.com/backend.checks: |
+          {
+            "openmetrics": {
+              "instances": [
+                {
+                  "openmetrics_endpoint": "http://%%host%%:5000/metrics",
+                  "namespace": "kronos",
+                  "metrics": [".*"]
+                }
+              ]
+            }
     spec:
       containers:
         - name: backend
