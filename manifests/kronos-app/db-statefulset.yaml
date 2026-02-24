@@ -36,6 +36,8 @@ spec:
                 secretKeyRef:
                   name: postgres-secret
                   key: password
+            - name: POSTGRES_SHARED_PRELOAD_LIBRARIES
+              value: "pg_stat_statements"
           volumeMounts:
             - name: postgres-storage
               mountPath: /var/lib/postgresql/data
