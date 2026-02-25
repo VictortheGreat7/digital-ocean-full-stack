@@ -1,8 +1,8 @@
 manager:
   resources:
     requests:
-      cpu: "50m"
-      memory: "128Mi"
+      cpu: "2m"
+      memory: "50Mi"
     limits:
-      cpu: "200m"
-      memory: "256Mi"
+      cpu: "3m"
+      memory: "64Mi"

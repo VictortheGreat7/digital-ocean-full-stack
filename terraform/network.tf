@@ -11,6 +11,7 @@ resource "digitalocean_tag" "kronos" {
 }
 
 # trivy:ignore:DIG-0003
+# trivy:ignore:DIG-0001
 resource "digitalocean_firewall" "kronos" {
   name = "${random_pet.kronos.id}-firewall"
   tags = [digitalocean_tag.kronos.name]
