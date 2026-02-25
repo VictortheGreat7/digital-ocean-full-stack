@@ -28,16 +28,17 @@ Here's a breakdown of the key technologies, grouped for clarity, with rationale 
 | **Orchestration** | Kubernetes (DOKS), Helm, kubectl | I'm trying to build exertise here |
 | **Infrastructure** | Terraform, Digital Ocean CLI | For Terraform, I have the most experience using HCL. For Digital Ocean, I had free credits (still stuck with a 3 droplet limit though) |
 | **CI/CD** | GitHub Actions | It can help automate builds, tests, and deploys on every push/PR. It's free and built into where I keep my code |
-| **Monitoring & Observability** | Prometheus, Grafana, Datadog, OpenTelemetry | Prometheus collects metrics efficiently; Grafana visualizes them in dashboards. As for Datadog, also had a free account just sitting so I am also testing a SaaS offering |
+| **Monitoring & Observability** | Prometheus, Grafana, Datadog, OpenTelemetry | Comprehensive metric, log, and trace collection using Datadog and the Kube-Prometheus stack to monitor SLIs and SLOs. Prometheus collects metrics efficiently; Grafana visualizes them in dashboards. Datadog is an all-in-one observability SaaS option I am testing |
 | **Networking & Security** | Cilium Gateway, Cert Manager (Let's Encrypt), Digital Ocean Firewall, Cloudflare DNS | Cilium Gateway routes traffic securely; Cert Manager automates SSL for HTTPS. Firewall for cloud level security and Cloudflare for DNS |
-| **Testing** | K6 (for chaos testing) | Simulates load and failures to test resilience |
+| **Chaos & Load Testing** | Grafana's K6 | Automated API endpoint testing to identify system breaking points when under stress |
 
 ### ✨ Features
 
-- Automated infrastructure provisioning and app deployment.
-- Monitoring dashboards for metrics, logs, and traces.
-- Secure HTTPS access with auto-renewing certificates.
-- Chaos testing to simulate outages and verify resilience.
+- **Infrastructure as Code:** Automated infrastructure provisioning and app deployment.
+- **Monitoring:** Dashboards for metrics, logs, and traces.
+- **SSL Ingress Encryption** Secure HTTPS access with auto-renewing certificates.
+- **Chaos Engineering:** Chaos testing to simulate outages and verify resilience.
+- **Incident Management:** Read my [Post-Mortem: Severe Latency During Stress Test](./docs/post-mortems/2026-02-25-load-test-failure.md) to see how I analyze, document, and learn from system failures.
 
 ## 🏗️ Getting Started: How to Spin Up the Project?
 
