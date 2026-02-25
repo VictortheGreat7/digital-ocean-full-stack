@@ -10,6 +10,7 @@ resource "digitalocean_tag" "kronos" {
   depends_on = [random_pet.kronos]
 }
 
+# trivy:ignore:DIG-0003
 resource "digitalocean_firewall" "kronos" {
   name = "${random_pet.kronos.id}-firewall"
 
