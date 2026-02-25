@@ -10,33 +10,27 @@ resource "digitalocean_tag" "kronos" {
   depends_on = [random_pet.kronos]
 }
 
+# trivy:ignore:DIG-0003
 resource "digitalocean_firewall" "kronos" {
   name = "${random_pet.kronos.id}-firewall"
-
   tags = [digitalocean_tag.kronos.name]
 
-  # trivy:ignore:DIG-0003
   inbound_rule {
     protocol         = "tcp"
     port_range       = "443"
     source_addresses = ["0.0.0.0/0"]
-  } # trivy:ignore:DIG-0003
+  }
 
-  # trivy:ignore:DIG-0003
   outbound_rule {
     protocol              = "tcp"
     port_range            = "1-65535"
     destination_addresses = ["0.0.0.0/0"]
   }
-
-  # trivy:ignore:DIG-0003
   outbound_rule {
     protocol              = "udp"
     port_range            = "1-65535"
     destination_addresses = ["0.0.0.0/0"]
   }
-
-  # trivy:ignore:DIG-0003
   outbound_rule {
     protocol              = "icmp"
     destination_addresses = ["0.0.0.0/0"]
