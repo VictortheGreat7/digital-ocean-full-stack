@@ -44,8 +44,8 @@ data:
       // Expected Normal Load
       load: {
         stages: [
-          { duration: '2m', target: 500 }, // Start with 500 users
-          { duration: '10m', target: 500 }, // Stay at 500 users
+          { duration: '2m', target: 1000 }, // Start with 500 users
+          { duration: '10m', target: 1000 }, // Stay at 500 users
           { duration: '2m', target: 0 }, // Ramp down to 0 users
         ],
         thresholds: {
@@ -77,8 +77,8 @@ data:
       spike: {
         stages: [
           { duration: '1m', target: 1000 }, // Baseline
-          { duration: '5m', target: 1750 }, // Spike to 1750 users
-          { duration: '10m', target: 1750 }, // Stay at spike
+          { duration: '5m', target: 1500 }, // Spike to 1500 users
+          { duration: '10m', target: 1500 }, // Stay at spike
           { duration: '2m', target: 1000 }, // Drop back to baseline
           { duration: '1m', target: 1000 }, // Stay at baseline
           { duration: '1m', target: 0 }, // Recover
