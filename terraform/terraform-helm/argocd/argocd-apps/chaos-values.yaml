@@ -25,6 +25,8 @@ applications:
   chaos-operator:
     namespace: knative-cd
     project: chaos-testing
+    annotations:
+      argocd.argoproj.io/sync-wave: "4"
     syncPolicy:
       automated:
         selfHeal: true
@@ -49,6 +51,7 @@ applications:
     project: chaos-testing
     annotations:
       argocd.argoproj.io/depends-on: chaos-operator
+      argocd.argoproj.io/sync-wave: "5"
     syncPolicy:
       automated:
         selfHeal: true
