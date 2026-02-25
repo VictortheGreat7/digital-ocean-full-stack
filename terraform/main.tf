@@ -16,6 +16,7 @@ resource "digitalocean_kubernetes_cluster" "kronos" {
   }
 
   auto_upgrade                     = true
+  surge_upgrade                    = true
   destroy_all_associated_resources = true
 
   tags = [digitalocean_tag.kronos.name]

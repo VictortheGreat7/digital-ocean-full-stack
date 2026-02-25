@@ -39,7 +39,7 @@ jobs:
         with:
           scan-type: 'fs'
           format: 'table'
-          exit-code: '0'
+          exit-code: '1'
           scanners: 'vuln,secret,misconfig,license'
           severity: 'CRITICAL'
       - name: Run Trivy Repo Comprehensive Scan
@@ -50,7 +50,7 @@ jobs:
           exit-code: '0'
           scanners: 'vuln,secret,misconfig,license'
           severity: 'HIGH,MEDIUM,LOW,UNKNOWN'
-          skip-trivy-setup: true
+          skip-setup-trivy: true
 
   # Runs ONLY if backend/ folder changed
   build-backend:
