@@ -4,7 +4,7 @@ metadata:
   name: kronos-slos
   namespace: monitoring
   labels:
-    release: kube-prometheus-stack
+    release: kube-prom-stack
 spec:
   groups:
     - name: slo.world_clocks
