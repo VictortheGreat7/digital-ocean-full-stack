@@ -14,9 +14,9 @@ spec:
         - record: sli:world_clocks:availability:ratio_rate5m
           expr: 1 - (sum(rate(k6_http_reqs_total{endpoint="world-clocks", status=~"4..|5.."}[5m])) / clamp_min(sum(rate(k6_http_reqs_total{endpoint="world-clocks"}[5m])), 1))
         
-        # Latency SLI using k6 duration histogram (le="0.5" is 500ms since metric is in seconds)
+        # Latency SLI using the pre-calculated custom k6 SLI ratio gauge instead of missing buckets
         - record: sli:world_clocks:latency_500ms:ratio_rate5m
-          expr: sum(rate(k6_http_req_duration_seconds_bucket{endpoint="world-clocks", le="0.5"}[5m])) / clamp_min(sum(rate(k6_http_req_duration_seconds_count{endpoint="world-clocks"}[5m])), 1)
+          expr: avg_over_time(k6_sli_latency_vs_slo_ratio{endpoint="world-clocks"}[5m])
         
         - record: burn:world_clocks:availability:1h
           expr: (1 - sli:world_clocks:availability:ratio_rate5m) / 0.001
