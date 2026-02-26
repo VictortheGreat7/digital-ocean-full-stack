@@ -2,7 +2,6 @@
 terraform {
   cloud {
     organization = "VictortheGreat7-TF"
-
     workspaces {
       name = "digital-ocean-full-stack"
     }
