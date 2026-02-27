@@ -42,7 +42,6 @@ resource "helm_release" "parent_app" {
 
   depends_on = [
     helm_release.gateway,
-    helm_release.kronos_argocd,
     kubernetes_secret_v1.postgres_pass,
     kubernetes_secret_v1.datadog_secret
   ]
