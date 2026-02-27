@@ -6,13 +6,13 @@ applications:
     project: default
     syncPolicy:
       automated:
+        selfHeal: true
       retry:
         limit: 5
         backoff:
           duration: 5s
           maxDuration: 3m0s
           factor: 2
-        selfHeal: true
     sources:
     - repoURL: https://github.com/VictortheGreat7/digital-ocean-full-stack.git
       targetRevision: main

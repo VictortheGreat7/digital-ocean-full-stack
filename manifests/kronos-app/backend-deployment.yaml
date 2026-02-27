@@ -54,8 +54,12 @@ spec:
               valueFrom:
                 fieldRef:
                     fieldPath: status.hostIP
+            - name: DD_AGENT_HOST
+              value: datadog.monitoring.svc.cluster.local
+            - name: DD_DOGSTATSD_PORT
+              value: "8125"
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: http://$(HOST_IP):4317
+              value: datadog.monitoring.svc.cluster.local:4317
             - name: OTLP_EXPORTER_OTLP_PROTOCOL
               value: grpc
             - name: OTEL_RESOURCE_ATTRIBUTES

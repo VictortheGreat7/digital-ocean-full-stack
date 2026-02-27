@@ -54,7 +54,7 @@ jobs:
         echo "Attempting to destroy Terraform Resources (max 3 attempts)..."
         for destroy in {1..3}; do
           echo "Attempt $destroy..."
-          terraform destroy -target=random_pet.kronos --auto-approve && break || {
+          terraform destroy --auto-approve && break || {
             echo "Terraform destroy failed (attempt $destroy)."
             if [ "$destroy" -lt 3 ]; then
               echo "Retrying in 10 seconds..."
