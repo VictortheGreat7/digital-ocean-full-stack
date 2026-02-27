@@ -27,6 +27,8 @@ applications:
     project: chaos-testing
     annotations:
       argocd.argoproj.io/sync-wave: "4"
+    finalizers:
+    - resources-finalizer.argocd.argoproj.io
     syncPolicy:
       automated:
         selfHeal: true
@@ -52,6 +54,8 @@ applications:
     annotations:
       argocd.argoproj.io/depends-on: chaos-operator
       argocd.argoproj.io/sync-wave: "5"
+    finalizers:
+    - resources-finalizer.argocd.argoproj.io
     syncPolicy:
       automated:
         selfHeal: true
