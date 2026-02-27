@@ -22,9 +22,9 @@ applications:
       targetRevision: 2.0.4
       helm:
         valueFiles:
-          - $values/terraform-helm/argocd/argocd-apps/monitoring-values.yaml
-          - $values/terraform-helm/argocd/argocd-apps/app-values.yaml
-          - $values/terraform-helm/argocd/argocd-apps/chaos-values.yaml
+          - $values/terraform/terraform-helm/argocd/argocd-apps/monitoring-values.yaml
+          - $values/terraform/terraform-helm/argocd/argocd-apps/app-values.yaml
+          - $values/terraform/terraform-helm/argocd/argocd-apps/chaos-values.yaml
         parameters:
           - name: applications.kube-prom-stack.sources[1].helm.parameters[0].name
             value: prometheus.prometheusSpec.externalUrl
