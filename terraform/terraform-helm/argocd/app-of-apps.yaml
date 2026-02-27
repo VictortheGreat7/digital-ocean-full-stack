@@ -1,8 +1,27 @@
 applications:
+  http-redirect:
+    namespace: knative-cd
+    finalizers:
+    - resources-finalizer.argocd.argoproj.io
+    additionalAnnotations:
+      argocd.argoproj.io/sync-wave: "-2"
+    project: default
+    syncPolicy:
+      automated:
+        selfHeal: true
+    source:
+      repoURL: https://github.com/VictortheGreat7/digital-ocean-full-stack.git
+      targetRevision: main
+      path: manifests/argo-parent/http-redirect.yaml
+    destination:
+      server: https://kubernetes.default.svc
+      namespace: kube-system
   parent:
     namespace: knative-cd
     finalizers:
     - resources-finalizer.argocd.argoproj.io
+    additionalAnnotations:
+      argocd.argoproj.io/sync-wave: "-1"
     project: default
     syncPolicy:
       automated:
@@ -22,34 +41,34 @@ applications:
       targetRevision: 2.0.4
       helm:
         valueFiles:
-          - $values/terraform/terraform-helm/argocd/argocd-apps/monitoring-values.yaml
-          - $values/terraform/terraform-helm/argocd/argocd-apps/app-values.yaml
-          - $values/terraform/terraform-helm/argocd/argocd-apps/chaos-values.yaml
+          - $values/terraform/argocd-helm/argocd-apps/monitoring-values.yaml
+          - $values/terraform/argocd-helm/argocd-apps/app-values.yaml
+          - $values/terraform/argocd-helm/argocd-apps/chaos-values.yaml
         parameters:
           - name: applications.kube-prom-stack.sources[1].helm.parameters[0].name
             value: prometheus.prometheusSpec.externalUrl
           - name: applications.kube-prom-stack.sources[1].helm.parameters[0].value
-            value: "https://${hostname}/monitoring/prometheus/"
+            value: "https://${prometheus_hostname}"
           - name: applications.kube-prom-stack.sources[1].helm.parameters[1].name
             value: prometheus.route.main.hostnames[0]
           - name: applications.kube-prom-stack.sources[1].helm.parameters[1].value
-            value: ${hostname}
+            value: ${prometheus_hostname}
           - name: applications.kube-prom-stack.sources[1].helm.parameters[2].name
             value: alertmanager.alertmanagerSpec.externalUrl
           - name: applications.kube-prom-stack.sources[1].helm.parameters[2].value
-            value: "https://${hostname}/monitoring/alertmanager/"
+            value: "https://${alertmanager_hostname}"
           - name: applications.kube-prom-stack.sources[1].helm.parameters[3].name
             value: alertmanager.route.main.hostnames[0]
           - name: applications.kube-prom-stack.sources[1].helm.parameters[3].value
-            value: ${hostname}
+            value: ${alertmanager_hostname}
           - name: applications.kube-prom-stack.sources[1].helm.parameters[4].name
             value: grafana.grafana\.ini.server.root_url
           - name: applications.kube-prom-stack.sources[1].helm.parameters[4].value
-            value: "https://${hostname}/monitoring/grafana/"
+            value: "https://${grafana_hostname}"
           - name: applications.kube-prom-stack.sources[1].helm.parameters[5].name
             value: grafana.route.main.hostnames[0]
           - name: applications.kube-prom-stack.sources[1].helm.parameters[5].value
-            value: ${hostname}
+            value: ${grafana_hostname}
           - name: applications.datadog.sources[1].helm.parameters[0].name
             value: datadog.clusterName
           - name: applications.datadog.sources[1].helm.parameters[0].value

@@ -69,7 +69,7 @@ resource "helm_release" "gateway" {
 
   values = [
     templatefile("${path.root}/terraform-helm/traffic/gateway/values.yaml", {
-      hostname = "${var.subdomains[0]}.${var.domain}"
+      domain = "${var.domain}"
     })
   ]
 
@@ -91,11 +91,7 @@ resource "helm_release" "external_dns" {
   atomic           = true
   cleanup_on_fail  = true
 
-  values = [
-    templatefile("${path.root}/terraform-helm/traffic/external-dns/values.yaml", {
-      subdomain = var.subdomains[0]
-    })
-  ]
+  values = [file("${path.root}/terraform-helm/traffic/external-dns/values.yaml")]
 
   wait    = true
   timeout = 600

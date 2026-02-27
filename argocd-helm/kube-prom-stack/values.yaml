@@ -29,13 +29,7 @@ prometheus:
       matches:
         - path:
             type: PathPrefix
-            value: /monitoring/prometheus
-      filters:
-        - type: URLRewrite
-          urlRewrite:
-            path:
-              type: ReplacePrefixMatch
-              replacePrefixMatch: /
+            value: /
 
 alertmanager:
   enabled: true
@@ -65,13 +59,7 @@ alertmanager:
       matches:
         - path:
             type: PathPrefix
-            value: /monitoring/alertmanager
-      filters:
-        - type: URLRewrite
-          urlRewrite:
-            path:
-              type: ReplacePrefixMatch
-              replacePrefixMatch: /
+            value: /
 
 grafana:
   persistence:
@@ -96,7 +84,7 @@ grafana:
   adminPassword: admin
   grafana.ini:
     server:
-      serve_from_sub_path: true
+      serve_from_sub_path: false
   route:
     main:
       enabled: true
@@ -107,4 +95,4 @@ grafana:
       matches:
         - path:
             type: PathPrefix
-            value: /monitoring/grafana
+            value: /

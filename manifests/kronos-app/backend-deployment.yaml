@@ -50,10 +50,6 @@ spec:
               value: dev
             - name: SERVICE_VERSION
               value: 1.0.0
-            - name: HOST_IP
-              valueFrom:
-                fieldRef:
-                    fieldPath: status.hostIP
             - name: DD_AGENT_HOST
               value: datadog.monitoring.svc.cluster.local
             - name: DD_DOGSTATSD_PORT

@@ -9,7 +9,7 @@ env:
         name: cloudflare-api
         key: api-token
 policy: sync
-txtOwnerId: "${subdomain}"
+txtOwnerId: "gateway"
 extraArgs:
   - --gateway-namespace=kube-system
   - --cloudflare-proxied

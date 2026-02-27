@@ -4,14 +4,14 @@ server:
     parentRefs: 
       - name: main-gateway
         namespace: kube-system
-        sectionName: https
+        sectionName: argo-https
     hostnames:
-      - "${kronos_domain}"
+      - "${argo_hostname}"
     rules:
       - matches:
         - path:
             type: PathPrefix
-            value: /kcd/argo
+            value: /
         backendRefs:
           - name: argocd-server
             port: 80

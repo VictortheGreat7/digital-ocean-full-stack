@@ -9,7 +9,7 @@ resource "helm_release" "argo_cd" {
 
   values = [
     templatefile("${path.root}/terraform-helm/argocd/values.yaml", {
-      kronos_domain = "${var.subdomains[0]}.${var.domain}"
+      argo_hostname = "${var.subdomains[0]}.${var.domain}"
     })
   ]
 
@@ -33,7 +33,10 @@ resource "helm_release" "parent_app" {
   values = [
     templatefile("${path.root}/terraform-helm/argocd/app-of-apps.yaml", {
       cluster_name = digitalocean_kubernetes_cluster.kronos.name,
-      hostname     = "${var.subdomains[0]}.${var.domain}"
+      prometheus_hostname     = "${var.subdomains[1]}.${var.domain}",
+      alertmanager_hostname = "${var.subdomains[2]}.${var.domain}",
+      grafana_hostname      = "${var.subdomains[3]}.${var.domain}",
+      kronos_hostname     = "${var.subdomains[4]}.${var.domain}"
     })
   ]
 
@@ -41,7 +44,6 @@ resource "helm_release" "parent_app" {
   timeout = 600
 
   depends_on = [
-    helm_release.gateway,
     helm_release.argo_cd,
     helm_release.external_dns,
     kubernetes_secret_v1.postgres_pass,

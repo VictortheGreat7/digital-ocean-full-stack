@@ -74,19 +74,6 @@ applications:
         helm:
           valueFiles:
             - $values/argocd-helm/kube-prom-stack/values.yaml
-          parameters:
-            - name: prometheus.prometheusSpec.externalUrl
-              value: "https://${hostname}/monitoring/prometheus/"
-            - name: prometheus.route.main.hostnames[0]
-              value: ${hostname}
-            - name: alertmanager.alertmanagerSpec.externalUrl
-              value: "https://${hostname}/monitoring/alertmanager/"
-            - name: alertmanager.route.main.hostnames[0]
-              value: ${hostname}
-            - name: grafana.grafana\.ini.server.root_url
-              value: "https://${hostname}/monitoring/grafana/"
-            - name: grafana.route.main.hostnames[0]
-              value: ${hostname}
     destination:
       server: https://kubernetes.default.svc
       namespace: monitoring
@@ -114,9 +101,6 @@ applications:
         helm:
           valueFiles:
             - $values/argocd-helm/datadog/values.yaml
-          parameters:
-            - name: datadog.clusterName
-              value: ${cluster_name} # Terraform-set cluster name
     destination:
       server: https://kubernetes.default.svc
       namespace: monitoring
