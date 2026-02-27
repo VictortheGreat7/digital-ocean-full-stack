@@ -2,6 +2,10 @@ projects:
   chaos-testing:
     namespace: knative-cd
     description: Project for chaos testing applications
+    finalizers:
+      - resources-finalizer.argocd.argoproj.io
+    additionalAnnotations:
+      argocd.argoproj.io/sync-wave: "6"
     sourceRepos:
       - "https://github.com/VictortheGreat7/digital-ocean-full-stack.git"
       - "https://grafana.github.io/helm-charts"
@@ -25,8 +29,8 @@ applications:
   chaos-operator:
     namespace: knative-cd
     project: chaos-testing
-    annotations:
-      argocd.argoproj.io/sync-wave: "4"
+    additionalAnnotations:
+      argocd.argoproj.io/sync-wave: "7"
     finalizers:
     - resources-finalizer.argocd.argoproj.io
     syncPolicy:
@@ -51,9 +55,9 @@ applications:
   chaos-test:
     namespace: knative-cd
     project: chaos-testing
-    annotations:
+    additionalAnnotations:
       argocd.argoproj.io/depends-on: chaos-operator
-      argocd.argoproj.io/sync-wave: "5"
+      argocd.argoproj.io/sync-wave: "8"
     finalizers:
     - resources-finalizer.argocd.argoproj.io
     syncPolicy:

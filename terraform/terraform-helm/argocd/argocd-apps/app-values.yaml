@@ -2,6 +2,10 @@ projects:
   kronos:
     namespace: knative-cd
     description: Project for Kronos World Clock application
+    finalizers:
+      - resources-finalizer.argocd.argoproj.io
+    additionalAnnotations:
+      argocd.argoproj.io/sync-wave: "4"
     sourceRepos:
       - "https://github.com/VictortheGreat7/digital-ocean-full-stack.git"
     destinations:
@@ -14,8 +18,8 @@ applications:
   kronos:
     namespace: knative-cd
     project: kronos
-    annotations:
-      argocd.argoproj.io/sync-wave: "3"
+    additionalAnnotations:
+      argocd.argoproj.io/sync-wave: "5"
     finalizers:
     - resources-finalizer.argocd.argoproj.io
     syncPolicy:
