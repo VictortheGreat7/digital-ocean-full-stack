@@ -1,0 +1,24 @@
+applications:
+  parent:
+    namespace: knative-cd
+    finalizers:
+    - resources-finalizer.argocd.argoproj.io
+    project: default
+    syncPolicy:
+      automated:
+      retry:
+        limit: 5
+        backoff:
+          duration: 5s
+          maxDuration: 3m0s
+          factor: 2
+        selfHeal: true
+      syncOptions:
+        - CreateNamespace=true
+    source:
+      repoURL: https://github.com/VictortheGreat7/digital-ocean-full-stack.git
+      targetRevision: main
+      path: manifests/argo-parent
+    destination:
+      server: https://kubernetes.default.svc
+      namespace: knative-cd

@@ -1,0 +1,79 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: chaos-operator
+  namespace: knative-cd
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: chaos-testing
+  sources:
+    - repoURL: https://github.com/VictortheGreat7/digital-ocean-full-stack.git
+      targetRevision: main
+      ref: values
+    - repoURL: https://grafana.github.io/helm-charts
+      chart: k6-operator
+      targetRevision: 4.2.0
+      helm:
+        valueFiles:
+          - $values/argocd-helm/chaos-operator/values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: chaos
+  syncPolicy:
+    automated:
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: chaos-test
+  namespace: knative-cd
+  annotations:
+    argocd.argoproj.io/depends-on: chaos-operator
+    argocd.argoproj.io/sync-wave: "5"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: chaos-testing
+  source:
+    repoURL: https://github.com/VictortheGreat7/digital-ocean-full-stack.git
+    targetRevision: main
+    path: manifests/chaos-testing
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: chaos
+  syncPolicy:
+    automated:
+      selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: chaos-testing
+  namespace: knative-cd
+spec:
+  description: Project for chaos testing applications
+  sourceRepos:
+    - https://github.com/VictortheGreat7/digital-ocean-full-stack.git
+    - https://grafana.github.io/helm-charts
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: chaos
+    - server: https://kubernetes.default.svc
+      namespace: default
+    - server: https://kubernetes.default.svc
+      namespace: monitoring
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+    - group: '*'
+      kind: CustomResourceDefinition
+    - group: '*'
+      kind: ClusterRole
+    - group: '*'
+      kind: ClusterRoleBinding

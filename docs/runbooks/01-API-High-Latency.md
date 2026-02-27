@@ -33,3 +33,24 @@ If the database is blocking connections, restart the backend pods to clear dead 
 ## 📞 Escalation
 
 If scaling up does not resolve the issue within 10 minutes, escalate to the Database Reliability team.
+
+k6_checks_rate		
+k6_data_received_total		
+k6_data_sent_total		
+k6_group_duration_seconds		
+k6_http_req_blocked_seconds		
+k6_http_req_connecting_seconds		
+k6_http_req_duration_seconds		
+k6_http_req_failed_rate		
+k6_http_req_receiving_seconds		
+k6_http_req_sending_seconds		
+k6_http_req_tls_handshaking_seconds		
+k6_http_req_waiting_seconds		
+k6_http_reqs_total		
+k6_iteration_duration_seconds		
+k6_iterations_total		
+k6_sli_error_budget_burn_rate		
+k6_sli_latency_vs_slo_ratio		
+k6_sli_request_count_total		
+k6_vus		
+k6_vus_max		
