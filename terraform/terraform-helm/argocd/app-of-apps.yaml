@@ -13,8 +13,6 @@ applications:
           maxDuration: 3m0s
           factor: 2
         selfHeal: true
-      syncOptions:
-        - CreateNamespace=true
     sources:
     - repoURL: https://github.com/VictortheGreat7/digital-ocean-full-stack.git
       targetRevision: main
