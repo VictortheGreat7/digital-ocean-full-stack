@@ -30,7 +30,6 @@ configs:
         end
       end
       return hs
+    url: "${argo_hostname}"
   params:
-    server.basehref: /kcd/argo
-    server.rootpath: /kcd/argo
     server.insecure: true
