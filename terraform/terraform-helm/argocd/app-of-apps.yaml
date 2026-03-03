@@ -43,7 +43,7 @@ applications:
         valueFiles:
           - $values/terraform/argocd-helm/argocd-apps/monitoring-values.yaml
           - $values/terraform/argocd-helm/argocd-apps/app-values.yaml
-          - $values/terraform/argocd-helm/argocd-apps/chaos-values.yaml
+          # - $values/terraform/argocd-helm/argocd-apps/chaos-values.yaml
         parameters:
           - name: applications.kube-prom-stack.sources[1].helm.parameters[0].name
             value: prometheus.prometheusSpec.externalUrl
