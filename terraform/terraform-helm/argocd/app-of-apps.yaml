@@ -12,7 +12,7 @@ applications:
     source:
       repoURL: https://github.com/VictortheGreat7/digital-ocean-full-stack.git
       targetRevision: main
-      path: manifests/argo-parent/http-redirect.yaml
+      path: manifests/argo-parent/
     destination:
       server: https://kubernetes.default.svc
       namespace: kube-system
@@ -41,9 +41,9 @@ applications:
       targetRevision: 2.0.4
       helm:
         valueFiles:
-          - $values/terraform/argocd-helm/argocd-apps/monitoring-values.yaml
-          - $values/terraform/argocd-helm/argocd-apps/app-values.yaml
-          # - $values/terraform/argocd-helm/argocd-apps/chaos-values.yaml
+          - $values/argocd-helm/argocd-apps/monitoring-values.yaml
+          - $values/argocd-helm/argocd-apps/app-values.yaml
+          # - $values/argocd-helm/argocd-apps/chaos-values.yaml
         parameters:
           - name: applications.kube-prom-stack.sources[1].helm.parameters[0].name
             value: prometheus.prometheusSpec.externalUrl
