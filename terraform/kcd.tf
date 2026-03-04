@@ -35,8 +35,7 @@ resource "helm_release" "parent_app" {
       cluster_name          = digitalocean_kubernetes_cluster.kronos.name,
       prometheus_hostname   = "${var.subdomains[1]}.${var.domain}",
       alertmanager_hostname = "${var.subdomains[2]}.${var.domain}",
-      grafana_hostname      = "${var.subdomains[3]}.${var.domain}",
-      kronos_hostname       = "${var.subdomains[4]}.${var.domain}"
+      grafana_hostname      = "${var.subdomains[3]}.${var.domain}"
     })
   ]
 
