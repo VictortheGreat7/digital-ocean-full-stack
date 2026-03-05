@@ -14,13 +14,6 @@ spec:
     - matches:
         - path:
             type: PathPrefix
-            value: /
-      backendRefs:
-        - name: kronos-frontend-svc
-          port: 80
-    - matches:
-        - path:
-            type: PathPrefix
             value: /api/metrics
       filters:
         - type: URLRewrite
@@ -43,4 +36,11 @@ spec:
               replacePrefixMatch: /
       backendRefs:
         - name: kronos-backend-svc
+          port: 80
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: kronos-frontend-svc
           port: 80
