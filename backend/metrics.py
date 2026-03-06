@@ -13,7 +13,6 @@ from opentelemetry import trace
 from opentelemetry.trace import format_trace_id
 from prometheus_client import Counter, Histogram
 from prometheus_flask_exporter import PrometheusMetrics
-from ddtrace.runtime import RuntimeMetrics
 
 from config import EXCLUDED_PATHS
 from db import enqueue_request_log
@@ -37,10 +36,9 @@ _metrics: PrometheusMetrics | None = None
 def init_metrics(app: Flask) -> None:
     """Register the ``/metrics`` endpoint and before/after hooks."""
     global _metrics
+
     _metrics = PrometheusMetrics(app)
     _metrics.info("app_info", "World Clock Backend Application", version="1.0.0")
-
-    RuntimeMetrics.enable()
 
     app.before_request(_start_timer)
     app.after_request(_record_metrics)

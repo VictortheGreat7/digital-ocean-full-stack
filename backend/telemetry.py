@@ -20,6 +20,8 @@ from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
+from ddtrace.runtime import RuntimeMetrics
+
 
 from config import (
     OTEL_EXPORTER_OTLP_ENDPOINT,
@@ -40,6 +42,8 @@ _resource = Resource(attributes={
     "service.version": SERVICE_VERSION,
 })
 
+_runtime_metrics_enabled = False
+
 # ── Tracer provider + OTLP exporter ───────────────────────────────────
 tracer_provider = TracerProvider(resource=_resource)
 trace.set_tracer_provider(tracer_provider)
@@ -55,6 +59,12 @@ tracer = trace.get_tracer(__name__)
 
 def init_telemetry(app) -> None:
     """Instrument Flask, requests, psycopg2, and logging."""
+    global _runtime_metrics_enabled
+
+    # Enable Datadog runtime metrics (CPU, memory, etc.)
+    if not _runtime_metrics_enabled:
+        RuntimeMetrics.enable()
+        _runtime_metrics_enabled = True
 
     # Flask auto-instrumentation (creates spans per request)
     FlaskInstrumentor().instrument_app(app)
