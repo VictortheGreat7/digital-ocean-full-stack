@@ -130,16 +130,16 @@ data:
           recordSli(res, 'world-clocks', 500);
         });
       } else if (rand < 0.9) {
-        // Homepage Endpoint. 10% of traffic, expected to be common but less than API calls
-        group('homepage endpoint', () => {
-          let res = http.get(`${BASE_URL}/`, {
-            tags: { name: 'homepage', endpoint: 'homepage' },
+        // Timezones Endpoint. 10% of traffic, expected to be common but less than API calls
+        group('timezones endpoint', () => {
+          let res = http.get(`${BASE_URL}/api/timezones`, {
+            tags: { name: 'timezones', endpoint: 'timezones' },
           });
           check(res, {
-            'homepage status 200': (r) => r.status === 200,
-            'homepage latency < 500ms': (r) => r.timings.duration < 500,
+            'timezones status 200': (r) => r.status === 200,
+            'timezones latency < 500ms': (r) => r.timings.duration < 500,
           });
-          recordSli(res, 'homepage', 500);
+          recordSli(res, 'timezones', 500);
         });
       } else {
         // Current Time API Endpoint. Also 10% of traffic, expected to be common but less than world clocks endpoint

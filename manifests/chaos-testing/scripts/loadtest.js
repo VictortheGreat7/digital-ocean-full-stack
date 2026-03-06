@@ -37,8 +37,8 @@ const profiles = {
   // Expected Normal Load
   load: {
     stages: [
-      { duration: '2m', target: 500 }, // Start with 500 users
-      { duration: '10m', target: 500 }, // Stay at 500 users
+      { duration: '3m', target: 1000 }, // Start with 1000 users
+      { duration: '10m', target: 1000 }, // Stay at 1000 users
       { duration: '2m', target: 0 }, // Ramp down to 0 users
     ],
     thresholds: {
@@ -52,12 +52,12 @@ const profiles = {
   // Stress Testing to find breaking points
   stress: {
     stages: [
-      { duration: '2m', target: 500 }, // Start with 500 users
+      { duration: '2m', target: 250 }, // Start with 250 users
+      { duration: '5m', target: 500}, // Ramp up to 500 users
       { duration: '5m', target: 750}, // Ramp up to 750 users
-      { duration: '5m', target: 1250}, // Ramp up to 1250 users
-      { duration: '5m', target: 2500}, // Ramp up to 2500 users
-      { duration: '5m', target: 5000}, // Ramp up to 5000 users
-      { duration: '10m', target: 5000}, // Stay at 5000 users
+      { duration: '5m', target: 1000}, // Ramp up to 1000 users
+      { duration: '5m', target: 1500}, // Ramp up to 1500 users
+      { duration: '10m', target: 1500}, // Stay at 1500 users
       { duration: '5m', target: 0 }, // Recover
     ],
     thresholds: {
@@ -69,11 +69,11 @@ const profiles = {
   // Spike Testing for sudden traffic bursts
   spike: {
     stages: [
-      { duration: '1m', target: 500 }, // Baseline
-      { duration: '5m', target: 5000 }, // Spike to 5000 users
-      { duration: '10m', target: 5000 }, // Stay at spike
-      { duration: '2m', target: 500 }, // Drop back to baseline
-      { duration: '1m', target: 500 }, // Stay at baseline
+      { duration: '1m', target: 1000 }, // Baseline
+      { duration: '5m', target: 2000 }, // Spike to 2000 users
+      { duration: '10m', target: 2000 }, // Stay at spike
+      { duration: '2m', target: 1000 }, // Drop back to baseline
+      { duration: '1m', target: 1000 }, // Stay at baseline
       { duration: '1m', target: 0 }, // Recover
     ],
     thresholds: {
@@ -85,8 +85,8 @@ const profiles = {
   // Soak Testing for long-term stability
   soak: {
     stages: [
-      { duration: '5m', target: 500 }, // Start with 500 users
-      { duration: '3h', target: 500 }, // Hold for 3 hours
+      { duration: '5m', target: 1000 }, // Start with 1000 users
+      { duration: '3h', target: 1000 }, // Hold for 3 hours
       { duration: '5m', target: 0 }, // Ramp down to 0 users
     ],
     thresholds: {
@@ -123,16 +123,16 @@ export default function () {
       recordSli(res, 'world-clocks', 500);
     });
   } else if (rand < 0.9) {
-    // Homepage Endpoint. 10% of traffic, expected to be common but less than API calls
-    group('homepage endpoint', () => {
-      let res = http.get(`${BASE_URL}/`, {
-        tags: { name: 'homepage', endpoint: 'homepage' },
+    // Timezones Endpoint. 10% of traffic, expected to be common but less than API calls
+    group('timezones endpoint', () => {
+      let res = http.get(`${BASE_URL}/api/timezones`, {
+        tags: { name: 'timezones', endpoint: 'timezones' },
       });
       check(res, {
-        'homepage status 200': (r) => r.status === 200,
-        'homepage latency < 500ms': (r) => r.timings.duration < 500,
+        'timezones status 200': (r) => r.status === 200,
+        'timezones latency < 500ms': (r) => r.timings.duration < 500,
       });
-      recordSli(res, 'homepage', 500);
+      recordSli(res, 'timezones', 500);
     });
   } else {
     // Current Time API Endpoint. Also 10% of traffic, expected to be common but less than world clocks endpoint
