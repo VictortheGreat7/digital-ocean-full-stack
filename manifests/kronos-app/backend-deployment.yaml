@@ -55,7 +55,7 @@ spec:
                 fieldRef:
                   fieldPath: status.hostIP
             - name: DD_AGENT_HOST
-              value: $(HOST_IP)
+              value: datadog.monitoring.svc.cluster.local
             - name: DD_DOGSTATSD_PORT
               value: "8125"
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
