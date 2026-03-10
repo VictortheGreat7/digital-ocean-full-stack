@@ -1,0 +1,44 @@
+architecture: replication
+
+auth:
+  enabled: true
+  existingSecret: redis-auth
+  existingSecretPasswordKey: password
+  sentinel: true
+
+master:
+  count: 1
+  persistence:
+    enabled: true
+    size: 8Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+replica:
+  replicaCount: 2
+  persistence:
+    enabled: true
+    size: 8Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+sentinel:
+  enabled: true
+  masterSet: foreman
+  quorum: 2
+  automateClusterRecovery: true
+
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
