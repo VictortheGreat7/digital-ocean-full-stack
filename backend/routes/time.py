@@ -80,15 +80,8 @@ def get_world_clocks():
 
     ttl = CACHE_TTL_WORLD_CLOCKS
     now = monotonic()
-    bucket = int(now // ttl)
-    cache_key = "world-clocks:local"
 
     if cached is not None and now < expires_at:
-        with tracer.start_as_current_span("cache.world_clocks") as span:
-            span.set_attribute("cache.key", cache_key)
-            span.set_attribute("cache.hit", True)
-            span.set_attribute("cache.bucket", bucket)
-            span.set_attribute("cache.backend", "in_memory")
         return jsonify(cached)
 
     with _world_clocks_lock:
@@ -107,8 +100,6 @@ def get_world_clocks():
 
                 try:
                     data = format_time_response(tz_name, city=city)
-                    span.set_attribute("city.is_day", data["is_day"])
-                    span.set_attribute("city.hour", int(data["time"][:2]))
                     cities_data.append(data)
                 except Exception as exc:
                     span.set_attribute("error", True)
@@ -118,13 +109,6 @@ def get_world_clocks():
         payload = {"cities": cities_data, "count": len(cities_data)}
         _world_clocks_cache["data"] = payload
         _world_clocks_cache["expires_at"] = now + ttl
-
-    with tracer.start_as_current_span("cache.world_clocks") as span:
-        span.set_attribute("cache.key", cache_key)
-        span.set_attribute("cache.hit", False)
-        span.set_attribute("cache.bucket", bucket)
-        span.set_attribute("cache.ttl_seconds", ttl)
-        span.set_attribute("cache.backend", "in_memory")
 
     return jsonify(payload)
 
