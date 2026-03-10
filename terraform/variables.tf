@@ -40,6 +40,13 @@ variable "postgres_pass" {
   sensitive   = true
 }
 
+variable "redis_pass" {
+  type        = string
+  description = "Redis Cache password"
+  sensitive   = true
+}
+
+
 variable "subdomains" {
   description = "List of subdomains to create"
   type        = list(string)

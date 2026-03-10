@@ -10,6 +10,10 @@ DOCKER_PASSWORD=""
 DO_API_TOKEN=""
 CLOUDFLARE_TOKEN=""
 CLOUDFLARE_ZONE_ID=""
+DATADOG_API_KEY=""
+DATADOG_APP_KEY=""
+POSTGRES_PASS=""
+REDIS_PASS=""
 
 # Declare an associative array to hold secrets and their corresponding values
 declare -A secrets=(
