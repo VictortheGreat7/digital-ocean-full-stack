@@ -2,9 +2,9 @@ name: Build, Provision Cloud Infrastructure for and Deploy Application
 
 # This workflow will run on pushes to the main branch and manual triggers
 on:
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -212,7 +212,8 @@ jobs:
             "cloudflare_zone_id": "${{ secrets.CLOUDFLARE_ZONE_ID }}",
             "datadog_api_key": "${{ secrets.DATADOG_API_KEY }}",
             "datadog_app_key": "${{ secrets.DATADOG_APP_KEY }}",
-            "postgres_pass": "${{ secrets.POSTGRES_PASS }}"
+            "postgres_pass": "${{ secrets.POSTGRES_PASS }}",
+            "redis_pass": "${{ secrets.REDIS_PASS }}"
           }
           EOF
 
