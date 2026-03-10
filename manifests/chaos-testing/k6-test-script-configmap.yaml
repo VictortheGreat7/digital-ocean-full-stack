@@ -115,9 +115,8 @@ data:
     };
 
     export default function () {
-      let rand = Math.random();
 
-      if (rand < 0.8) {
+      if (Math.random() < 0.8) {
         // World Clocks API Endpoint. 80% of traffic, expected to be the most common endpoint hit by users
         group('world clocks endpoint', () => {
           let res = http.get(`${BASE_URL}/world-clocks`, {
@@ -129,7 +128,7 @@ data:
           });
           recordSli(res, 'world-clocks', 500);
         });
-      } else if (rand < 0.9) {
+      } else if (Math.random() < 0.9) {
         // Timezones Endpoint. 10% of traffic, expected to be common but less than API calls
         group('timezones endpoint', () => {
           let res = http.get(`${BASE_URL}/timezones`, {
@@ -144,7 +143,7 @@ data:
       } else {
         // Current Time API Endpoint. Also 10% of traffic, expected to be common but less than world clocks endpoint
         group('time endpoint', () => {
-          let tz = TIMEZONES[Math.floor(rand * TIMEZONES.length)];
+          let tz = TIMEZONES[Math.floor(Math.random() * TIMEZONES.length)];
           let res = http.get(`${BASE_URL}/time?timezone=${tz}`, {
             tags: { name: 'time', endpoint: 'time' },
           });
@@ -156,7 +155,7 @@ data:
         });
       }
 
-      sleep(1 + rand * 2); // Think time 1-3s
+      sleep(1 + Math.random() * 2); // Think time 1-3s
     }
 
     export function handleSummary(data) {
