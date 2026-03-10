@@ -59,7 +59,7 @@ REDIS_SENTINELS_RAW: str = os.getenv(
 REDIS_MASTER_SET: str = os.getenv("REDIS_MASTER_SET", "foreman")
 REDIS_PASSWORD: str = os.getenv("REDIS_PASSWORD", "")
 REDIS_DB: int = int(os.getenv("REDIS_DB", "0"))
-REDIS_SOCKET_TIMEOUT: float = float(os.getenv("REDIS_SOCKET_TIMEOUT", "1.0"))
+REDIS_SOCKET_TIMEOUT: float = float(os.getenv("REDIS_SOCKET_TIMEOUT", "0.1"))
 
 CACHE_ENABLED: bool = os.getenv("CACHE_ENABLED", "true").lower() == "true"
 CACHE_KEY_PREFIX: str = os.getenv("CACHE_KEY_PREFIX", "kronos:cache")
