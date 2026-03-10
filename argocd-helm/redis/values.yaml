@@ -2,7 +2,7 @@ architecture: replication
 
 auth:
   enabled: true
-  existingSecret: redis-auth
+  existingSecret: redis-secret
   existingSecretPasswordKey: password
   sentinel: true
 
