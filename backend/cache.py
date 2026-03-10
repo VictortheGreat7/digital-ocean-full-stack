@@ -10,7 +10,7 @@ import json
 import logging
 from typing import Any
 
-from redis.sentinel import Sentinel
+import redis
 
 from config import (
     CACHE_ENABLED,
@@ -24,7 +24,7 @@ from config import (
 
 logger = logging.getLogger(__name__)
 
-_client: Sentinel | None = None
+_client: redis.Redis | None = None
 _ready = False
 
 def _parse_sentinels(raw: str) -> list[tuple[str, int]]:
@@ -51,7 +51,7 @@ def init_cache(app=None) -> None:
         return
 
     try:
-        sentinel = Sentinel(
+        sentinel = redis.sentinel.Sentinel(
             REDIS_SENTINELS,
             socket_timeout=REDIS_SOCKET_TIMEOUT,
             sentinel_kwargs={"password": REDIS_PASSWORD} if REDIS_PASSWORD else {},
