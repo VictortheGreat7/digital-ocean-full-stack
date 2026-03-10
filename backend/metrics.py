@@ -15,7 +15,7 @@ from prometheus_client import Counter, Histogram
 from prometheus_flask_exporter import PrometheusMetrics
 
 from config import EXCLUDED_PATHS
-from db import enqueue_request_log
+# from db import enqueue_request_log
 
 # ── Custom application metrics ─────────────────────────────────────────
 frontend_http_errors = Counter(
@@ -77,14 +77,14 @@ def _record_metrics(response):
     )
 
     # Non-blocking DB log
-    enqueue_request_log(
-        path=path,
-        method=request.method,
-        status=status,
-        latency_ms=int(duration * 1000),
-        timezone=request.args.get("timezone", "unknown"),
-        trace_id=trace_id,
-        span_context=root_span.get_span_context() if root_span else None,
-    )
+    # enqueue_request_log(
+    #     path=path,
+    #     method=request.method,
+    #     status=status,
+    #     latency_ms=int(duration * 1000),
+    #     timezone=request.args.get("timezone", "unknown"),
+    #     trace_id=trace_id,
+    #     span_context=root_span.get_span_context() if root_span else None,
+    # )
 
     return response
