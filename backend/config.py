@@ -48,3 +48,22 @@ MAJOR_CITIES: dict[str, str] = {
     "Hong Kong": "Asia/Hong_Kong",
     "Berlin": "Europe/Berlin",
 }
+
+# --- Redis / Cache ---
+REDIS_SENTINELS_RAW: str = os.getenv(
+    "REDIS_SENTINELS",
+    "redis-node-0.redis-headless.kronos.svc.cluster.local:26379,"
+    "redis-node-1.redis-headless.kronos.svc.cluster.local:26379,"
+    "redis-node-2.redis-headless.kronos.svc.cluster.local:26379",
+)
+REDIS_MASTER_SET: str = os.getenv("REDIS_MASTER_SET", "foreman")
+REDIS_PASSWORD: str = os.getenv("REDIS_PASSWORD", "")
+REDIS_DB: int = int(os.getenv("REDIS_DB", "0"))
+REDIS_SOCKET_TIMEOUT: float = float(os.getenv("REDIS_SOCKET_TIMEOUT", "1.0"))
+
+CACHE_ENABLED: bool = os.getenv("CACHE_ENABLED", "true").lower() == "true"
+CACHE_KEY_PREFIX: str = os.getenv("CACHE_KEY_PREFIX", "kronos:cache")
+
+# Endpoint-specific TTLs
+CACHE_TTL_WORLD_CLOCKS: int = int(os.getenv("CACHE_TTL_WORLD_CLOCKS", "2"))
+CACHE_TTL_TIMEZONES: int = int(os.getenv("CACHE_TTL_TIMEZONES", "86400"))
