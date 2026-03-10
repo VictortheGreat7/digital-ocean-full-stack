@@ -81,6 +81,15 @@ spec:
                 secretKeyRef:
                   name: postgres-secret
                   key: password
+            - name: REDIS_SENTINELS
+              value: redis-node-0.redis-headless.kronos.svc.cluster.local:26379,redis-node-1.redis-headless.kronos.svc.cluster.local:26379,redis-node-2.redis-headless.kronos.svc.cluster.local:26379
+            - name: REDIS_MASTER_SET
+              value: foreman
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: password
           ports:
             - containerPort: 5000
           resources:
