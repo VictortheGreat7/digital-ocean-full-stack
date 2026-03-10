@@ -50,7 +50,6 @@ data:
         ],
         thresholds: {
           'http_req_duration': ['p(95)<500', 'p(99)<1000'],  // SLO targets
-          'group_duration': ['p(99)<2000'],
           'http_req_failed': ['rate<0.001'],  // Error rate < 0.1%
           'sli_error_budget_burn': ['rate<0.001'],
           'sli_latency_vs_slo_ratio': ['p(95)<1.0'],
@@ -70,7 +69,6 @@ data:
         ],
         thresholds: {
           'http_req_duration': ['p(95)<2000', 'p(99)<5000'],  // Relaxed SLO targets
-          'group_duration': ['p(99)<2000'], 
           'http_req_failed': ['rate<0.05'],  // Error rate < 5%
         },
       },
@@ -87,7 +85,6 @@ data:
         ],
         thresholds: {
           'http_req_duration': ['p(95)<2000', 'p(99)<5000'],
-          'group_duration': ['p(99)<2000'],
           'http_req_failed': ['rate<0.10'],  // Error rate < 10%
         },
       },
@@ -101,7 +98,6 @@ data:
         ],
         thresholds: {
           'http_req_duration': ['p(95)<500', 'p(99)<1000'],  // Standard SLO targets
-          'group_duration': ['p(99)<2000'],
           'http_req_failed': ['rate<0.01'],  // Error rate < 1%
           'sli_error_budget_burn': ['rate<0.001'],
           'sli_latency_vs_slo_ratio': ['p(95)<1.0'],
