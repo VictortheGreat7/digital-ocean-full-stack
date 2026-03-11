@@ -40,7 +40,6 @@ def get_timezones():
 
     if cached is not None:
         with tracer.start_as_current_span("cache.timezones") as span:
-            span.set_attribute("cache.key", cache_key)
             span.set_attribute("cache.hit", True)
         return jsonify(cached)
 
@@ -58,7 +57,6 @@ def get_timezones():
     set_json(cache_key, payload, CACHE_TTL_TIMEZONES)
 
     with tracer.start_as_current_span("cache.timezones") as span:
-        span.set_attribute("cache.key", cache_key)
         span.set_attribute("cache.hit", False)
 
     return jsonify(payload)
@@ -67,36 +65,24 @@ def get_timezones():
 @time_bp.route("/world-clocks", methods=["GET"])
 def get_world_clocks():
     """Return the pre-computed world clocks from Redis."""
-    cache_key = build_cache_key("world-clocks", "latest")
-    cached = get_json(cache_key)
+    cached = get_json(build_cache_key("world-clocks", "latest"))
 
     if cached is not None:
         with tracer.start_as_current_span("cache.world_clocks") as span:
-            span.set_attribute("cache.key", cache_key)
             span.set_attribute("cache.hit", True)
         return jsonify(cached)
 
-    # Fallback for the very first second of a fresh deployment 
-    # before the background thread completes its first run
     with tracer.start_as_current_span("cache.world_clocks") as span:
-        span.set_attribute("cache.key", cache_key)
         span.set_attribute("cache.hit", False)
 
     cities_data: list[dict] = []
     
     for city, tz_name in MAJOR_CITIES.items():
-        with tracer.start_as_current_span(
-            f"city_time_fetch.{city.replace(' ', '_')}"
-        ) as span:
-            span.set_attribute("city.name", city)
-
-            try:
-                data = format_time_response(tz_name, city=city)
-                cities_data.append(data)
-            except Exception as exc:
-                span.set_attribute("error", True)
-                span.record_exception(exc)
-                cities_data.append({"city": city, "error": str(exc)})
+        try:
+            data = format_time_response(tz_name, city=city)
+            cities_data.append(data)
+        except Exception as exc:
+            cities_data.append({"city": city, "error": str(exc)})
         
     return jsonify({"cities": cities_data, "count": len(cities_data)})
 
