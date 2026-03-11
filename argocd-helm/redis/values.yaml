@@ -13,10 +13,10 @@ master:
     size: 8Gi
   resources:
     requests:
-      cpu: 100m
+      cpu: 50m
       memory: 256Mi
     limits:
-      cpu: 200m
+      cpu: 100m
       memory: 512Mi
 
 replica:
@@ -26,10 +26,10 @@ replica:
     size: 8Gi
   resources:
     requests:
-      cpu: 100m
+      cpu: 50m
       memory: 256Mi
     limits:
-      cpu: 200m
+      cpu: 100m
       memory: 512Mi
 
 sentinel:
