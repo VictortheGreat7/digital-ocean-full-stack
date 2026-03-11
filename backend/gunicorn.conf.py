@@ -5,6 +5,7 @@ worker_class = "gevent"
 worker_connections = 1000
 
 backlog = 2048
+accesslog = None
 keepalive = 5
 timeout = 60
 graceful_timeout = 30
