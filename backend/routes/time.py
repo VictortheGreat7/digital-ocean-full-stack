@@ -4,14 +4,14 @@ Time-related endpoints.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime
 from zoneinfo import available_timezones
 
 from flask import Blueprint, jsonify, request
 
 from cache import build_cache_key, get_json, set_json
 
-from config import CACHE_TTL_TIMEZONES, CACHE_TTL_WORLD_CLOCKS, MAJOR_CITIES
+from config import CACHE_TTL_TIMEZONES
 from helpers import format_time_response, validate_timezone
 from telemetry import tracer
 
@@ -66,41 +66,23 @@ def get_timezones():
 
 @time_bp.route("/world-clocks", methods=["GET"])
 def get_world_clocks():
-    """Return the current time for every city in ``MAJOR_CITIES``."""
-    ttl = max(1, CACHE_TTL_WORLD_CLOCKS)
-    cache_key = build_cache_key("world-clocks", "v1")
-
+    """Return the pre-computed world clocks from Redis."""
+    cache_key = build_cache_key("world-clocks", "latest")
     cached = get_json(cache_key)
+
     if cached is not None:
         with tracer.start_as_current_span("cache.world_clocks") as span:
             span.set_attribute("cache.key", cache_key)
             span.set_attribute("cache.hit", True)
         return jsonify(cached)
 
-    cities_data: list[dict] = []
-
-    for city, timezone_name in MAJOR_CITIES.items():
-        with tracer.start_as_current_span(
-            f"city_time_fetch.{city.replace(' ', '_')}"
-        ) as span:
-            span.set_attribute("city.name", city)
-
-            try:
-                data = format_time_response(timezone_name, city=city)
-                cities_data.append(data)
-            except Exception as exc:
-                span.set_attribute("error", True)
-                span.record_exception(exc)
-                cities_data.append({"city": city, "error": str(exc)})
-
-    payload = {"cities": cities_data, "count": len(cities_data)}
-    set_json(cache_key, payload, ttl + 1)
-
+    # Fallback for the very first second of a fresh deployment 
+    # before the background thread completes its first run
     with tracer.start_as_current_span("cache.world_clocks") as span:
         span.set_attribute("cache.key", cache_key)
         span.set_attribute("cache.hit", False)
-
-    return jsonify(payload)
+        
+    return jsonify({"error": "Service warming up, please retry in 1 second"}), 503
 
 
 @time_bp.route("/legacy/time", methods=["GET"])
