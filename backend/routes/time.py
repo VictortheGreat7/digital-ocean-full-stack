@@ -11,7 +11,7 @@ from flask import Blueprint, jsonify, request
 
 from cache import build_cache_key, get_json, set_json
 
-from config import CACHE_TTL_TIMEZONES
+from config import CACHE_TTL_TIMEZONES, MAJOR_CITIES
 from helpers import format_time_response, validate_timezone
 from telemetry import tracer
 
@@ -81,6 +81,22 @@ def get_world_clocks():
     with tracer.start_as_current_span("cache.world_clocks") as span:
         span.set_attribute("cache.key", cache_key)
         span.set_attribute("cache.hit", False)
+
+    cities_data: list[dict] = []
+    
+    for city, tz_name in MAJOR_CITIES.items():
+        with tracer.start_as_current_span(
+            f"city_time_fetch.{city.replace(' ', '_')}"
+        ) as span:
+            span.set_attribute("city.name", city)
+
+            try:
+                data = format_time_response(tz_name, city=city)
+                cities_data.append(data)
+            except Exception as exc:
+                span.set_attribute("error", True)
+                span.record_exception(exc)
+                cities_data.append({"city": city, "error": str(exc)})
         
     return jsonify({"error": "Service warming up, please retry in 1 second"}), 503
 
