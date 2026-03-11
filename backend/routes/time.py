@@ -98,7 +98,7 @@ def get_world_clocks():
                 span.record_exception(exc)
                 cities_data.append({"city": city, "error": str(exc)})
         
-    return jsonify({"error": "Service warming up, please retry in 1 second"}), 503
+    return jsonify({"cities": cities_data, "count": len(cities_data)})
 
 
 @time_bp.route("/legacy/time", methods=["GET"])
