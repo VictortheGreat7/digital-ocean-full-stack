@@ -68,8 +68,7 @@ def get_timezones():
 def get_world_clocks():
     """Return the current time for every city in ``MAJOR_CITIES``."""
     ttl = max(1, CACHE_TTL_WORLD_CLOCKS)
-    bucket = int(datetime.now(timezone.utc).timestamp()) // ttl
-    cache_key = build_cache_key("world-clocks", "v1", str(bucket))
+    cache_key = build_cache_key("world-clocks", "v1")
 
     cached = get_json(cache_key)
     if cached is not None:
