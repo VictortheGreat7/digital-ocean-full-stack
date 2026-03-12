@@ -77,7 +77,7 @@ def get_world_clocks():
         span.set_attribute("cache.hit", False)
 
     cities_data: list[dict] = []
-    
+
     for city, tz_name in MAJOR_CITIES.items():
         try:
             data = format_time_response(tz_name, city=city)
