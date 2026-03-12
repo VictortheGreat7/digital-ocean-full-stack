@@ -24,21 +24,12 @@ def _clock_updater_loop():
                 # Try to acquire a 2-second distributed lock.
                 # nx=True ensures only ONE worker across the cluster gets the lock.
                 if cache._client.set(lock_key, "locked", nx=True, ex=2):
-                    cities_data: list[dict] = []
+                    with tracer.start_as_current_span("world_clocks_background_update"):
+                        cities_data: list[dict] = []
                     
                     for city, tz_name in MAJOR_CITIES.items():
-                        with tracer.start_as_current_span(
-                            f"city_time_fetch.{city.replace(' ', '_')}"
-                        ) as span:
-                            span.set_attribute("city.name", city)
-
-                            try:
-                                data = format_time_response(tz_name, city=city)
-                                cities_data.append(data)
-                            except Exception as exc:
-                                span.set_attribute("error", True)
-                                span.record_exception(exc)
-                                cities_data.append({"city": city, "error": str(exc)})
+                        data = format_time_response(tz_name, city=city)
+                        cities_data.append(data)
                             
                     payload = {"cities": cities_data, "count": len(cities_data)}
                     

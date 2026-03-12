@@ -63,20 +63,20 @@ def _record_metrics(response):
     if status >= 400:
         frontend_http_errors.labels(method=request.method, path=path, status=status).inc()
 
-    # Enrich the active span
-    root_span = trace.get_current_span()
-    if root_span and root_span.get_span_context().is_valid:
-        root_span.set_attribute("http.route", path)
-        root_span.set_attribute("http.method", request.method)
-        root_span.set_attribute("http.status_code", status)
+    # # Enrich the active span
+    # root_span = trace.get_current_span()
+    # if root_span and root_span.get_span_context().is_valid:
+    #     root_span.set_attribute("http.route", path)
+    #     root_span.set_attribute("http.method", request.method)
+    #     root_span.set_attribute("http.status_code", status)
 
-    trace_id = (
-        format_trace_id(root_span.get_span_context().trace_id)
-        if root_span and root_span.get_span_context().is_valid
-        else None
-    )
+    # trace_id = (
+    #     format_trace_id(root_span.get_span_context().trace_id)
+    #     if root_span and root_span.get_span_context().is_valid
+    #     else None
+    # )
 
-    # Non-blocking DB log
+    # # Non-blocking DB log
     # enqueue_request_log(
     #     path=path,
     #     method=request.method,
