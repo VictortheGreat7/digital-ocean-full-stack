@@ -14,7 +14,7 @@ from opentelemetry.instrumentation.flask import FlaskInstrumentor
 from opentelemetry.instrumentation.logging import LoggingInstrumentor
 from opentelemetry.instrumentation.psycopg2 import Psycopg2Instrumentor
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.propagate import set_global_textmap
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
@@ -45,7 +45,7 @@ _resource = Resource(attributes={
 tracer_provider = TracerProvider(resource=_resource)
 trace.set_tracer_provider(tracer_provider)
 
-_otlp_exporter = OTLPSpanExporter(endpoint=OTEL_EXPORTER_OTLP_ENDPOINT)
+_otlp_exporter = OTLPSpanExporter(endpoint=OTEL_EXPORTER_OTLP_ENDPOINT, insecure=True)
 tracer_provider.add_span_processor(
     BatchSpanProcessor(_otlp_exporter, schedule_delay_millis=2000, max_export_batch_size=512)
 )
@@ -56,7 +56,6 @@ tracer = trace.get_tracer(__name__)
 
 def init_telemetry(app) -> None:
     """Instrument Flask, requests, psycopg2, and logging."""
-    global _runtime_metrics_enabled, _profiler_enabled
 
     # Flask auto-instrumentation (creates spans per request)
     FlaskInstrumentor().instrument_app(app)
