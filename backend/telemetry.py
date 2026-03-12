@@ -12,7 +12,6 @@ import logging
 from opentelemetry import trace
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
 from opentelemetry.instrumentation.logging import LoggingInstrumentor
-from opentelemetry.instrumentation.psycopg2 import Psycopg2Instrumentor
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.propagate import set_global_textmap
@@ -55,12 +54,11 @@ tracer = trace.get_tracer(__name__)
 
 
 def init_telemetry(app) -> None:
-    """Instrument Flask, requests, psycopg2, and logging."""
+    """Instrument Flask, requests and logging."""
 
     # Flask auto-instrumentation (creates spans per request)
     FlaskInstrumentor().instrument_app(app)
     RequestsInstrumentor().instrument()
-    Psycopg2Instrumentor().instrument()
     LoggingInstrumentor().instrument(set_logging_format=True)
 
     # Structured log handler with trace context
