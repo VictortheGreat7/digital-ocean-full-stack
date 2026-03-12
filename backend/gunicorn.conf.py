@@ -1,8 +1,8 @@
 bind = "0.0.0.0:5000"
 
 workers = 4
-worker_class = "gevent"
-worker_connections = 1000
+worker_class = "gthread"
+threads = 50 
 
 backlog = 2048
 keepalive = 2
