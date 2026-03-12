@@ -1,4 +1,12 @@
 bind = "0.0.0.0:5000"
+
 workers = 4
-threads = 4
+worker_class = "gevent"
+worker_connections = 1000
+
+backlog = 2048
+keepalive = 2
+timeout = 10
+graceful_timeout = 30
+
 control_socket_disable = True
