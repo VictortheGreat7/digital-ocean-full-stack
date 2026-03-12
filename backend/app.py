@@ -11,12 +11,9 @@ from __future__ import annotations
 from flask import Flask
 from flask_cors import CORS
 
-from db import init_db
 from metrics import init_metrics
 from routes import register_routes
 from telemetry import init_telemetry
-
-from cache import init_cache
 
 from ddtrace.runtime import RuntimeMetrics
 from ddtrace.profiling import Profiler
@@ -36,9 +33,9 @@ def create_app() -> Flask:
 
     _profiler_enabled = False
     prof = Profiler(
-        env="dev",  # Defaults to DD_ENV if not set
-        service="kronos-backend", # Defaults to DD_SERVICE if not set
-        version="1.0.0"    # Defaults to DD_VERSION if not set
+        env="dev",
+        service="kronos-backend",
+        version="1.0.0"
     )
 
     # Enable Datadog profiler (CPU and wall-time)
@@ -49,12 +46,6 @@ def create_app() -> Flask:
     # Observability
     init_telemetry(app)
     init_metrics(app)
-
-    # Cache
-    init_cache(app)
-
-    # Database
-    init_db(app)
 
     # Route blueprints
     register_routes(app)
