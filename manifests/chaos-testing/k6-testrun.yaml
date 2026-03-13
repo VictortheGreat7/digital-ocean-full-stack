@@ -10,11 +10,11 @@ spec:
     image: grafana/k6:latest
     resources:
       requests:
-        cpu: 200m
-        memory: 256Mi
-      limits:
         cpu: 250m
         memory: 320Mi
+      limits:
+        cpu: 300m
+        memory: 384Mi
     env:
       - name: BASE_URL
         value: http://kronos-backend-svc.kronos.svc.cluster.local
