@@ -6,7 +6,7 @@ worker_connections = 1000
 
 backlog = 2048
 keepalive = 5
-timeout = 30
+timeout = 60
 graceful_timeout = 30
 
 control_socket_disable = True
