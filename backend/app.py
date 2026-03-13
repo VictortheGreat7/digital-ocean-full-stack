@@ -17,7 +17,6 @@ from routes import register_routes
 from telemetry import init_telemetry
 
 from cache import init_cache
-from clock_worker import init_clock_updater
 
 
 def create_app() -> Flask:
@@ -31,9 +30,6 @@ def create_app() -> Flask:
 
     # Cache
     init_cache(app)
-
-    # Clock Background Worker
-    init_clock_updater(app)
 
     # Database
     init_db(app)
