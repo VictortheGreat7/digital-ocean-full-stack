@@ -44,9 +44,6 @@ datadog:
   networkMonitoring:
     enabled: true
 
-  traceRoute:
-    enabled: true
-
   processAgent:
     enabled: true
     processCollection: true

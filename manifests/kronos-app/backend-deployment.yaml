@@ -59,7 +59,7 @@ spec:
             - name: DD_DOGSTATSD_PORT
               value: "8125"
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: http://$(HOST_IP):4317
+              value: $(HOST_IP):4317
             - name: OTLP_EXPORTER_OTLP_PROTOCOL
               value: grpc
             - name: OTEL_RESOURCE_ATTRIBUTES
@@ -69,8 +69,6 @@ spec:
             - name: DD_RUNTIME_METRICS_RUNTIME_ID_ENABLED
               value: "true"
             - name: DD_PROFILING_ENABLED
-              value: "true"
-            - name: DD_PROFILING_TIMELINE_ENABLED
               value: "true"
             - name: DB_HOST
               value: kronos-postgres-svc.kronos.svc.cluster.local
@@ -98,10 +96,10 @@ spec:
             - containerPort: 5000
           resources:
             requests:
-              memory: 512Mi
-              cpu: 800m
+              memory: 400Mi
+              cpu: 600m
             limits:
-              memory: 640Mi
+              memory: 512Mi
               cpu: 1000m
           livenessProbe:
             httpGet:
