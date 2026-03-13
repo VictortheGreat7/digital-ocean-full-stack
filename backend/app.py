@@ -18,11 +18,33 @@ from telemetry import init_telemetry
 
 from cache import init_cache
 
+from ddtrace.runtime import RuntimeMetrics
+from ddtrace.profiling import Profiler
+
+_runtime_metrics_enabled = False
+_profiler_enabled = False
+prof = Profiler(
+    env="dev",
+    service="kronos-backend",
+    version="1.0.0"
+)
 
 def create_app() -> Flask:
     """Build and return a fully configured Flask application."""
     app = Flask(__name__)
     CORS(app)
+
+    global _runtime_metrics_enabled, _profiler_enabled
+
+    # Enable Datadog runtime metrics (CPU, memory, etc.)
+    if not _runtime_metrics_enabled:
+        RuntimeMetrics.enable()
+        _runtime_metrics_enabled = True
+
+    # Enable Datadog profiler (CPU and wall-time)
+    if not _profiler_enabled:
+        prof.start()
+        _profiler_enabled = True
 
     # Observability
     init_telemetry(app)
