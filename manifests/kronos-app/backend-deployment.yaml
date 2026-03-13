@@ -96,10 +96,10 @@ spec:
             - containerPort: 5000
           resources:
             requests:
-              memory: 400Mi
+              memory: 512Mi
               cpu: 800m
             limits:
-              memory: 512Mi
+              memory: 620Mi
               cpu: 1000m
           livenessProbe:
             httpGet:
