@@ -20,6 +20,9 @@ from telemetry import tracer
 
 
 time_bp = Blueprint("time", __name__)
+# Setup cache and lock at the module level
+_timezones_lock = Lock()
+_timezones_cache = {"data": None, "expires_at": 0}
 _world_clocks_cache = {"data": None, "expires_at": 0}
 _world_clocks_lock = Lock()
 
@@ -40,29 +43,39 @@ def get_time():
 @time_bp.route("/timezones", methods=["GET"])
 def get_timezones():
     """List every IANA timezone grouped by region."""
-    cache_key = build_cache_key("timezones", "v1")
-    cached = get_json(cache_key)
+    
+    cached = _timezones_cache["data"]
+    expires_at = _timezones_cache["expires_at"]
+    
+    ttl = CACHE_TTL_TIMEZONES
+    now = monotonic()
 
-    if cached is not None:
+    if cached is not None and now < expires_at:
         with tracer.start_as_current_span("cache.timezones") as span:
             span.set_attribute("cache.hit", True)
         return jsonify(cached)
 
-    all_tz = sorted(available_timezones())
-    regions: dict[str, list[str]] = {}
-    for tz in all_tz:
-        if "/" in tz:
-            region = tz.split("/")[0]
-            regions.setdefault(region, []).append(tz)
-
-    payload = {
-        "count": len(all_tz),
-        "regions": regions,
-    }
-    set_json(cache_key, payload, CACHE_TTL_TIMEZONES)
-
     with tracer.start_as_current_span("cache.timezones") as span:
         span.set_attribute("cache.hit", False)
+
+    with _timezones_lock:
+        if _timezones_cache["data"] is not None and now < _timezones_cache["expires_at"]:
+            return jsonify(_timezones_cache["data"])
+
+        all_tz = sorted(available_timezones())
+        regions: dict[str, list[str]] = {}
+        for tz in all_tz:
+            if "/" in tz:
+                region = tz.split("/")[0]
+                regions.setdefault(region, []).append(tz)
+
+        payload = {
+            "count": len(all_tz),
+            "regions": regions,
+        }
+
+        _timezones_cache["data"] = payload
+        _timezones_cache["expires_at"] = now + ttl
 
     return jsonify(payload)
 
