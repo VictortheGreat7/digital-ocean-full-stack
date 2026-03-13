@@ -45,7 +45,6 @@ def get_timezones():
 
     if cached is not None:
         with tracer.start_as_current_span("cache.timezones") as span:
-            span.set_attribute("cache.key", cache_key)
             span.set_attribute("cache.hit", True)
         return jsonify(cached)
 
@@ -63,9 +62,7 @@ def get_timezones():
     set_json(cache_key, payload, CACHE_TTL_TIMEZONES)
 
     with tracer.start_as_current_span("cache.timezones") as span:
-        span.set_attribute("cache.key", cache_key)
         span.set_attribute("cache.hit", False)
-        span.set_attribute("cache.ttl_seconds", CACHE_TTL_TIMEZONES)
 
     return jsonify(payload)
 
@@ -82,7 +79,12 @@ def get_world_clocks():
     now = monotonic()
 
     if cached is not None and now < expires_at:
+        with tracer.start_as_current_span("cache.world_clocks") as span:
+            span.set_attribute("cache.hit", True)
         return jsonify(cached)
+    
+    with tracer.start_as_current_span("cache.world_clocks") as span:
+        span.set_attribute("cache.hit", False)
 
     with _world_clocks_lock:
         # Double-check: another thread may have refreshed while we waited
@@ -92,10 +94,7 @@ def get_world_clocks():
         cities_data: list[dict] = []
 
         for city, tz_name in MAJOR_CITIES.items():
-            with tracer.start_as_current_span(
-                f"city_time_fetch.{city.replace(' ', '_')}"
-            ) as span:
-                span.set_attribute("city.name", city)
+            with tracer.start_as_current_span("world_clocks_background_update") as span:
                 span.set_attribute("city.timezone", tz_name)
 
                 try:
