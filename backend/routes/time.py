@@ -61,13 +61,19 @@ def get_timezones():
     with _timezones_lock:
         if _timezones_cache["data"] is not None and now < _timezones_cache["expires_at"]:
             return jsonify(_timezones_cache["data"])
-
-        all_tz = sorted(available_timezones())
-        regions: dict[str, list[str]] = {}
-        for tz in all_tz:
-            if "/" in tz:
-                region = tz.split("/")[0]
-                regions.setdefault(region, []).append(tz)
+        
+        with tracer.start_as_current_span("all_tz__fetch") as span:
+            try:
+                all_tz = sorted(available_timezones())
+                regions: dict[str, list[str]] = {}
+                for tz in all_tz:
+                    if "/" in tz:
+                        region = tz.split("/")[0]
+                        regions.setdefault(region, []).append(tz)
+            except Exception as exc:
+                span.set_attribute("error", True)
+                span.record_exception(exc)
+                return jsonify({"error": "Failed to fetch timezones"}), 500
 
         payload = {
             "count": len(all_tz),
@@ -107,7 +113,7 @@ def get_world_clocks():
         cities_data: list[dict] = []
 
         for city, tz_name in MAJOR_CITIES.items():
-            with tracer.start_as_current_span("world_clocks_background_update") as span:
+            with tracer.start_as_current_span("tz_sample_fetch") as span:
                 span.set_attribute("city.timezone", tz_name)
 
                 try:
