@@ -2,11 +2,11 @@ bind = "0.0.0.0:5000"
 
 workers = 4
 worker_class = "gevent"
-worker_connections = 1000
+worker_connections = 500
 
 backlog = 2048
 keepalive = 5
-timeout = 60
+timeout = 30
 graceful_timeout = 30
 
 control_socket_disable = True
