@@ -12,8 +12,6 @@ from flask import Blueprint, jsonify, request
 
 from threading import Lock
 
-from cache import build_cache_key, get_json, set_json
-
 from config import CACHE_TTL_TIMEZONES, CACHE_TTL_WORLD_CLOCKS, MAJOR_CITIES
 from helpers import format_time_response, validate_timezone
 from telemetry import tracer
