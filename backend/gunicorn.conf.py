@@ -2,7 +2,7 @@ bind = "0.0.0.0:5000"
 
 workers = 4
 worker_class = "gevent"
-worker_connections = 200
+worker_connections = 50
 
 backlog = 2048
 keepalive = 5

@@ -1,10 +1,10 @@
 installCRDs: true
 resources:
   limits:
-    cpu: 200m
-    memory: 512Mi
+    cpu: 5m
+    memory: 128Mi
   requests:
-    cpu: 100m
-    memory: 256Mi
+    cpu: 3m
+    memory: 64Mi
 config:
   enableGatewayAPI: true
