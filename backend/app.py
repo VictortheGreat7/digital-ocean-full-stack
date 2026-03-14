@@ -12,7 +12,7 @@ from flask import Flask
 from flask_cors import CORS
 
 from db import init_db
-from metrics import init_metrics
+# from metrics import init_metrics
 from routes import register_routes
 from telemetry import init_telemetry
 
@@ -24,7 +24,7 @@ def create_app() -> Flask:
 
     # Observability
     init_telemetry(app)
-    init_metrics(app)
+    # init_metrics(app) --- IGNORE --- Metrics are currently disabled due to issues with request log entries to PostgreSQL db. Will re-enable once those issues are resolved.
 
     # Database
     init_db(app)
