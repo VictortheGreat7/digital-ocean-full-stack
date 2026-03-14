@@ -16,8 +16,6 @@ from metrics import init_metrics
 from routes import register_routes
 from telemetry import init_telemetry
 
-from cache import init_cache
-
 
 def create_app() -> Flask:
     """Build and return a fully configured Flask application."""
@@ -27,9 +25,6 @@ def create_app() -> Flask:
     # Observability
     init_telemetry(app)
     init_metrics(app)
-
-    # Cache
-    init_cache(app)
 
     # Database
     init_db(app)
