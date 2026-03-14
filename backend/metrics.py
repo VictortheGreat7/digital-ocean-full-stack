@@ -18,15 +18,15 @@ from config import EXCLUDED_PATHS
 from db import enqueue_request_log
 
 # ── Custom application metrics ─────────────────────────────────────────
-frontend_http_errors = Counter(
-    "frontend_http_request_errors_total",
-    "Total frontend HTTP request errors",
+custom_request_errors = Counter(
+    "custom_request_errors_total",
+    "Total request errors",
     ["method", "path", "status"],
 )
 
-frontend_http_latency = Histogram(
-    "frontend_http_request_duration_seconds",
-    "Latency of frontend HTTP requests",
+custom_request_latency = Histogram(
+    "custom_request_duration_seconds",
+    "Request Latency in seconds",
     ["method", "path", "status"],
 )
 
@@ -34,7 +34,7 @@ _metrics: PrometheusMetrics | None = None
 
 
 def init_metrics(app: Flask) -> None:
-    """Register the ``/metrics`` endpoint and before/after hooks."""
+    """Initialize Prometheus metrics and Flask exporter."""
     global _metrics
 
     _metrics = PrometheusMetrics(app)
@@ -59,9 +59,9 @@ def _record_metrics(response):
     status = response.status_code
 
     # Prometheus
-    frontend_http_latency.labels(method=request.method, path=path, status=status).observe(duration)
+    custom_request_latency.labels(method=request.method, path=path, status=status).observe(duration)
     if status >= 400:
-        frontend_http_errors.labels(method=request.method, path=path, status=status).inc()
+        custom_request_errors.labels(method=request.method, path=path, status=status).inc()
 
     # Enrich the active span
     root_span = trace.get_current_span()
