@@ -10,16 +10,16 @@ spec:
     image: grafana/k6:latest
     resources:
       requests:
-        cpu: 250m
-        memory: 320Mi
-      limits:
         cpu: 300m
-        memory: 384Mi
+        memory: 400Mi
+      limits:
+        cpu: 400m
+        memory: 512Mi
     env:
       - name: BASE_URL
         value: http://kronos-backend-svc.kronos.svc.cluster.local
       - name: TEST_TYPE
-        value: soak
+        value: spike
       - name: K6_OUT
         value: experimental-prometheus-rw
       - name: K6_PROMETHEUS_RW_PUSH_INTERVAL
