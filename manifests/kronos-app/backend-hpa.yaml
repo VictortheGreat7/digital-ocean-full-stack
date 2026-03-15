@@ -4,7 +4,7 @@ metadata:
   name: kronos-backend-hpa
   namespace: kronos
 spec:
-  minReplicas: 8
+  minReplicas: 7
   maxReplicas: 20
   scaleTargetRef:
     apiVersion: apps/v1
