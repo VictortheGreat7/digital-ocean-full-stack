@@ -15,10 +15,13 @@ from threading import Thread
 
 from psycopg2 import pool
 from psycopg2.extras import execute_values
+from psycogreen.gevent import patch_psycopg
 from opentelemetry import context
 from opentelemetry.trace import SpanContext
 
 from config import DB_CONFIG
+
+patch_psycopg()
 
 logger = logging.getLogger(__name__)
 

@@ -11,10 +11,10 @@ spec:
     resources:
       requests:
         cpu: 400m
-        memory: 400Mi
+        memory: 512Mi
       limits:
         cpu: 500m
-        memory: 512Mi
+        memory: 1Gi
     env:
       - name: BASE_URL
         value: http://kronos.mywonderworks.tech
