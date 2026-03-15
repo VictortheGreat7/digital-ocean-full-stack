@@ -21,18 +21,21 @@ from opentelemetry.trace import SpanContext
 
 from config import DB_CONFIG
 
+# patch_psycopg() should be called before any psycopg2 connections are created. It monkey-patches psycopg2 to make it cooperative with gevent's green threads to prevent blocking of the server during db operations.
 patch_psycopg()
 
 logger = logging.getLogger(__name__)
 
-# ── Connection pool ────────────────────────────────────────────────────
+# Connection pool
 _pool: pool.ThreadedConnectionPool | None = None
 
-# ── Async request-log queue + worker ───────────────────────────────────
+# Async request-log queue
 _log_queue: Queue = Queue(maxsize=5000)
+
+# Sentinel value to signal worker thread shutdown
 _SENTINEL = object() 
 
-# ── Worker thread and shutdown flag ───────────────────────────────────
+# Worker thread and shutdown flags
 _db_thread: Thread | None = None
 _shutdown_registered = False
 _shutdown_called = False

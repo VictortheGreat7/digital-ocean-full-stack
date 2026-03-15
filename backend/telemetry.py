@@ -14,13 +14,16 @@ from opentelemetry.instrumentation.flask import FlaskInstrumentor
 from opentelemetry.instrumentation.logging import LoggingInstrumentor
 from opentelemetry.instrumentation.psycopg2 import Psycopg2Instrumentor
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
-# from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+
+# HTTP exporter uses standard Python sockets, which gevent can monkey-patch to be non-blocking. This allows spans to be exported in the background without blocking the main application.
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+
 from opentelemetry.propagate import set_global_textmap
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
+
 from ddtrace.runtime import RuntimeMetrics
 from ddtrace.profiling import Profiler
 
@@ -57,9 +60,9 @@ tracer_provider.add_span_processor(
 )
 
 prof = Profiler(
-    env="dev",  # Defaults to DD_ENV if not set
-    service="kronos-backend", # Defaults to DD_SERVICE if not set
-    version="1.0.0"    # Defaults to DD_VERSION if not set
+    env="dev",
+    service="kronos-backend",
+    version="1.0.0"
 )
 
 # Convenience handle used throughout the app

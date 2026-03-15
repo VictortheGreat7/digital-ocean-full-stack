@@ -59,7 +59,7 @@ spec:
             - name: DD_DOGSTATSD_PORT
               value: "8125"
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: $(HOST_IP):4318/v1/traces
+              value: http://$(HOST_IP):4318/v1/traces
             - name: OTLP_EXPORTER_OTLP_PROTOCOL
               value: http/protobuf
             - name: OTEL_RESOURCE_ATTRIBUTES

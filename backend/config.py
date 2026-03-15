@@ -17,7 +17,7 @@ DB_CONFIG: dict[str, str] = {
 # --- Telemetry ---
 OTEL_EXPORTER_OTLP_ENDPOINT: str = os.getenv(
     "OTEL_EXPORTER_OTLP_ENDPOINT",
-    "datadog.monitoring.svc.cluster.local:4318/v1/traces",
+    "http://datadog.monitoring.svc.cluster.local:4318/v1/traces",
 )
 
 SERVICE_NAME: str = os.getenv("OTEL_SERVICE_NAME", "kronos-backend")
