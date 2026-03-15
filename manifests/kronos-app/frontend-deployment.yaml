@@ -32,11 +32,11 @@ spec:
             - containerPort: 80
           resources:
             requests:
-              memory: 8Mi
-              cpu: 5m
-            limits:
               memory: 16Mi
               cpu: 10m
+            limits:
+              memory: 32Mi
+              cpu: 20m
           livenessProbe:
             httpGet:
               path: /health
