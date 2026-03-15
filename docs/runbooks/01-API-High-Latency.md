@@ -1,38 +1,108 @@
-# Runbook: High API Latency (> 2000ms)
+# Runbook: High API Latency (> 500ms)
 
-## 🚨 Description
+## Description
 
-This alert triggers when the 95th percentile (p95) latency for the backend API exceeds 2 seconds for more than 5 minutes.
+This alert triggers when the 99th percentile (p99) latency for the backend API exceeds 500 milliseconds for more than 5 minutes.
+
+**Known Architectural Vulnerability:** The backend currently uses `gevent`. If C-extensions (like `psycopg2` or `grpcio`) are not properly monkey-patched, they will perform synchronous blocking I/O, starving the event loop. This results in the entire worker process freezing, leading to massive latency spikes and request queuing, even if CPU/Memory utilization appears normal or low.
 
 ## 📊 Dashboards & Links
 
-* [Datadog APM Dashboard](link-to-your-datadog)
-* [ArgoCD UI](link-to-argocd)
+* [Datadog APM Dashboard](https://www.google.com/search?q=link-to-your-datadog)
+* [Datadog Continuous Profiler](https://www.google.com/search?q=link-to-datadog-profiles) *(Crucial for diagnosing Event Loop blocks)*
+* [ArgoCD UI](https://www.google.com/search?q=link-to-argocd)
+* [NGINX / Ingress Controller Metrics](https://www.google.com/search?q=link-to-ingress-dashboard)
 
-## 🩺 Triage & Confirmation
+---
 
-1. Check the Datadog APM dashboard to confirm the spike is ongoing.
-2. Run this command to check if the backend pods are struggling or restarting:
-   `kubectl get pods -n kronos -l app=backend`
-3. Check if the database is overwhelmed:
-   `kubectl logs -n kronos -l app=backend | grep -i "timeout"`
+## Triage & Confirmation
 
-## 🩹 Mitigation (Stop the Bleeding)
+1. **Confirm the Spike:** Check the Datadog APM dashboard to confirm the spike is ongoing across multiple pods.
+2. **Check Pod Health & Queuing:** Run this command to check if backend pods are struggling, restarting, or maxing out concurrency:\
 
-If the backend pods are overwhelmed, manually scale up the deployment temporarily until the autoscaler catches up:
-`kubectl scale deployment backend -n kronos --replicas=10`
+```bash
+kubectl get pods -n kronos -l component=backend
+```
 
-If the database is blocking connections, restart the backend pods to clear dead connection pools:
-`kubectl rollout restart deployment backend -n kronos`
+3. **Scan for Gridlock Symptoms (Gevent Starvation):** Check backend logs for timeouts, specifically looking for workers failing to heartbeat or trace exporter warnings.
 
-## 🕵️ Investigation (Find the Root Cause)
+```bash
+kubectl logs -n kronos -l component=backend --tail=100 | grep -iE "timeout|critical|worker"
+```
 
-* Check the PostgreSQL database metrics in Datadog (`postgresql.connections`). Are we hitting the connection limit?
-* Look at the APM traces in Datadog: Is the slowdown happening in the application logic, or is it waiting on a specific database query?
+4. **Profiler Check:** Open Datadog Continuous Profiler. If you see methods like `SocketMixin.recv` or `_UnaryUnaryMultiCallable._blocking` taking hundreds of milliseconds or seconds, **you are experiencing event loop starvation.**
 
-## 📞 Escalation
+---
 
-If scaling up does not resolve the issue within 10 minutes, escalate to the Database Reliability team.
+## Mitigation (Stop the Bleeding)
+
+*Execute these steps in order until the system stabilizes. Do not wait for root-cause analysis to mitigate.*
+
+### Level 1: Disable Tracing Overhead (Fastest Mitigation)
+
+If `grpcio` is blocking the event loop, disabling the OpenTelemetry exporter instantly frees up the workers.
+
+```bash
+# Inject environment variable to disable OTel exporter dynamically
+kubectl set env deployment/kronos-backend -n kronos OTEL_TRACES_EXPORTER=none
+
+```
+
+### Level 2: Aggressive Horizontal Scaling
+
+If requests are queuing up behind blocked workers, you need more OS processes immediately. Bypass the HPA and over-provision.
+
+```bash
+# Pause HPA temporarily to prevent it from scaling back down
+kubectl patch hpa kronos-backend-hpa -n kronos -p '{"spec":{"paused":true}}'
+
+# Manually blast the replica count to clear the backlog
+kubectl scale deployment kronos-backend -n kronos --replicas=30
+
+```
+
+### Level 3: Database Connection Purge
+
+If the database is blocking connections (or PgBouncer is exhausted due to held open connections from frozen workers), restart the backend pods to sever all dead connections.
+
+```bash
+kubectl rollout restart deployment kronos-backend -n kronos
+
+```
+
+### Level 4: Load Shedding / Fail-Fast (Ingress Level)
+
+If the backend is completely locked and scaling isn't helping, protect the database and downstream services by dropping requests early.
+
+* Go to the Ingress/Gateway configuration in ArgoCD (or via `kubectl edit`).
+* **Reduce the proxy read timeout** from default (e.g., 60s) down to `2s` or `3s`.
+* *Result:* Users will see fast 504 Gateway Timeouts instead of holding connections open and cascading the failure.
+
+---
+
+## Investigation (Find the Root Cause)
+
+Once the system is stabilized (latency < 500ms or traffic is successfully load-shedding):
+
+1. **Investigate Database Contention:**
+
+* Check the PostgreSQL metrics in Datadog (`postgresql.connections`). Did we hit the max connection limit?
+* Look at Datadog APM Database traces. Find the longest-running query. Even with asynchronous workers, a 5-second raw query (`SocketMixin.recv - 5.38s`) is an application anti-pattern.
+
+2. **Investigate Python Profiler:**
+
+* Validate if `psycogreen` is properly patching `psycopg2`. If database calls are blocking the main thread, the SWEs must patch this.
+
+---
+
+## Escalation & Developer Handoff
+
+* **Time threshold:** If Level 1-3 mitigations do not restore service within 10 minutes, page the **Database Reliability Team**.
+* **Post-Incident SWE Handoff:** Regardless of resolution, open a high-priority Jira ticket for the Software Engineering team with the following requirements:
+
+1. **Migrate Exporter:** Switch OpenTelemetry from gRPC to HTTP/Protobuf (`opentelemetry-exporter-otlp-proto-http`) to ensure compatibility with `gevent`.
+2. **Implement Psycogreen:** Ensure `psycogreen.gevent.patch_psycopg()` is invoked immediately after the standard gevent monkey patch on app startup.
+3. **Query Optimization:** Provide the specific slow SQL query found in Datadog so they can add indices or optimize it.
 
 k6_checks_rate		
 k6_data_received_total		

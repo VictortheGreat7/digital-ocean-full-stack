@@ -86,24 +86,3 @@ resource "kubernetes_secret_v1" "postgres_pass" {
 
   depends_on = [helm_release.reflector]
 }
-
-resource "kubernetes_secret_v1" "redis_pass" {
-  metadata {
-    name      = "redis-secret"
-    namespace = "secrets"
-    annotations = {
-      "reflector.v1.k8s.emberstack.com/reflection-auto-enabled"       = "true"
-      "reflector.v1.k8s.emberstack.com/reflection-auto-namespaces"    = "kronos"
-      "reflector.v1.k8s.emberstack.com/reflection-allowed"            = "true"
-      "reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces" = "kronos"
-    }
-  }
-
-  data = {
-    password = var.redis_pass
-  }
-
-  type = "Opaque"
-
-  depends_on = [helm_release.reflector]
-}

@@ -25,6 +25,13 @@ spec:
         component: backend
         environment: development
     spec:
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox:1.28
+          command: 
+            - 'sh'
+            - '-c'
+            - 'until nc -z kronos-postgres-svc.kronos.svc.cluster.local 5432; do echo waiting for postgres; sleep 2; done;'
       containers:
         - name: backend
           image: victorthegreat7/kronos-backend:latest
@@ -82,15 +89,6 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: postgres-secret
-                  key: password
-            - name: REDIS_SENTINELS
-              value: redis-node-0.redis-headless.kronos.svc.cluster.local:26379,redis-node-1.redis-headless.kronos.svc.cluster.local:26379,redis-node-2.redis-headless.kronos.svc.cluster.local:26379
-            - name: REDIS_MASTER_SET
-              value: foreman
-            - name: REDIS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: redis-secret
                   key: password
           ports:
             - containerPort: 5000
