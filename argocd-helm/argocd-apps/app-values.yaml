@@ -8,7 +8,6 @@ projects:
       argocd.argoproj.io/sync-wave: "4"
     sourceRepos:
       - "https://github.com/VictortheGreat7/digital-ocean-full-stack.git"
-      - "https://charts.bitnami.com/bitnami"
     destinations:
       - server: https://kubernetes.default.svc
         namespace: kronos
