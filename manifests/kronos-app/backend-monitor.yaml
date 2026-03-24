@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: kronos-backend
+  namespace: kronos
+  labels:
+    release: kube-prom-stack
+spec:
+  namespaceSelector:
+    matchNames:
+      - kronos
+  selector:
+    matchLabels:
+      app: kronos-app
+      component: backend
+      environment: development
+  endpoints:
+    - path: /metrics
+      interval: 15s
+      scrapeTimeout: 10s
+      targetPort: 5000

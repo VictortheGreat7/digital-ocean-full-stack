@@ -32,18 +32,6 @@ custom_request_latency = Histogram(
 
 _metrics: PrometheusMetrics | None = None
 
-
-def init_metrics(app: Flask) -> None:
-    """Initialize Prometheus metrics and Flask exporter."""
-    global _metrics
-
-    _metrics = PrometheusMetrics(app)
-    _metrics.info("app_info", "World Clock Backend Application", version="1.0.0")
-
-    app.before_request(_start_timer)
-    app.after_request(_record_metrics)
-
-
 # ── Hooks ───────────────────────────────────────────────────────────────
 def _start_timer() -> None:
     g.start_time = monotonic()
@@ -88,3 +76,13 @@ def _record_metrics(response):
     )
 
     return response
+
+def init_metrics(app: Flask) -> None:
+    """Initialize Prometheus metrics and Flask exporter."""
+    global _metrics
+
+    _metrics = PrometheusMetrics(app)
+    _metrics.info("app_info", "World Clock Backend Application", version="1.0.0")
+
+    app.before_request(_start_timer)
+    app.after_request(_record_metrics)
