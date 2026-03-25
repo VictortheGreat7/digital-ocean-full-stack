@@ -52,3 +52,6 @@ MAJOR_CITIES: dict[str, str] = {
 # --- Endpoint-specific Cache TTLs ---
 CACHE_TTL_WORLD_CLOCKS: int = int(os.getenv("CACHE_TTL_WORLD_CLOCKS", "2"))
 CACHE_TTL_TIMEZONES: int = int(os.getenv("CACHE_TTL_TIMEZONES", "86400"))
+
+BATCH_SIZE = 200
+BATCH_FLUSH_SECONDS = 0.05

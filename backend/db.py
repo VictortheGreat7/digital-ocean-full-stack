@@ -19,7 +19,7 @@ from psycogreen.gevent import patch_psycopg
 from opentelemetry import context
 from opentelemetry.trace import SpanContext
 
-from config import DB_CONFIG
+from config import DB_CONFIG, BATCH_SIZE, BATCH_FLUSH_SECONDS
 
 # patch_psycopg() should be called before any psycopg2 connections are created. It monkey-patches psycopg2 to make it cooperative with gevent's green threads to prevent blocking of the server during db operations.
 patch_psycopg()
@@ -39,9 +39,6 @@ _SENTINEL = object()
 _db_thread: Thread | None = None
 _shutdown_registered = False
 _shutdown_called = False
-
-BATCH_SIZE = 200
-BATCH_FLUSH_SECONDS = 0.05
 
 _DROP_LOG_EVERY_SECONDS = 5.0
 _dropped_since_last_log = 0
