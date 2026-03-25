@@ -57,12 +57,12 @@ data:
         traces:
           receivers: [otlp]
           processors: [infraattributes]
-          exporters: [debug, datadog, datadog/connector]
+          exporters: [datadog, datadog/connector]
         metrics:
           receivers: [otlp, datadog/connector, prometheus]
           processors: [infraattributes]
-          exporters: [debug, datadog]
+          exporters: [datadog]
         logs:
           receivers: [otlp]
           processors: [infraattributes]
-          exporters: [debug, datadog]
+          exporters: [datadog]
