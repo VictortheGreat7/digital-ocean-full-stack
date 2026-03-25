@@ -3,13 +3,18 @@ kind: Service
 metadata:
   name: kronos-backend-svc
   namespace: kronos
+  labels:
+    app: kronos-app
+    component: backend
+    environment: development
 spec:
   selector:
     app: kronos-app
     component: backend
     environment: development
   ports:
-    - protocol: TCP
+    - name: http
+      protocol: TCP
       port: 80
       targetPort: 5000
   type: ClusterIP

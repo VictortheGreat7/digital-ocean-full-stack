@@ -15,7 +15,8 @@ spec:
       component: backend
       environment: development
   endpoints:
-    - path: /metrics
+    - port: http
+      path: /metrics
       interval: 15s
       scrapeTimeout: 10s
-      targetPort: 5000
+      scheme: http
