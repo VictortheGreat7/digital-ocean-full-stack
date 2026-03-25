@@ -19,14 +19,14 @@ data:
               metrics_path: /metrics
               static_configs:
                 - targets:
-                    - kronos-backend.kronos.svc.cluster.local:80
+                    - kronos-backend-svc.kronos.svc.cluster.local:80
             - job_name: "k6"
               scrape_interval: 15s
               metrics_path: /federate
               honor_labels: true
               params:
                 'match[]':
-                  - '{__name__=~"k6.*"}'
+                  - '{__name__=~"k6_.*"}'
               static_configs:
                 - targets:
                     - kube-prom-stack-kube-prome-prometheus.monitoring.svc.cluster.local:9090
