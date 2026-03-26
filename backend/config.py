@@ -53,5 +53,9 @@ MAJOR_CITIES: dict[str, str] = {
 CACHE_TTL_WORLD_CLOCKS: int = int(os.getenv("CACHE_TTL_WORLD_CLOCKS", "2"))
 CACHE_TTL_TIMEZONES: int = int(os.getenv("CACHE_TTL_TIMEZONES", "86400"))
 
+# --- Telemetry toggles ---
+RUNTIME_METRICS_ENABLED: bool = True if os.getenv("DD_RUNTIME_METRICS_ENABLED") == "true" and os.getenv("DD_RUNTIME_METRICS_RUNTIME_ID_ENABLED") == "true" else False
+PROFILER_ENABLED: bool = True if os.getenv("DD_PROFILING_ENABLED") == "true" else False
+
 BATCH_SIZE = 200
 BATCH_FLUSH_SECONDS = 0.05
