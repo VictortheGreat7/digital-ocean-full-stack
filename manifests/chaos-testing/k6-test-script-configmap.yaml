@@ -112,6 +112,7 @@ data:
       tags: {
         test_type: TEST_TYPE,
       },
+      summaryTrendStats: ["avg", "min", "med", "max", "p(90)", "p(95)", "p(99.99)", "count"],
     };
 
     export default function () {
