@@ -34,6 +34,8 @@ from config import (
     SERVICE_NAMESPACE,
     DEPLOYMENT_ENV,
     SERVICE_VERSION,
+    RUNTIME_METRICS_ENABLED,
+    PROFILER_ENABLED,
 )
 
 # ── Global propagator ──────────────────────────────────────────────────
@@ -46,9 +48,6 @@ _resource = Resource(attributes={
     "deployment.environment": DEPLOYMENT_ENV,
     "service.version": SERVICE_VERSION,
 })
-
-_runtime_metrics_enabled = False
-_profiler_enabled = False
 
 # ── Tracer provider + OTLP exporter ───────────────────────────────────
 tracer_provider = TracerProvider(resource=_resource)
@@ -65,6 +64,9 @@ prof = Profiler(
     version="1.0.0"
 )
 
+_runtime_metrics_enabled = False
+_profiler_enabled = False
+
 # Convenience handle used throughout the app
 tracer = trace.get_tracer(__name__)
 
@@ -73,15 +75,15 @@ def init_telemetry(app) -> None:
     """Instrument Flask, requests, psycopg2, and logging."""
     global _runtime_metrics_enabled, _profiler_enabled
 
-    # # Enable Datadog runtime metrics (CPU, memory, etc.)
-    # if not _runtime_metrics_enabled:
-    #     RuntimeMetrics.enable()
-    #     _runtime_metrics_enabled = True
+    # Enable Datadog runtime metrics (CPU, memory, etc.)
+    if RUNTIME_METRICS_ENABLED and not _runtime_metrics_enabled:
+        RuntimeMetrics.enable()
+        _runtime_metrics_enabled = True
 
-    # # Enable Datadog profiler (CPU and wall-time)
-    # if not _profiler_enabled:
-    #     prof.start()
-    #     _profiler_enabled = True
+    # Enable Datadog profiler (CPU and wall-time)
+    if PROFILER_ENABLED and not _profiler_enabled:
+        prof.start()
+        _profiler_enabled = True
 
     # Flask auto-instrumentation (creates spans per request)
     FlaskInstrumentor().instrument_app(app)
