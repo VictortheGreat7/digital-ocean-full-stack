@@ -54,8 +54,8 @@ CACHE_TTL_WORLD_CLOCKS: int = int(os.getenv("CACHE_TTL_WORLD_CLOCKS", "2"))
 CACHE_TTL_TIMEZONES: int = int(os.getenv("CACHE_TTL_TIMEZONES", "86400"))
 
 # --- Telemetry toggles ---
-RUNTIME_METRICS_ENABLED: bool = True if str(os.getenv("ENABLE_DD_RUNTIME_METRICS", "no")).lower() == "yes" else False
-PROFILER_ENABLED: bool = True if str(os.getenv("ENABLE_DD_PROFILER", "no")).lower() == "yes" else False
+RUNTIME_METRICS_ENABLED: bool = True if str(os.getenv("DD_RUNTIME_METRICS_ENABLED", "false")) == "true" and str(os.getenv("DD_RUNTIME_METRICS_RUNTIME_ID_ENABLED", "false")) == "true" else False
+PROFILER_ENABLED: bool = True if str(os.getenv("DD_PROFILING_ENABLED", "false")) == "true" else False
 
 BATCH_SIZE = 200
 BATCH_FLUSH_SECONDS = 0.05
