@@ -24,8 +24,8 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
 
-from ddtrace.runtime import RuntimeMetrics
-from ddtrace.profiling import Profiler
+# from ddtrace.runtime import RuntimeMetrics
+# from ddtrace.profiling import Profiler
 
 
 from config import (
@@ -34,8 +34,8 @@ from config import (
     SERVICE_NAMESPACE,
     DEPLOYMENT_ENV,
     SERVICE_VERSION,
-    RUNTIME_METRICS_ENABLED,
-    PROFILER_ENABLED,
+    # RUNTIME_METRICS_ENABLED,
+    # PROFILER_ENABLED,
 )
 
 # ── Global propagator ──────────────────────────────────────────────────
@@ -58,14 +58,14 @@ tracer_provider.add_span_processor(
     BatchSpanProcessor(_otlp_exporter, schedule_delay_millis=2000, max_export_batch_size=256, max_queue_size=4096)
 )
 
-prof = Profiler(
-    env="dev",
-    service="kronos-backend",
-    version="1.0.0"
-)
+# prof = Profiler(
+#     env="dev",
+#     service="kronos-backend",
+#     version="1.0.0"
+# )
 
-_runtime_metrics_enabled = False
-_profiler_enabled = False
+# _runtime_metrics_enabled = False
+# _profiler_enabled = False
 
 # Convenience handle used throughout the app
 tracer = trace.get_tracer(__name__)
@@ -73,17 +73,17 @@ tracer = trace.get_tracer(__name__)
 
 def init_telemetry(app) -> None:
     """Instrument Flask, requests, psycopg2, and logging."""
-    global _runtime_metrics_enabled, _profiler_enabled
+    # global _runtime_metrics_enabled, _profiler_enabled
 
-    # Enable Datadog runtime metrics (CPU, memory, etc.)
-    if RUNTIME_METRICS_ENABLED and not _runtime_metrics_enabled:
-        RuntimeMetrics.enable()
-        _runtime_metrics_enabled = True
+    # # Enable Datadog runtime metrics (CPU, memory, etc.)
+    # if RUNTIME_METRICS_ENABLED and not _runtime_metrics_enabled:
+    #     RuntimeMetrics.enable()
+    #     _runtime_metrics_enabled = True
 
-    # Enable Datadog profiler (CPU and wall-time)
-    if PROFILER_ENABLED and not _profiler_enabled:
-        prof.start()
-        _profiler_enabled = True
+    # # Enable Datadog profiler (CPU and wall-time)
+    # if PROFILER_ENABLED and not _profiler_enabled:
+    #     prof.start()
+    #     _profiler_enabled = True
 
     # Flask auto-instrumentation (creates spans per request)
     FlaskInstrumentor().instrument_app(app)
