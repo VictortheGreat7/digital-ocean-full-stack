@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 _pool: pool.ThreadedConnectionPool | None = None
 
 # Async request-log queue
-_log_queue: Queue = Queue(maxsize=0)
+_log_queue: Queue = Queue(maxsize=5000)
 
 # Sentinel value to signal worker thread shutdown
 _SENTINEL = object() 
@@ -67,7 +67,7 @@ def enqueue_request_log(
     )
 
     try:
-        _log_queue.put(item, timeout=0.1)
+        _log_queue.put_nowait(item)
     except Full:
         _dropped_since_last_log += 1
         now = monotonic()
