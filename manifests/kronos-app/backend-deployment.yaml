@@ -73,10 +73,6 @@ spec:
               value: "false"
             - name: DD_PROFILING_ENABLED
               value: "false"
-            - name: ENABLE_DD_RUNTIME_METRICS
-              value: "no"
-            - name: ENABLE_DD_PROFILER
-              value: "no"
             - name: DB_HOST
               value: kronos-pgbouncer-svc.kronos.svc.cluster.local
             - name: DB_PORT
