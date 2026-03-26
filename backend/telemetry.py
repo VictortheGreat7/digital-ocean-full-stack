@@ -73,15 +73,15 @@ def init_telemetry(app) -> None:
     """Instrument Flask, requests, psycopg2, and logging."""
     global _runtime_metrics_enabled, _profiler_enabled
 
-    # Enable Datadog runtime metrics (CPU, memory, etc.)
-    if not _runtime_metrics_enabled:
-        RuntimeMetrics.enable()
-        _runtime_metrics_enabled = True
+    # # Enable Datadog runtime metrics (CPU, memory, etc.)
+    # if not _runtime_metrics_enabled:
+    #     RuntimeMetrics.enable()
+    #     _runtime_metrics_enabled = True
 
-    # Enable Datadog profiler (CPU and wall-time)
-    if not _profiler_enabled:
-        prof.start()
-        _profiler_enabled = True
+    # # Enable Datadog profiler (CPU and wall-time)
+    # if not _profiler_enabled:
+    #     prof.start()
+    #     _profiler_enabled = True
 
     # Flask auto-instrumentation (creates spans per request)
     FlaskInstrumentor().instrument_app(app)
