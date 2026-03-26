@@ -54,9 +54,9 @@ _profiler_enabled = False
 tracer_provider = TracerProvider(resource=_resource)
 trace.set_tracer_provider(tracer_provider)
 
-_otlp_exporter = OTLPSpanExporter(endpoint=OTEL_EXPORTER_OTLP_ENDPOINT)
+_otlp_exporter = OTLPSpanExporter(endpoint=OTEL_EXPORTER_OTLP_ENDPOINT, timeout=20)
 tracer_provider.add_span_processor(
-    BatchSpanProcessor(_otlp_exporter, schedule_delay_millis=2000, max_export_batch_size=512)
+    BatchSpanProcessor(_otlp_exporter, schedule_delay_millis=2000, max_export_batch_size=256, max_queue_size=4096)
 )
 
 prof = Profiler(
