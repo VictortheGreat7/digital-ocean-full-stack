@@ -4,10 +4,11 @@ Routes — ``__init__.py``
 Registers all Blueprints with the app.
 """
 
+from __future__ import annotations
+
 from flask import Flask
 from .time import time_bp
 from .health import health_bp
-from __future__ import annotations
 
 
 def register_routes(app: Flask) -> None:

@@ -5,10 +5,10 @@ Call ``init_db(app)`` from the application factory and ``shutdown_db()``
 at exit to drain the queue gracefully.
 """
 
-import logging
 from __future__ import annotations
 
 import atexit
+import logging
 from time import monotonic
 from threading import Thread
 from queue import Queue, Full, Empty
@@ -52,7 +52,7 @@ def enqueue_request_log(
     method: str,
     status: int,
     latency_ms: int,
-    timezone: str,
+    timezone: str | None,
     trace_id: str | None,
     span_context: SpanContext | None,
 ) -> None:

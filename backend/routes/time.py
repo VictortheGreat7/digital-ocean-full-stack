@@ -2,11 +2,12 @@
 Time-related endpoints.
 """
 
+from __future__ import annotations
+
 from time import monotonic
 from threading import Lock
 from telemetry import tracer
 from datetime import datetime
-from __future__ import annotations
 from zoneinfo import available_timezones
 from flask import Blueprint, jsonify, request
 from helpers import format_time_response, validate_timezone

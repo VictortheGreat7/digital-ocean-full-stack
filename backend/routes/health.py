@@ -2,8 +2,9 @@
 Health & readiness endpoints.
 """
 
-import logging
 from __future__ import annotations
+
+import logging
 from flask import Blueprint, jsonify
 from db import get_connection, put_connection
 
