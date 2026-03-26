@@ -2,22 +2,19 @@
 Time-related endpoints.
 """
 
-from __future__ import annotations
-
-from datetime import datetime
 from time import monotonic
-from zoneinfo import available_timezones
-
-from flask import Blueprint, jsonify, request
-
 from threading import Lock
-
-from config import CACHE_TTL_TIMEZONES, CACHE_TTL_WORLD_CLOCKS, MAJOR_CITIES
-from helpers import format_time_response, validate_timezone
 from telemetry import tracer
+from datetime import datetime
+from __future__ import annotations
+from zoneinfo import available_timezones
+from flask import Blueprint, jsonify, request
+from helpers import format_time_response, validate_timezone
+from config import CACHE_TTL_TIMEZONES, CACHE_TTL_WORLD_CLOCKS, MAJOR_CITIES
 
 
 time_bp = Blueprint("time", __name__)
+
 # Setup cache and lock at the module level
 _timezones_lock = Lock()
 _timezones_cache = {"data": None, "expires_at": 0}

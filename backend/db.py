@@ -5,17 +5,18 @@ Call ``init_db(app)`` from the application factory and ``shutdown_db()``
 at exit to drain the queue gracefully.
 """
 
+import logging
 from __future__ import annotations
 
 import atexit
-import logging
-from queue import Queue, Full, Empty
 from time import monotonic
 from threading import Thread
+from queue import Queue, Full, Empty
 
 from psycopg2 import pool
 from psycopg2.extras import execute_values
 from psycogreen.gevent import patch_psycopg
+
 from opentelemetry import context
 from opentelemetry.trace import SpanContext
 
