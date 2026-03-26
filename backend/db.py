@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 _pool: pool.ThreadedConnectionPool | None = None
 
 # Async request-log queue
-_log_queue: Queue = Queue(maxsize=5000)
+_log_queue: Queue = Queue(maxsize=0)
 
 # Sentinel value to signal worker thread shutdown
 _SENTINEL = object() 
