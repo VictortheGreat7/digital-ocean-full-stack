@@ -15,19 +15,11 @@ data:
     auth_file = /etc/pgbouncer/users.txt
     pool_mode = transaction
     max_client_conn = 1000
-    default_pool_size = 30
-    min_pool_size = 10
-    reserve_pool_size = 10
-    max_db_connections = 45
-    max_db_client_connections = 400
-    query_wait_timeout = 8
-    server_connect_timeout = 5
-    server_idle_timeout = 300
-    server_lifetime = 1800
-    stats_users = app
+    default_pool_size = 20
+    reserve_pool_size = 5
+    max_db_connections = 40
     ignore_startup_parameters = extra_float_digits,options
     server_reset_query = DISCARD ALL
-    server_reset_query_always = 0
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -139,3 +131,35 @@ spec:
       protocol: TCP
       name: metrics
   type: ClusterIP
+---
+# apiVersion: v1
+# kind: ConfigMap
+# metadata:
+#   name: pgbouncer-config
+#   namespace: kronos
+# data:
+#   pgbouncer.ini: |
+#     [databases]
+#     kronos = host=kronos-postgres-svc.kronos.svc.cluster.local port=5432 dbname=kronos
+
+#     [pgbouncer]
+#     listen_addr = 0.0.0.0
+#     listen_port = 5432
+#     auth_type = md5
+#     auth_file = /etc/pgbouncer/users.txt
+#     pool_mode = transaction
+#     max_client_conn = 1000
+#     default_pool_size = 30
+#     min_pool_size = 10
+#     reserve_pool_size = 10
+#     max_db_connections = 45
+#     max_db_client_connections = 400
+#     query_wait_timeout = 8
+#     server_connect_timeout = 5
+#     server_idle_timeout = 300
+#     server_lifetime = 1800
+#     stats_users = app
+#     ignore_startup_parameters = extra_float_digits,options
+#     server_reset_query = DISCARD ALL
+#     server_reset_query_always = 0
+# ---
