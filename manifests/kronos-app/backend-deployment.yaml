@@ -26,7 +26,7 @@ spec:
         environment: development
     spec:
       initContainers:
-        - name: wait-for-postgres
+        - name: wait-for-pqbouncer
           image: busybox:1.28
           command: 
             - 'sh'
