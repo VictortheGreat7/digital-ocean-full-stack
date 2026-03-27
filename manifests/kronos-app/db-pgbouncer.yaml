@@ -67,6 +67,28 @@ spec:
               port: 5432
             initialDelaySeconds: 5
             periodSeconds: 5
+        - name: pgbouncer-exporter
+          image: prometheuscommunity/pgbouncer-exporter:latest
+          ports:
+            - containerPort: 9127
+              name: metrics
+          env:
+            - name: PGBOUNCER_EXPORTER_LISTEN_ADDR
+              value: "0.0.0.0:9127"
+            - name: PGBOUNCER_EXPORTER_CONNECTION_STRING
+              value: "postgresql://postgres:@localhost:5432/pgbouncer?sslmode=disable"
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: 9127
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: 9127
+            initialDelaySeconds: 5
+            periodSeconds: 5
       volumes:
         - name: config
           configMap:
@@ -80,6 +102,10 @@ kind: Service
 metadata:
   name: kronos-pgbouncer-svc
   namespace: kronos
+  labels:
+    app: kronos-app
+    component: pgbouncer
+    environment: development
 spec:
   selector:
     app: kronos-app
@@ -89,4 +115,9 @@ spec:
     - port: 5432
       targetPort: 5432
       protocol: TCP
+      name: pgbouncer
+    - port: 9127
+      targetPort: 9127
+      protocol: TCP
+      name: metrics
   type: ClusterIP
