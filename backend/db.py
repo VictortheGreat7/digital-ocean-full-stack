@@ -179,7 +179,7 @@ def init_db(app=None) -> None:
         try:
             _pool = pool.ThreadedConnectionPool(
                 minconn=1,
-                maxconn=10,
+                maxconn=4,
                 **DB_CONFIG,
             )
             logger.info("Database connection pool created")
