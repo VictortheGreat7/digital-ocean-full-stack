@@ -25,7 +25,7 @@ metadata:
   name: pgbouncer-monitor
   namespace: kronos
   labels:
-      release: kube-prom-stack
+    release: kube-prom-stack
 spec:
   namespaceSelector:
     matchNames:
