@@ -12,4 +12,4 @@ policy: sync
 txtOwnerId: "gateway"
 extraArgs:
   - --gateway-namespace=kube-system
-  - --cloudflare-proxied
+  # - --cloudflare-proxied
