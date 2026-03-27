@@ -20,16 +20,16 @@ spec:
         value: http://kronos-backend-svc.kronos.svc.cluster.local
       - name: TEST_TYPE
         value: load
-      - name: K6_OUT
-        value: experimental-prometheus-rw
-      - name: K6_PROMETHEUS_RW_PUSH_INTERVAL
-        value: 10s
-      - name: K6_PROMETHEUS_RW_SERVER_URL
-        value: http://kube-prom-stack-kube-prome-prometheus.monitoring.svc.cluster.local:9090/api/v1/write
-      - name: K6_PROMETHEUS_RW_TREND_STATS
-        value: p(95),p(99),min,max,avg
-      - name: K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM
-        value: "true"
+      # - name: K6_OUT
+      #   value: experimental-prometheus-rw
+      # - name: K6_PROMETHEUS_RW_PUSH_INTERVAL
+      #   value: 10s
+      # - name: K6_PROMETHEUS_RW_SERVER_URL
+      #   value: http://kube-prom-stack-kube-prome-prometheus.monitoring.svc.cluster.local:9090/api/v1/write
+      # - name: K6_PROMETHEUS_RW_TREND_STATS
+      #   value: p(95),p(99),min,max,avg
+      # - name: K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM
+      #   value: "true"
   script:
     configMap:
       name: k6-test-script
