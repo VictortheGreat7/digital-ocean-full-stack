@@ -63,8 +63,15 @@ spec:
             - containerPort: 9187
               name: metrics
           env:
-            - name: DATA_SOURCE_NAME
-              value: "postgresql://app:@localhost:5432/kronos?sslmode=disable"
+            - name: DATA_SOURCE_URI
+              value: "localhost:5432/kronos?sslmode=disable"
+            - name: DATA_SOURCE_USER
+              value: app
+            - name: DATA_SOURCE_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: password
             - name: PG_EXPORTER_LISTEN_ADDR
               value: "0.0.0.0:9187"
           livenessProbe:

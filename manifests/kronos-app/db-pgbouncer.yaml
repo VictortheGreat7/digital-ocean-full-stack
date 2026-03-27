@@ -18,6 +18,7 @@ data:
     default_pool_size = 20
     reserve_pool_size = 5
     max_db_connections = 40
+    stats_users = app
     ignore_startup_parameters = extra_float_digits,options
     server_reset_query = DISCARD ALL
 ---
@@ -76,7 +77,10 @@ spec:
             - name: PGBOUNCER_EXPORTER_LISTEN_ADDR
               value: "0.0.0.0:9127"
             - name: PGBOUNCER_EXPORTER_CONNECTION_STRING
-              value: "postgresql://postgres:@localhost:5432/pgbouncer?sslmode=disable"
+              valueFrom:
+                secretKeyRef:
+                  name: pgbouncer-auth
+                  key: exporter_connection_string
           livenessProbe:
             httpGet:
               path: /metrics
