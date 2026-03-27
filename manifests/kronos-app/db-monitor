@@ -4,9 +4,7 @@ metadata:
   name: postgres-monitor
   namespace: kronos
   labels:
-    app: kronos-app
-    component: db
-    environment: development
+    release: kube-prom-stack
 spec:
   selector:
     matchLabels:
@@ -24,9 +22,7 @@ metadata:
   name: pgbouncer-monitor
   namespace: kronos
   labels:
-    app: kronos-app
-    component: pgbouncer
-    environment: development
+      release: kube-prom-stack
 spec:
   selector:
     matchLabels:
