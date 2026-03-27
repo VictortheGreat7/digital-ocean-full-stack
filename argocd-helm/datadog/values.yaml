@@ -3,6 +3,7 @@ datadog:
   appKeyExistingSecret: datadog-secret
   site: us5.datadoghq.com
 
+
   logs:
     enabled: true
     containerCollectAll: true
@@ -43,6 +44,11 @@ datadog:
 
   networkMonitoring:
     enabled: true
+  traceroute:
+    enabled: true
+  networkPath:
+    connectionsMonitoring:
+      enabled: true
 
   processAgent:
     enabled: true
