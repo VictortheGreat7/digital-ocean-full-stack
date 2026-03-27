@@ -6,6 +6,9 @@ metadata:
   labels:
     release: kube-prom-stack
 spec:
+  namespaceSelector:
+    matchNames:
+      - kronos
   selector:
     matchLabels:
       app: kronos-app
@@ -24,6 +27,9 @@ metadata:
   labels:
       release: kube-prom-stack
 spec:
+  namespaceSelector:
+    matchNames:
+      - kronos
   selector:
     matchLabels:
       app: kronos-app
