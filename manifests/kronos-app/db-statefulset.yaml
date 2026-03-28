@@ -60,8 +60,8 @@ spec:
                 - -c
                 - pg_isready -U app -d kronos
             initialDelaySeconds: 30
-            periodSeconds: 10
-            timeoutSeconds: 5
+            periodSeconds: 15
+            timeoutSeconds: 10
             failureThreshold: 5
         - name: postgres-exporter
           image: prometheuscommunity/postgres-exporter:latest
@@ -86,15 +86,15 @@ spec:
               port: 9187
             initialDelaySeconds: 10
             periodSeconds: 15
-            timeoutSeconds: 5
+            timeoutSeconds: 10
             failureThreshold: 5
           readinessProbe:
             httpGet:
               path: /metrics
               port: 9187
             initialDelaySeconds: 10
-            periodSeconds: 5
-            timeoutSeconds: 5
+            periodSeconds: 15
+            timeoutSeconds: 10
             failureThreshold: 5
       volumes:
         - name: init-script
