@@ -173,9 +173,12 @@ The build workflow will:
 
 - Display all available clocks on the dashboard.
 - Set up useful alerts and notifications.
-- Optimize costs with auto-scaling.
+- Optimize resource usage with auto-scaling.
 - Secrets are currently stored in GitHub secrets and injected into Terraform, which is not ideal. A better approach would be to use a dedicated secrets manager like Azure Key Vault or AWS Secrets Manager, and integrate it with External Secret Operator on Kubernetes for secure secret management.
 - Gunicorn workers having issues with exporting traces to Datadog svc for the first few minutes.
-- Missing prometheus metrics? Some imported k8s can't get some queries.
+- Investigate external hostname resolution. Latency is significantly higher than when loadtesting against internal svc, which is expected, but the magnitude of the difference is surprising (around 1s). I want to understand if this is due to network routing, load balancer performance, or something else.
 
 ### Lessons
+
+- Observability has costs. Enabling runtime metrics and continuous profiling with Datadog in my Python backend, specifically in my case, increased lock wait times and, in turn, quintuped the response latency of my API. I had to disable runtime metrics and continuous profiling to get back to acceptable latency levels. A balance needs to be found between visibility and performance.
+- Redundancy is key for reliability. Running multiple replicas of my PostgreSQL database and using PgBouncer for connection pooling significantly improved the resilience of the application during load testing.
