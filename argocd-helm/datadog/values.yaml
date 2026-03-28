@@ -4,6 +4,7 @@ datadog:
   site: us5.datadoghq.com
 
 
+  logs_enabled: true
   logs:
     enabled: true
     containerCollectAll: true
