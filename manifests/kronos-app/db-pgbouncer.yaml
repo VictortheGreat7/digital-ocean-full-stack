@@ -13,6 +13,7 @@ data:
     listen_port = 5432
     auth_type = md5
     auth_file = /etc/pgbouncer/users.txt
+    stats_users = app
     pool_mode = transaction
     max_client_conn = 1000
     reserve_pool_size = 5
