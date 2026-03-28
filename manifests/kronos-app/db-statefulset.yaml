@@ -25,6 +25,12 @@ spec:
           args:
             - "-c"
             - "shared_preload_libraries=pg_stat_statements"
+            - "-c"
+            - "track_activity_query_size=4096"
+            - "-c"
+            - "pg_stat_statements.track=ALL"
+            - "-c"
+            - "track_io_timing=on"
           imagePullPolicy: IfNotPresent
           ports:
             - name: postgres
@@ -39,8 +45,6 @@ spec:
                 secretKeyRef:
                   name: postgres-secret
                   key: password
-            - name: POSTGRES_HOST_AUTH_METHOD
-              value: trust
             - name: POSTGRES_INITDB_ARGS
               value: "--data-checksums"
           volumeMounts:
