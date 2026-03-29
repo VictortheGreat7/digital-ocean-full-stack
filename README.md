@@ -182,3 +182,4 @@ The build workflow will:
 
 - Observability has costs. Enabling runtime metrics and continuous profiling with Datadog in my Python backend, specifically in my case, increased lock wait times and, in turn, quintuped the response latency of my API. I had to disable runtime metrics and continuous profiling to get back to acceptable latency levels. A balance needs to be found between visibility and performance.
 - Redundancy is key for reliability. Running multiple replicas of my PostgreSQL database and using PgBouncer for connection pooling significantly improved the resilience of the application during load testing.
+- It would seem rollout restarts affect latency.
