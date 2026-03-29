@@ -58,4 +58,4 @@ RUNTIME_METRICS_ENABLED: bool = True if str(os.getenv("DD_RUNTIME_METRICS_ENABLE
 PROFILER_ENABLED: bool = True if str(os.getenv("DD_PROFILING_ENABLED", "false")) == "true" else False
 
 BATCH_SIZE = 200
-BATCH_FLUSH_SECONDS = 0.05
+BATCH_FLUSH_SECONDS = 0.5
