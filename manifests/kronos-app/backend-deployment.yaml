@@ -58,14 +58,11 @@ spec:
             - name: SERVICE_VERSION
               value: 1.0.0
             - name: DD_AGENT_HOST
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: status.hostIP
+              value: datadog.monitoring.svc.cluster.local
             - name: DD_DOGSTATSD_PORT
               value: "8125"
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: http://$(DD_AGENT_HOST):4318/v1/traces
+              value: http://datadog.monitoring.svc.cluster.local:4318/v1/traces
             - name: OTEL_EXPORTER_OTLP_PROTOCOL
               value: http/protobuf
             - name: OTEL_RESOURCE_ATTRIBUTES
