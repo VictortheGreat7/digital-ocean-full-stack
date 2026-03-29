@@ -185,6 +185,7 @@ def init_db(app=None) -> None:
             logger.info("Database connection pool created")
         except Exception as exc:
             logger.error("Failed to create DB pool: %s", exc)
+            raise
     else:
         logger.debug("DB pool already initialized")
     

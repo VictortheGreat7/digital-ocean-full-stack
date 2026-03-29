@@ -102,7 +102,7 @@ resource "kubernetes_secret_v1" "pgbouncer_auth" {
   data = {
     exporter_connection_string = "postgresql://app:${var.postgres_pass}@localhost:5432/pgbouncer?sslmode=disable"
     "users.txt" = <<-EOT
-      "app" "md5${md5("${var.postgres_pass}app")}"
+      "app" "${var.postgres_pass}"
     EOT
   }
 
