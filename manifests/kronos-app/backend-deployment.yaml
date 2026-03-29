@@ -32,6 +32,12 @@ spec:
             - 'sh'
             - '-c'
             - 'until nc -z kronos-pgbouncer-svc.kronos.svc.cluster.local 5432; do echo waiting for postgres; sleep 2; done;'
+        - name: wait-for-datadog
+          image: busybox:1.28
+          command: 
+            - 'sh'
+            - '-c'
+            - 'until nc -z datadog.monitoring.svc.cluster.local 4318; do echo waiting for datadog; sleep 2; done;'
       containers:
         - name: backend
           image: victorthegreat7/kronos-backend:latest
