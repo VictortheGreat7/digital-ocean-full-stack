@@ -19,9 +19,6 @@ data:
     reserve_pool_size = 5
     max_db_connections = 20
     server_connect_timeout = 5
-    server_login_retry = 5
-    dns_max_ttl = 5
-    dns_nxdomain_ttl = 2
     ignore_startup_parameters = extra_float_digits,options
     verbose = 1
 ---
