@@ -5,21 +5,32 @@ metadata:
   namespace: default
 spec:
   # cleanup: post
-  parallelism: 4
+  parallelism: 3
   runner:
     image: grafana/k6:latest
+    affinity:
+      # Push K6 pods away from each other so they spread across all 3 nodes evenly
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+            - key: app
+              operator: In
+              values:
+              - k6
+          topologyKey: kubernetes.io/hostname
     resources:
       requests:
         cpu: 400m
         memory: 512Mi
       limits:
-        cpu: 500m
-        memory: 1Gi
+        cpu: 550m
+        memory: 1.1Gi
     env:
       - name: BASE_URL
         value: http://kronos-backend-svc.kronos.svc.cluster.local
       - name: TEST_TYPE
-        value: soak
+        value: load
       - name: K6_OUT
         value: experimental-prometheus-rw
       - name: K6_PROMETHEUS_RW_PUSH_INTERVAL
