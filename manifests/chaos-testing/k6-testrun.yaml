@@ -14,10 +14,10 @@ spec:
         requiredDuringSchedulingIgnoredDuringExecution:
         - labelSelector:
             matchExpressions:
-            - key: app
+            - key: runner
               operator: In
               values:
-              - k6
+              - "true"
           topologyKey: kubernetes.io/hostname
     resources:
       requests:
