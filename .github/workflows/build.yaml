@@ -91,6 +91,8 @@ jobs:
             -e POSTGRES_PASSWORD=dev-password \
             -p 5432:5432 \
             postgres:15-alpine
+          
+          sleep 5
 
           # Start backend on the same network; use container DNS name
           docker run -d --name backend-test --network kronos-net \
