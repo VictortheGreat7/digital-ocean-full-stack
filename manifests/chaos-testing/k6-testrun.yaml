@@ -25,12 +25,12 @@ spec:
         memory: 512Mi
       limits:
         cpu: 550m
-        memory: 1.1Gi
+        memory: 1125Mi
     env:
       - name: BASE_URL
         value: http://kronos-backend-svc.kronos.svc.cluster.local
       - name: TEST_TYPE
-        value: load
+        value: soak
       - name: K6_OUT
         value: experimental-prometheus-rw
       - name: K6_PROMETHEUS_RW_PUSH_INTERVAL
