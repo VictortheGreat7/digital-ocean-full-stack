@@ -101,11 +101,11 @@ spec:
             - containerPort: 5000
           resources:
             requests:
-              memory: 512Mi
-              cpu: 1200m
+              memory: 256Mi
+              cpu: 1700m
             limits:
-              memory: 620Mi
-              cpu: 1500m
+              memory: 512Mi
+              cpu: 2000m
           livenessProbe:
             httpGet:
               path: /health
