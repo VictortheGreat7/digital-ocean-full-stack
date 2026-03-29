@@ -20,7 +20,6 @@ data:
     max_db_connections = 20
     server_connect_timeout = 5
     ignore_startup_parameters = extra_float_digits,options
-    verbose = 1
 ---
 apiVersion: apps/v1
 kind: Deployment

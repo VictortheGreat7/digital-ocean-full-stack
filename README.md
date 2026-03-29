@@ -175,7 +175,7 @@ The build workflow will:
 - [ ] Set up useful alerts and notifications.
 - [ ] Optimize resource usage with auto-scaling.
 - [ ] Secrets are currently stored in GitHub secrets and injected into Terraform, which is not ideal. A better approach would be to use a dedicated secrets manager like Azure Key Vault or AWS Secrets Manager, and integrate it with External Secret Operator on Kubernetes for secure secret management.
-- [ ] Gunicorn workers having issues with exporting traces to Datadog svc for the first few minutes.
+- [ ] Deploy a separate OpenTelemetry Collector to handle trace exporting from the backend.
 - [ ] Investigate external hostname resolution. Latency is significantly higher than when loadtesting against internal svc, which is expected, but the magnitude of the difference is surprising (around 1s). I want to understand if this is due to network routing, load balancer performance, or something else.
 
 ### Lessons
@@ -183,3 +183,4 @@ The build workflow will:
 - Observability has costs. Enabling runtime metrics and continuous profiling with Datadog in my Python backend, specifically in my case, increased lock wait times and, in turn, quintuped the response latency of my API. I had to disable runtime metrics and continuous profiling to get back to acceptable latency levels. A balance needs to be found between visibility and performance.
 - Redundancy is key for reliability. Running multiple replicas of my PostgreSQL database and using PgBouncer for connection pooling significantly improved the resilience of the application during load testing.
 - It would seem rollout restarts affect latency.
+- Beware of CPU throttling. Enabling telemetry logging into database in a background thread with an aggressive flush interval (polling 20x a second) caused severe CPU starvation. Rollout restarts during load tests also causes CPU throttling as new pods could not start up in time to share the load, which caused latency spikes and request timeouts.
