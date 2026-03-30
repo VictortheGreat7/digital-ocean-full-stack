@@ -2,13 +2,6 @@ datadog:
   apiKeyExistingSecret: datadog-secret
   appKeyExistingSecret: datadog-secret
   site: us5.datadoghq.com
-  # otlp:
-  #   receiver:
-  #     protocols:
-  #       grpc:
-  #         enabled: true
-  #       http:
-  #         enabled: true
 
 
   logs_enabled: true
