@@ -32,7 +32,7 @@ def post_fork(server, worker):
     from opentelemetry.sdk.trace.export import BatchSpanProcessor
     from telemetry import tracer_provider, _otlp_exporter
     tracer_provider.add_span_processor(
-        BatchSpanProcessor(_otlp_exporter, schedule_delay_millis=5000, max_export_batch_size=256, max_queue_size=2048)
+        BatchSpanProcessor(_otlp_exporter, schedule_delay_millis=2000, max_export_batch_size=512)
     )
 
 control_socket_disable = True
