@@ -82,17 +82,40 @@ def get_timezones():
     return jsonify(payload)
 
 
+def _update_world_clocks():
+    """Heavy background task to fetch world clocks."""
+    cities_data: list[dict] = []
+    
+    # We create a detached span for the background process
+    with tracer.start_as_current_span("background_refresh.world_clocks")as span:
+        span.set_attribute("cities_count", len(MAJOR_CITIES))
+        for city, tz_name in MAJOR_CITIES.items():
+            try:
+                data = format_time_response(tz_name, city=city)
+                cities_data.append(data)
+            except Exception as exc:
+                span.set_attribute("error", True)
+                span.record_exception(exc)
+                cities_data.append({"city": city, "error": str(exc)})
+
+    payload = {"cities": cities_data, "count": len(cities_data)}
+    
+    # Safely update the cache and release the refreshing lock
+    with _world_clocks_lock:
+        _world_clocks_cache["data"] = payload
+        _world_clocks_cache["expires_at"] = monotonic() + CACHE_TTL_WORLD_CLOCKS
+        _world_clocks_cache["refreshing"] = False
+
+
 @time_bp.route("/world-clocks", methods=["GET"])
 def get_world_clocks():
     """Return the current time for every city in ``MAJOR_CITIES``."""
 
-    # Fast path: read without lock
     cached = _world_clocks_cache["data"]
     expires_at = _world_clocks_cache["expires_at"]
-
-    ttl = CACHE_TTL_WORLD_CLOCKS
     now = monotonic()
 
+    # 1. Cache is fresh: return immediately
     if cached is not None and now < expires_at:
         with tracer.start_as_current_span("cache.world_clocks") as span:
             span.set_attribute("cache.hit", True)
@@ -101,29 +124,29 @@ def get_world_clocks():
     with tracer.start_as_current_span("cache.world_clocks") as span:
         span.set_attribute("cache.hit", False)
 
+    # 2. Cache is stale but exists: return stale data, refresh in background
+    if cached is not None:
+        with _world_clocks_lock:
+            if not _world_clocks_cache["refreshing"]:
+                _world_clocks_cache["refreshing"] = True
+                # Spawn a daemon thread to do the heavy lifting silently
+                Thread(target=_update_world_clocks, daemon=True).start()
+        
+        # Immediately return the slightly stale data; no latency spike!
+        return jsonify(cached)
+
+    # 3. Cache is completely empty (First request ever): Wait synchronously
     with _world_clocks_lock:
-        # Double-check: another thread may have refreshed while we waited
-        if _world_clocks_cache["data"] is not None and now < _world_clocks_cache["expires_at"]:
+        # Double check in case another thread just finished the initial load
+        if _world_clocks_cache["data"] is not None:
             return jsonify(_world_clocks_cache["data"])
-
-        cities_data: list[dict] = []
-
-        with tracer.start_as_current_span("background_refresh.world_clocks")as span:
-            span.set_attribute("cities_count", len(MAJOR_CITIES))
-            for city, tz_name in MAJOR_CITIES.items():
-                try:
-                    data = format_time_response(tz_name, city=city)
-                    cities_data.append(data)
-                except Exception as exc:
-                    span.set_attribute("error", True)
-                    span.record_exception(exc)
-                    cities_data.append({"city": city, "error": str(exc)})
-
-        payload = {"cities": cities_data, "count": len(cities_data)}
-        _world_clocks_cache["data"] = payload
-        _world_clocks_cache["expires_at"] = now + ttl
-
-    return jsonify(payload)
+            
+        _world_clocks_cache["refreshing"] = True
+        
+    # Run synchronously for the very first hit
+    _update_world_clocks()
+    
+    return jsonify(_world_clocks_cache["data"])
 
 
 @time_bp.route("/legacy/time", methods=["GET"])
