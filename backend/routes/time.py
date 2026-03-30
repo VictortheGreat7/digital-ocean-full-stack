@@ -142,9 +142,8 @@ def get_world_clocks():
             return jsonify(_world_clocks_cache["data"])
             
         _world_clocks_cache["refreshing"] = True
-        
-    # Run synchronously for the very first hit
-    _update_world_clocks()
+        # Run synchronously for the very first hit
+        _update_world_clocks()
     
     return jsonify(_world_clocks_cache["data"])
 
