@@ -87,18 +87,16 @@ def _update_world_clocks():
     cities_data: list[dict] = []
     
     # We create a detached span for the background process
-    with tracer.start_as_current_span("background_refresh.world_clocks"):
+    with tracer.start_as_current_span("background_refresh.world_clocks")as span:
+        span.set_attribute("cities_count", len(MAJOR_CITIES))
         for city, tz_name in MAJOR_CITIES.items():
-            with tracer.start_as_current_span("tz_sample_fetch") as span:
-                span.set_attribute("city.timezone", tz_name)
-
-                try:
-                    data = format_time_response(tz_name, city=city)
-                    cities_data.append(data)
-                except Exception as exc:
-                    span.set_attribute("error", True)
-                    span.record_exception(exc)
-                    cities_data.append({"city": city, "error": str(exc)})
+            try:
+                data = format_time_response(tz_name, city=city)
+                cities_data.append(data)
+            except Exception as exc:
+                span.set_attribute("error", True)
+                span.record_exception(exc)
+                cities_data.append({"city": city, "error": str(exc)})
 
     payload = {"cities": cities_data, "count": len(cities_data)}
     
