@@ -107,7 +107,7 @@ def _flush_batch(rows: list[tuple]) -> None:
                 VALUES %s
                 """,
                 rows,
-                page_size=200,
+                page_size=50,
             )
         conn.commit()
     except Exception as exc:
