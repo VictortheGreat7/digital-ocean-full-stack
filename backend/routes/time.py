@@ -56,28 +56,28 @@ def get_timezones():
 
     with _timezones_lock:
         if _timezones_cache["data"] is not None and now < _timezones_cache["expires_at"]:
-            return jsonify(_timezones_cache["data"])
-        
-        with tracer.start_as_current_span("all_tz__fetch") as span:
-            try:
-                all_tz = sorted(available_timezones())
-                regions: dict[str, list[str]] = {}
-                for tz in all_tz:
-                    if "/" in tz:
-                        region = tz.split("/")[0]
-                        regions.setdefault(region, []).append(tz)
-            except Exception as exc:
-                span.set_attribute("error", True)
-                span.record_exception(exc)
-                return jsonify({"error": "Failed to fetch timezones"}), 500
+            payload = _timezones_cache["data"]
+        else:
+            with tracer.start_as_current_span("all_tz__fetch") as span:
+                try:
+                    all_tz = sorted(available_timezones())
+                    regions: dict[str, list[str]] = {}
+                    for tz in all_tz:
+                        if "/" in tz:
+                            region = tz.split("/")[0]
+                            regions.setdefault(region, []).append(tz)
+                except Exception as exc:
+                    span.set_attribute("error", True)
+                    span.record_exception(exc)
+                    return jsonify({"error": "Failed to fetch timezones"}), 500
 
-        payload = {
-            "count": len(all_tz),
-            "regions": regions,
-        }
+            payload = {
+                "count": len(all_tz),
+                "regions": regions,
+            }
 
-        _timezones_cache["data"] = payload
-        _timezones_cache["expires_at"] = now + ttl
+            _timezones_cache["data"] = payload
+            _timezones_cache["expires_at"] = now + ttl
 
     return jsonify(payload)
 
@@ -104,24 +104,24 @@ def get_world_clocks():
     with _world_clocks_lock:
         # Double-check: another thread may have refreshed while we waited
         if _world_clocks_cache["data"] is not None and now < _world_clocks_cache["expires_at"]:
-            return jsonify(_world_clocks_cache["data"])
+            payload = _world_clocks_cache["data"]
+        else:
+            cities_data: list[dict] = []
 
-        cities_data: list[dict] = []
+            with tracer.start_as_current_span("background_refresh.world_clocks")as span:
+                span.set_attribute("cities_count", len(MAJOR_CITIES))
+                for city, tz_name in MAJOR_CITIES.items():
+                    try:
+                        data = format_time_response(tz_name, city=city)
+                        cities_data.append(data)
+                    except Exception as exc:
+                        span.set_attribute("error", True)
+                        span.record_exception(exc)
+                        cities_data.append({"city": city, "error": str(exc)})
 
-        with tracer.start_as_current_span("background_refresh.world_clocks")as span:
-            span.set_attribute("cities_count", len(MAJOR_CITIES))
-            for city, tz_name in MAJOR_CITIES.items():
-                try:
-                    data = format_time_response(tz_name, city=city)
-                    cities_data.append(data)
-                except Exception as exc:
-                    span.set_attribute("error", True)
-                    span.record_exception(exc)
-                    cities_data.append({"city": city, "error": str(exc)})
-
-        payload = {"cities": cities_data, "count": len(cities_data)}
-        _world_clocks_cache["data"] = payload
-        _world_clocks_cache["expires_at"] = now + ttl
+            payload = {"cities": cities_data, "count": len(cities_data)}
+            _world_clocks_cache["data"] = payload
+            _world_clocks_cache["expires_at"] = now + ttl
 
     return jsonify(payload)
 
