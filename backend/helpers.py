@@ -12,13 +12,15 @@ from typing import Any
 def format_time_response(
     timezone: str,
     *,
+    tz: ZoneInfo | None = None,
     city: str | None = None,
 ) -> dict[str, Any]:
     """Return a consistent time-data dict for *timezone*.
 
     Raises ``ZoneInfoNotFoundError`` if the timezone is invalid.
     """
-    tz = ZoneInfo(timezone)
+    if tz is None:
+        tz = ZoneInfo(timezone)
     now = datetime.now(tz)
 
     hour = now.hour

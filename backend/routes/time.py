@@ -29,8 +29,8 @@ def get_time():
     timezone = request.args.get("timezone", "UTC")
 
     try:
-        validate_timezone(timezone)
-        data = format_time_response(timezone)
+        tz = validate_timezone(timezone)
+        data = format_time_response(timezone, tz=tz)
         return jsonify(data)
     except ValueError:
         return jsonify({"error": f"Unknown timezone: {timezone}"}), 400
