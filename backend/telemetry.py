@@ -52,9 +52,8 @@ _resource = Resource(attributes={
 tracer_provider = TracerProvider(resource=_resource)
 trace.set_tracer_provider(tracer_provider)
 
-_otlp_exporter = None
-# We handle adding the BatchSpanProcessor and initializing OTLPSpanExporter
-# in gunicorn.conf.py's post_fork hook
+_otlp_exporter = OTLPSpanExporter(endpoint=OTEL_EXPORTER_OTLP_ENDPOINT, timeout=20)
+# We handle adding the BatchSpanProcessor in gunicorn.conf.py's post_fork hook
 # to ensure the background thread survives the worker processes.
 
 prof = Profiler(
