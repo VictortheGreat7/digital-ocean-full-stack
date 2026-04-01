@@ -31,12 +31,11 @@ def post_fork(server, worker):
     # 2. Re-initialize OpenTelemetry BatchSpanProcessor in the new worker process
     from opentelemetry.sdk.trace.export import BatchSpanProcessor
     from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-    from telemetry import tracer_provider, OTEL_EXPORTER_OTLP_ENDPOINT
     import telemetry
 
-    telemetry._otlp_exporter = OTLPSpanExporter(endpoint=OTEL_EXPORTER_OTLP_ENDPOINT, timeout=20)
+    telemetry._otlp_exporter = OTLPSpanExporter(endpoint=telemetry.OTEL_EXPORTER_OTLP_ENDPOINT, timeout=20)
     
-    tracer_provider.add_span_processor(
+    telemetry.tracer_provider.add_span_processor(
         BatchSpanProcessor(telemetry._otlp_exporter, schedule_delay_millis=2000, max_export_batch_size=512, max_queue_size=2048)
     )
 
