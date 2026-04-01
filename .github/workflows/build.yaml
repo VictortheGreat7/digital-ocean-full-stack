@@ -26,6 +26,7 @@ jobs:
               - 'backend/**'
             frontend:
               - 'frontend/**'
+
   reposcan:
     needs: changes
     runs-on: ubuntu-latest
@@ -49,6 +50,7 @@ jobs:
           scanners: 'vuln,secret,misconfig,license'
           severity: 'HIGH,MEDIUM,LOW,UNKNOWN'
           skip-setup-trivy: true
+
   build-backend:
     needs: changes
     if: ${{ needs.changes.outputs.backend == 'true' }}
