@@ -126,11 +126,3 @@ spec:
             preStop:
               exec:
                 command: ["/bin/sh", "-c", "sleep 15"]  # give the app time to finish processing in-flight requests and flush telemetry before SIGTERM
-      #     volumeMounts:
-      #       - name: prometheus-multiproc
-      #         mountPath: /tmp/prometheus_multiproc
-      # volumes:
-      #   - name: prometheus-multiproc
-      #     emptyDir:
-      #       medium: Memory
-      #       sizeLimit: 128Mi
