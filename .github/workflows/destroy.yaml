@@ -10,17 +10,17 @@ jobs:
       contents: write
     steps:
     - name: Checkout this Github repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
     - name: Install doctl
       uses: digitalocean/action-doctl@v2
       with:
         token: ${{ secrets.DO_API_TOKEN }}
     - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v3
+      uses: hashicorp/setup-terraform@v4
       with:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
     - name: Cache Terraform Plugin Dir
-      uses: actions/cache@v3
+      uses: actions/cache@v5
       with:
         path: ${{ github.workspace }}/.terraform.d/plugin-cache
         key: terraform-plugin-cache-${{ runner.os }}-${{ hashFiles('terraform/.terraform.lock.hcl') }}
@@ -67,7 +67,7 @@ jobs:
         done
       working-directory: ./terraform
     - name: Commit Terraform Lock File
-      uses: stefanzweifel/git-auto-commit-action@v5
+      uses: stefanzweifel/git-auto-commit-action@v7
       with:
         commit_message: "chore: update terraform.lock.hcl"
         file_pattern: "terraform/.terraform.lock.hcl"

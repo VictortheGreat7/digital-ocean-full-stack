@@ -25,7 +25,7 @@ spec:
         memory: 512Mi
       limits:
         cpu: 550m
-        memory: 1125Mi
+        memory: 1300Mi
     env:
       - name: BASE_URL
         value: http://kronos-backend-svc.kronos.svc.cluster.local
