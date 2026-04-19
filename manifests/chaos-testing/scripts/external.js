@@ -113,7 +113,7 @@ export default function () {
   if (Math.random() < 0.8) {
     // World Clocks API Endpoint. 80% of traffic, expected to be the most common endpoint hit by users
     group('world clocks endpoint', () => {
-      let res = http.get(`${BASE_URL}/world-clocks`, {
+      let res = http.get(`${BASE_URL}/api/world-clocks`, {
         tags: { name: 'world-clocks', endpoint: 'world-clocks' },
       });
       check(res, {
@@ -125,7 +125,7 @@ export default function () {
   } else if (Math.random() < 0.9) {
     // Timezones Endpoint. 12% of traffic, expected to be common but less than API calls
     group('timezones endpoint', () => {
-      let res = http.get(`${BASE_URL}/timezones`, {
+      let res = http.get(`${BASE_URL}/api/timezones`, {
         tags: { name: 'timezones', endpoint: 'timezones' },
       });
       check(res, {
@@ -138,7 +138,7 @@ export default function () {
     // Current Time API Endpoint. Also 2% of traffic, expected to be common but less than world clocks endpoint
     group('time endpoint', () => {
       let tz = TIMEZONES[Math.floor(Math.random() * TIMEZONES.length)];
-      let res = http.get(`${BASE_URL}/time?timezone=${tz}`, {
+      let res = http.get(`${BASE_URL}/api/time?timezone=${tz}`, {
         tags: { name: 'time', endpoint: 'time' },
       });
       check(res, {

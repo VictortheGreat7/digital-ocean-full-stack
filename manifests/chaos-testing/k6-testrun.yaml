@@ -17,9 +17,9 @@ spec:
         memory: 1300Mi
     env:
       - name: BASE_URL
-        value: http://kronos.mywonderworks.tech
+        value: http://kronos-backend-svc.kronos.svc.cluster.local
       - name: TEST_TYPE
-        value: soak
+        value: load
       - name: K6_OUT
         value: experimental-prometheus-rw
       - name: K6_PROMETHEUS_RW_PUSH_INTERVAL

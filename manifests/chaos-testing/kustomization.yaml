@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: default
+
+resources:
+  - k6-testrun.yaml
+  - kronos-slos-prometheusrule.yaml
+
+configMapGenerator:
+  - name: k6-test-script
+    files:
+      - loadtest.js=scripts/loadtest.js
+
+generatorOptions:
+  disableNameSuffixHash: true
