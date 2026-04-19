@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from time import monotonic
 from threading import Lock, Thread
-from telemetry import tracer
+# from telemetry import tracer
 from datetime import datetime
 from zoneinfo import available_timezones
 from flask import Blueprint, jsonify, request
@@ -47,29 +47,29 @@ def get_timezones():
     now = monotonic()
 
     if cached is not None and now < expires_at:
-        with tracer.start_as_current_span("cache.timezones") as span:
-            span.set_attribute("cache.hit", True)
+        # with tracer.start_as_current_span("cache.timezones") as span:
+        #     span.set_attribute("cache.hit", True)
         return jsonify(cached)
 
-    with tracer.start_as_current_span("cache.timezones") as span:
-        span.set_attribute("cache.hit", False)
+    # with tracer.start_as_current_span("cache.timezones") as span:
+    #     span.set_attribute("cache.hit", False)
 
     with _timezones_lock:
         if _timezones_cache["data"] is not None and now < _timezones_cache["expires_at"]:
             return jsonify(_timezones_cache["data"])
         
-        with tracer.start_as_current_span("all_tz__fetch") as span:
-            try:
-                all_tz = sorted(available_timezones())
-                regions: dict[str, list[str]] = {}
-                for tz in all_tz:
-                    if "/" in tz:
-                        region = tz.split("/")[0]
-                        regions.setdefault(region, []).append(tz)
-            except Exception as exc:
-                span.set_attribute("error", True)
-                span.record_exception(exc)
-                return jsonify({"error": "Failed to fetch timezones"}), 500
+        # with tracer.start_as_current_span("all_tz__fetch") as span:
+        try:
+            all_tz = sorted(available_timezones())
+            regions: dict[str, list[str]] = {}
+            for tz in all_tz:
+                if "/" in tz:
+                    region = tz.split("/")[0]
+                    regions.setdefault(region, []).append(tz)
+        except Exception as exc:
+            # span.set_attribute("error", True)
+            # span.record_exception(exc)
+            return jsonify({"error": "Failed to fetch timezones"}), 500
 
         payload = {
             "count": len(all_tz),
@@ -94,12 +94,12 @@ def get_world_clocks():
     now = monotonic()
 
     if cached is not None and now < expires_at:
-        with tracer.start_as_current_span("cache.world_clocks") as span:
-            span.set_attribute("cache.hit", True)
+        # with tracer.start_as_current_span("cache.world_clocks") as span:
+        #     span.set_attribute("cache.hit", True)
         return jsonify(cached)
     
-    with tracer.start_as_current_span("cache.world_clocks") as span:
-        span.set_attribute("cache.hit", False)
+    # with tracer.start_as_current_span("cache.world_clocks") as span:
+    #     span.set_attribute("cache.hit", False)
 
     with _world_clocks_lock:
         # Double-check: another thread may have refreshed while we waited
@@ -108,16 +108,16 @@ def get_world_clocks():
 
         cities_data: list[dict] = []
 
-        with tracer.start_as_current_span("background_refresh.world_clocks")as span:
-            span.set_attribute("cities_count", len(MAJOR_CITIES))
-            for city, tz_name in MAJOR_CITIES.items():
-                try:
-                    data = format_time_response(tz_name, city=city)
-                    cities_data.append(data)
-                except Exception as exc:
-                    span.set_attribute("error", True)
-                    span.record_exception(exc)
-                    cities_data.append({"city": city, "error": str(exc)})
+        # with tracer.start_as_current_span("background_refresh.world_clocks")as span:
+        #     span.set_attribute("cities_count", len(MAJOR_CITIES))
+        for city, tz_name in MAJOR_CITIES.items():
+            try:
+                data = format_time_response(tz_name, city=city)
+                cities_data.append(data)
+            except Exception as exc:
+                # span.set_attribute("error", True)
+                # span.record_exception(exc)
+                cities_data.append({"city": city, "error": str(exc)})
 
         payload = {"cities": cities_data, "count": len(cities_data)}
         _world_clocks_cache["data"] = payload
