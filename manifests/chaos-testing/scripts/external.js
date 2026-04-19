@@ -6,6 +6,10 @@ import { textSummary } from 'https://jslib.k6.io/k6-summary/0.0.1/index.js';
 
 const BASE_URL = __ENV.BASE_URL || 'http://localhost';
 const TEST_TYPE = __ENV.TEST_TYPE || 'load';
+const ORIGIN_LB_IP = __ENV.ORIGIN_LB_IP || '146.190.197.11';
+const hostsOverride = ORIGIN_LB_IP
+  ? { 'kronos.mywonderworks.tech': ORIGIN_LB_IP }
+  : {};
 
 const TIMEZONES = new SharedArray('timezones', function() {
   return [
@@ -102,6 +106,7 @@ const selectedProfile = profiles[TEST_TYPE];
 
 export let options = {
   ...selectedProfile,
+  hosts: hostsOverride,
   tags: {
     test_type: TEST_TYPE,
   },
