@@ -32,6 +32,14 @@ applications:
       repoURL: https://github.com/VictortheGreat7/digital-ocean-full-stack.git
       targetRevision: main
       path: manifests/kronos-app
+      kustomize:
+        patches:
+          - target:
+              group: gateway.networking.k8s.io
+              version: v1
+              kind: HTTPRoute
+              name: kronos-https-route
+              namespace: kronos
     destination:
       server: https://kubernetes.default.svc
       namespace: kronos
