@@ -10,7 +10,7 @@ resources:
 configMapGenerator:
   - name: k6-test-script
     files:
-      - loadtest.js=scripts/internal.js
+      - loadtest.js=scripts/external.js
 
 generatorOptions:
   disableNameSuffixHash: true
