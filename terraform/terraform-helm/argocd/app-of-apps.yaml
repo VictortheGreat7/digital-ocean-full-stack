@@ -76,8 +76,9 @@ applications:
           - name: applications.kronos.source.kustomize.patches[0].patch
             value: |-
               - op: add
-                path: /spec/hostnames/0
-                value: ${kronos_hostname}
+                path: /spec/hostnames
+                value: 
+                  - ${kronos_hostname}
     destination:
       server: https://kubernetes.default.svc
       namespace: knative-cd
