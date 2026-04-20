@@ -73,19 +73,9 @@ applications:
             value: datadog.clusterName
           - name: applications.datadog.sources[1].helm.parameters[0].value
             value: ${cluster_name}
-          - name: applications.kronos.source.kustomize.patches[0].target.group
-            value: gateway.networking.k8s.io
-          - name: applications.kronos.source.kustomize.patches[0].target.version
-            value: v1
-          - name: applications.kronos.source.kustomize.patches[0].target.kind
-            value: HTTPRoute
-          - name: applications.kronos.source.kustomize.patches[0].target.name
-            value: kronos-https-route
-          - name: applications.kronos.source.kustomize.patches[0].target.namespace
-            value: kronos
           - name: applications.kronos.source.kustomize.patches[0].patch
             value: |-
-              - op: replace
+              - op: add
                 path: /spec/hostnames/0
                 value: ${kronos_hostname}
     destination:
