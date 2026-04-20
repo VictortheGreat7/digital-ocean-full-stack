@@ -173,10 +173,8 @@ The build workflow will:
 
 - [ ] Display all available clocks on the dashboard.
 - [ ] Set up useful alerts and notifications.
-- [ ] Optimize resource usage with auto-scaling.
 - [ ] Secrets are currently stored in GitHub secrets and injected into Terraform, which is not ideal. A better approach would be to use a dedicated secrets manager like Azure Key Vault or AWS Secrets Manager, and integrate it with External Secret Operator on Kubernetes for secure secret management.
 - [ ] Deploy a separate OpenTelemetry Collector to handle trace exporting from the backend.
-- [ ] Investigate external hostname resolution. Latency is significantly higher than when loadtesting against internal svc, which is expected, but the magnitude of the difference is surprising (around 1s). I want to understand if this is due to network routing, load balancer performance, or something else.
 
 ### Lessons
 
@@ -184,3 +182,4 @@ The build workflow will:
 - Redundancy is key for reliability. Running multiple replicas of my PostgreSQL database and using PgBouncer for connection pooling significantly improved the resilience of the application during load testing.
 - It would seem rollout restarts affect latency.
 - Beware of CPU throttling. Enabling telemetry logging into database in a background thread with an aggressive flush interval (polling 20x a second) caused severe CPU starvation. Rollout restarts during load tests also causes CPU throttling as new pods could not start up in time to share the load, which caused latency spikes and request timeouts.
+- External hostname p99 only spiked under heavy load; at 1500 VUs it stayed under 200ms, showing the issue was traffic saturation rather than Cloudflare or the ingress path itself. The external path has more infrastructure hops than the internal service path, so it reaches queueing and CPU contention sooner, which amplifies tail latency even though the backend can still handle the same nominal VU count internally.
