@@ -73,6 +73,11 @@ applications:
             value: datadog.clusterName
           - name: applications.datadog.sources[1].helm.parameters[0].value
             value: ${cluster_name}
+          - name: applications.kronos.source.kustomize.patches[0].patch
+            value: |-
+              - op: replace
+                path: /spec/hostnames/0
+                value: ${kronos_hostname}
     destination:
       server: https://kubernetes.default.svc
       namespace: knative-cd

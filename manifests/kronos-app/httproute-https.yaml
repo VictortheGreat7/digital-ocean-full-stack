@@ -4,8 +4,6 @@ metadata:
   name: kronos-https-route
   namespace: kronos
 spec:
-  hostnames:
-    - kronos.mywonderworks.tech
   parentRefs:
     - name: main-gateway
       namespace: kube-system

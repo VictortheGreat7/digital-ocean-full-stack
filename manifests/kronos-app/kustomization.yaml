@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: kronos
+
+resources:
+  - backend-deployment.yaml
+  - backend-hpa.yaml
+  - backend-monitor.yaml
+  - backend-service.yaml
+  - db-configmap.yaml
+  - db-monitor.yaml
+  - db-pgbouncer.yaml
+  - db-service.yaml
+  - db-statefulset.yaml
+  - frontend-deployment.yaml
+  - frontend-hpa.yaml
+  - frontend-service.yaml
+  - httproute-https.yaml
