@@ -8,6 +8,13 @@ metadata:
     component: backend
     environment: development
 spec:
+  topologySpreadConstraints:
+    - maxSkew: 2
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          component: backend
   strategy:
     type: RollingUpdate
     rollingUpdate:
