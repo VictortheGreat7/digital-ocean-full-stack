@@ -19,12 +19,8 @@ deschedulerPolicy:
               metricsServer: true
             thresholds:
               cpu: 60
-              memory: 60
-              pods: 60
             targetThresholds:
               cpu: 70
-              memory: 70
-              pods: 70
       plugins:
         balance:
           enabled:
