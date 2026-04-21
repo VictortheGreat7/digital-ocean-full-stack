@@ -8,17 +8,6 @@ spec:
   parallelism: 3
   runner:
     image: grafana/k6:latest
-    affinity:
-      # Push K6 pods away from each other so they spread across all 3 nodes evenly
-      podAntiAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-        - labelSelector:
-            matchExpressions:
-            - key: runner
-              operator: In
-              values:
-              - "true"
-          topologyKey: kubernetes.io/hostname
     resources:
       requests:
         cpu: 400m
@@ -30,7 +19,7 @@ spec:
       - name: BASE_URL
         value: https://kronos.mywonderworks.tech
       - name: TEST_TYPE
-        value: soak
+        value: load
       - name: K6_OUT
         value: experimental-prometheus-rw
       - name: K6_PROMETHEUS_RW_PUSH_INTERVAL
