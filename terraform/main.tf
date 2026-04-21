@@ -22,6 +22,24 @@ resource "digitalocean_kubernetes_cluster" "kronos" {
   tags = [digitalocean_tag.kronos.name]
 }
 
+resource "helm_release" "descheduler" {
+  name       = "descheduler"
+  repository = "https://kubernetes-sigs.github.io/descheduler/"
+  chart      = "descheduler"
+
+  namespace        = "kube-system"
+  create_namespace = false
+
+  atomic          = true
+  cleanup_on_fail = true
+
+  values = [file("${path.root}/terraform-helm/descheduler/values.yaml")]
+
+  timeout = 600
+
+  depends_on = [digitalocean_kubernetes_cluster.kronos]
+}
+
 # resource "digitalocean_project" "kronos" {
 #   name        = "kronos"
 #   description = "Kronos World Clock Project"

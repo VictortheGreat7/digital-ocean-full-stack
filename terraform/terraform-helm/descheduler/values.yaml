@@ -1,0 +1,31 @@
+kind: Deployment
+replicas: 3
+leaderElection:
+  enabled: true
+
+deschedulerPolicy:
+  metricsProviders:
+    - source: KubernetesMetrics
+  
+  profiles:
+    - name: RealUsageBalancing
+      pluginConfig:
+        - name: DefaultEvictor
+          args:
+            nodeFit: true
+        - name: LowNodeUtilization
+          args:
+            metricsUtilization:
+              metricsServer: true
+              thresholds:
+                cpu: 60
+                memory: 60
+                pods: 60
+              targetThresholds:
+                cpu: 70
+                memory: 70
+                pods: 70
+      plugins:
+        balance:
+          enabled:
+            - LowNodeUtilization
