@@ -9,7 +9,7 @@ metadata:
     environment: development
 spec:
   topologySpreadConstraints:
-    - maxSkew: 2
+    - maxSkew: 1
       topologyKey: kubernetes.io/hostname
       whenUnsatisfiable: ScheduleAnyway
       labelSelector:
