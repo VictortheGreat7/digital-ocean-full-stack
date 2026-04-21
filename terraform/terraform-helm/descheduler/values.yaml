@@ -1,7 +1,10 @@
-kind: Deployment
-replicas: 3
-leaderElection:
-  enabled: true
+kind: CronJob
+
+cronJob:
+  schedule: "*/5 * * * *"
+  suspend: false
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
 
 deschedulerPolicy:
   metricsProviders:
