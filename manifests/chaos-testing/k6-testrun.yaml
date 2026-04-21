@@ -8,17 +8,17 @@ spec:
   parallelism: 3
   runner:
     image: grafana/k6:latest
-    affinity:
-      # Push K6 pods away from each other so they spread across all 3 nodes evenly
-      podAntiAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-        - labelSelector:
-            matchExpressions:
-            - key: runner
-              operator: In
-              values:
-              - "true"
-          topologyKey: kubernetes.io/hostname
+    # affinity:
+    #   # Push K6 pods away from each other so they spread across all 3 nodes evenly
+    #   podAntiAffinity:
+    #     requiredDuringSchedulingIgnoredDuringExecution:
+    #     - labelSelector:
+    #         matchExpressions:
+    #         - key: runner
+    #           operator: In
+    #           values:
+    #           - "true"
+    #       topologyKey: kubernetes.io/hostname
     resources:
       requests:
         cpu: 400m
