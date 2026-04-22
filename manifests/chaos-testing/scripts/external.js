@@ -41,8 +41,8 @@ const profiles = {
   // Expected Normal Load
   load: {
     stages: [
-      { duration: '3m', target: 1000 }, // Start with 1000 users
-      { duration: '15m', target: 1000 }, // Stay at 1000 users
+      { duration: '3m', target: 1200 }, // Start with 1200 users
+      { duration: '15m', target: 1200 }, // Stay at 1200 users
       { duration: '2m', target: 0 }, // Ramp down to 0 users
     ],
     thresholds: {
