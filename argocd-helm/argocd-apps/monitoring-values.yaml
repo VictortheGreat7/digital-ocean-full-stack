@@ -100,6 +100,33 @@ applications:
         selfHeal: true
       syncOptions:
         - ServerSideApply=true
+    ignoreDifferences:
+    # Ignore non-deterministic telemetry values
+    - group: ""
+      kind: ConfigMap
+      name: datadog-kpi-telemetry-configmap
+      namespace: monitoring
+      jsonPointers:
+        - /data/install_id
+        - /data/install_time
+
+    # Ignore all checksum-based rollout annotations on agent DaemonSet
+    - group: apps
+      kind: DaemonSet
+      name: datadog
+      namespace: monitoring
+      jqPathExpressions:
+        - .spec.template.metadata.annotations
+          | with_entries(select(.key | startswith("checksum/")))
+
+    # Ignore all checksum-based rollout annotations on cluster agent
+    - group: apps
+      kind: Deployment
+      name: datadog-cluster-agent
+      namespace: monitoring
+      jqPathExpressions:
+        - .spec.template.metadata.annotations
+          | with_entries(select(.key | startswith("checksum/")))
     sources:
       - repoURL: https://github.com/VictortheGreat7/digital-ocean-full-stack.git
         targetRevision: main
