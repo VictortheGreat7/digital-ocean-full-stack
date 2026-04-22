@@ -16,6 +16,12 @@ deschedulerPolicy:
         - name: DefaultEvictor
           args:
             nodeFit: true
+            labelSelector:
+              matchExpressions:
+                - key: runner
+                  operator: NotIn
+                  values:
+                    - "true"
         - name: LowNodeUtilization
           args:
             metricsUtilization:
