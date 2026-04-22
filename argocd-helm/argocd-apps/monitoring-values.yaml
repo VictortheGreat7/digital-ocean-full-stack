@@ -64,6 +64,12 @@ applications:
         selfHeal: false
       syncOptions:
         - ServerSideApply=true
+    ignoreDifferences:
+      - group: gateway.networking.k8s.io
+        kind: HTTPRoute
+        jqPathExpressions:
+          - .spec.rules[].backendRefs
+          - .spec.parentRefs[]
     sources:
       - repoURL: https://github.com/VictortheGreat7/digital-ocean-full-stack.git
         targetRevision: main
