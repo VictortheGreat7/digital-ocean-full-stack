@@ -68,11 +68,11 @@ applications:
       - group: gateway.networking.k8s.io
         kind: HTTPRoute
         jqPathExpressions:
-          - .spec.parentRefs[].group
-          - .spec.parentRefs[].kind
-          - .spec.rules[].backendRefs[].group
-          - .spec.rules[].backendRefs[].kind
-          - .spec.rules[].backendRefs[].weight
+          - .spec.parentRefs[]?.group
+          - .spec.parentRefs[]?.kind
+          - .spec.rules[]?.backendRefs[]?.group
+          - .spec.rules[]?.backendRefs[]?.kind
+          - .spec.rules[]?.backendRefs[]?.weight
     sources:
       - repoURL: https://github.com/VictortheGreat7/digital-ocean-full-stack.git
         targetRevision: main
