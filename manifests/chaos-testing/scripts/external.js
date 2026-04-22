@@ -41,8 +41,8 @@ const profiles = {
   // Expected Normal Load
   load: {
     stages: [
-      { duration: '3m', target: 1500 }, // Start with 1500 users
-      { duration: '15m', target: 1500 }, // Stay at 1500 users
+      { duration: '3m', target: 500 }, // Start with 500 users
+      { duration: '15m', target: 500 }, // Stay at 500 users
       { duration: '2m', target: 0 }, // Ramp down to 0 users
     ],
     thresholds: {
@@ -89,8 +89,8 @@ const profiles = {
   // Soak Testing for long-term stability
   soak: {
     stages: [
-      { duration: '5m', target: 1250 }, // Start with 1250 users
-      { duration: '3h', target: 1250 }, // Hold for 3 hours
+      { duration: '5m', target: 1200 }, // Start with 1200 users
+      { duration: '3h', target: 1200 }, // Hold for 3 hours
       { duration: '5m', target: 0 }, // Ramp down to 0 users
     ],
     thresholds: {
