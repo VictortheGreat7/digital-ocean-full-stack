@@ -109,15 +109,22 @@ applications:
       jsonPointers:
         - /data/install_id
         - /data/install_time
+    
+    # Secret (Datadog cluster-agent token changes)
+    - group: ""
+      kind: Secret
+      name: datadog-cluster-agent
+      namespace: monitoring
+      jsonPointers:
+        - /data/token
 
-    # Ignore all checksum-based rollout annotations on agent DaemonSet
+    # Ignore some checksum-based rollout annotations on agent DaemonSet
     - group: apps
       kind: DaemonSet
       name: datadog
       namespace: monitoring
       jqPathExpressions:
-        - .spec.template.metadata.annotations
-          | with_entries(select(.key | startswith("checksum/")))
+        - .spec.template.metadata.annotations["checksum/clusteragent_token"]
 
     # Ignore all checksum-based rollout annotations on cluster agent
     - group: apps
@@ -125,8 +132,7 @@ applications:
       name: datadog-cluster-agent
       namespace: monitoring
       jqPathExpressions:
-        - .spec.template.metadata.annotations
-          | with_entries(select(.key | startswith("checksum/")))
+        - .spec.template.metadata.annotations["checksum/clusteragent_token"]
     sources:
       - repoURL: https://github.com/VictortheGreat7/digital-ocean-full-stack.git
         targetRevision: main
