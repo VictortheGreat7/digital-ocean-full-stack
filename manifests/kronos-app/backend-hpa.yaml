@@ -12,7 +12,7 @@ spec:
     name: kronos-backend
   behavior:
     scaleDown:
-      stabilizationWindowSeconds: 300
+      stabilizationWindowSeconds: 600
       selectPolicy: Min
       policies:
         - type: Pods
