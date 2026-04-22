@@ -17,17 +17,17 @@ spec:
       policies:
         - type: Pods
           value: 1
-          periodSeconds: 600
+          periodSeconds: 300
   metrics:
     - type: Resource
       resource:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: 60
+          averageUtilization: 80
     - type: Resource
       resource:
         name: memory
         target:
           type: Utilization
-          averageUtilization: 60
+          averageUtilization: 80
