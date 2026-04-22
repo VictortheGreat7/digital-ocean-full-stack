@@ -80,7 +80,7 @@ spec:
             - name: DD_RUNTIME_METRICS_RUNTIME_ID_ENABLED
               value: "true"
             - name: DD_PROFILING_ENABLED
-              value: "true"
+              value: "false"
             - name: DB_HOST
               value: kronos-pgbouncer-svc.kronos.svc.cluster.local
             - name: DB_PORT
