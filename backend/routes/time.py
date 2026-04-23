@@ -5,7 +5,7 @@ Time-related endpoints.
 from __future__ import annotations
 
 from time import monotonic
-from threading import Lock, Thread
+from threading import Lock
 from telemetry import tracer
 from datetime import datetime
 from zoneinfo import available_timezones
