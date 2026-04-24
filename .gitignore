@@ -1,4 +1,5 @@
 *.terraform
+vault.tf
 *alerts.tf*
 *dashboard.tf*
 prev_attempts/
