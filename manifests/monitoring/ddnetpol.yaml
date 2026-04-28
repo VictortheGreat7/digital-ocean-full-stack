@@ -6,11 +6,11 @@ metadata:
 spec:
   endpointSelector:
     matchLabels:
-      app.kubernetes.io/instance: datadog
+      app: datadog
   ingress:
   - fromEndpoints:
     - matchLabels:
-        k8s:io.kubernetes.pod.namespace: kronos
+        app: kronos-app
     toPorts:
     - ports:
       - port: "4318"
