@@ -1,4 +1,4 @@
-httproute:
+httpRoute:
   enabled: true
   parentRefs:
     - name: main-gateway
