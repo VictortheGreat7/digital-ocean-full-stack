@@ -9,8 +9,7 @@ spec:
       app: datadog
   ingress:
   - fromEndpoints:
-    - matchLabels:
-        app: kronos-app
+    - {}
     toPorts:
     - ports:
       - port: "4318"
