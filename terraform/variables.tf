@@ -48,7 +48,8 @@ variable "subdomains" {
     "prometheus",
     "alertmanager",
     "grafana",
-    "kronos"
+    "kronos",
+    "headlamp"
   ]
 }
 

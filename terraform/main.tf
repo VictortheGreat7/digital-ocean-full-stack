@@ -40,6 +40,27 @@ resource "helm_release" "descheduler" {
   depends_on = [digitalocean_kubernetes_cluster.kronos]
 }
 
+resource "helm_release" "headlamp" {
+  name             = "headlamp"
+  repository       = "https://kubernetes-sigs.github.io/headlamp/"
+  chart            = "headlamp"
+  namespace        = "kube-system"
+  create_namespace = false
+  atomic           = true
+  cleanup_on_fail  = true
+
+  values = [
+    templatefile("${path.root}/terraform-helm/headlamp/values.yaml", {
+      headlamp_hostname       = "${var.subdomains[5]}.${var.domain}"
+    })
+  ]
+
+  wait    = true
+  timeout = 600
+
+  depends_on = [digitalocean_kubernetes_cluster.kronos]
+}
+
 # resource "digitalocean_project" "kronos" {
 #   name        = "kronos"
 #   description = "Kronos World Clock Project"
