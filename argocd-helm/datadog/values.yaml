@@ -1,4 +1,36 @@
 datadog:
+  networkPolicy:
+    create: true
+    flavor: cilium
+
+agents:
+  containers:
+    agent:
+      resources:
+        limits:
+          cpu: 200m
+          memory: 256Mi
+    traceAgent:
+      resources:
+        limits:
+          cpu: 100m
+          memory: 200Mi
+    otelAgent:
+      resources:
+        limits:
+          cpu: 100m
+          memory: 200Mi
+    processAgent:
+      resources:
+        limits:
+          cpu: 100m
+          memory: 200Mi
+    systemProbe:
+      resources:
+        limits:
+          cpu: 300m
+          memory: 400Mi
+
   apiKeyExistingSecret: datadog-secret
   appKeyExistingSecret: datadog-secret
   site: us5.datadoghq.com
