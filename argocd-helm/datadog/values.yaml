@@ -1,7 +1,7 @@
 datadog:
-  networkPolicy:
-    create: true
-    flavor: cilium
+  # networkPolicy:
+  #   create: true
+  #   flavor: cilium
 
   apiKeyExistingSecret: datadog-secret
   appKeyExistingSecret: datadog-secret
