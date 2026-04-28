@@ -10,7 +10,7 @@ spec:
   ingress:
   - fromEndpoints:
     - matchLabels:
-        app: kronos-app
+        k8s:io.kubernetes.pod.namespace: kronos
     toPorts:
     - ports:
       - port: "4318"
