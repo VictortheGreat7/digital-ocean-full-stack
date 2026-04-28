@@ -4,7 +4,7 @@ namespace: monitoring
 
 resources:
   - otel-configmap.yaml
-  - ddnetpol.yaml
+  # - ddnetpol.yaml
 
 configMapGenerator:
   - name: grafana-dashboard-k6
