@@ -1,0 +1,21 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-kronos-to-datadog
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/instance: datadog
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: kronos-app
+    toPorts:
+    - ports:
+      - port: "4318"
+        protocol: TCP
+      - port: "8126"
+        protocol: TCP
+      - port: "8125"
+        protocol: UDP
