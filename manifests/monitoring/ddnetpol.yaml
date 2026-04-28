@@ -1,16 +1,16 @@
-apiVersion: cilium.io/v2
-kind: CiliumNetworkPolicy
-metadata:
-  name: allow-kronos-to-datadog
-  namespace: monitoring
-spec:
-  endpointSelector:
-    matchLabels:
-      app: datadog
-  ingress:
-  - fromEndpoints:
-    - {}
-    toPorts:
-    - ports:
-      - port: "4318"
-        protocol: TCP
+# apiVersion: cilium.io/v2
+# kind: CiliumNetworkPolicy
+# metadata:
+#   name: allow-kronos-to-datadog
+#   namespace: monitoring
+# spec:
+#   endpointSelector:
+#     matchLabels:
+#       app: datadog
+#   ingress:
+#   - fromEndpoints:
+#     - {}
+#     toPorts:
+#     - ports:
+#       - port: "4318"
+#         protocol: TCP
