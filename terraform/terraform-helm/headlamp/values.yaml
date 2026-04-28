@@ -3,6 +3,5 @@ httproute:
   parentRefs:
     - name: main-gateway
       namespace: kube-system
-      sectionName: https
   hostnames:
     - ${headlamp_hostname}
