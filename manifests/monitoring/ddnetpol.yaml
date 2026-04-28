@@ -15,7 +15,3 @@ spec:
     - ports:
       - port: "4318"
         protocol: TCP
-      - port: "8126"
-        protocol: TCP
-      - port: "8125"
-        protocol: UDP
