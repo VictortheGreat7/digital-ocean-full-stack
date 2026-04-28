@@ -62,6 +62,7 @@ applications:
     syncPolicy:
       automated:
         selfHeal: false
+        prune: true
       syncOptions:
         - ServerSideApply=true
     ignoreDifferences:
@@ -98,6 +99,7 @@ applications:
     syncPolicy:
       automated:
         selfHeal: true
+        prune: true
       syncOptions:
         - ServerSideApply=true
     ignoreDifferences:
