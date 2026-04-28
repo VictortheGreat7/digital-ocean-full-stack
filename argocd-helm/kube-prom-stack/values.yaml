@@ -1,4 +1,25 @@
+prometheusOperator:
+  resources:
+    limits:
+      cpu: 200m
+      memory: 200Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
+  prometheusConfigReloader:
+    resources:
+      limits:
+        cpu: 200m
+        memory: 50Mi
+      requests:
+        cpu: 25m
+        memory: 50Mi
+  # networkPolicy:
+  #   enabled: true
+
 prometheus:
+  # networkPolicy:
+  #   enabled: true
   prometheusSpec:
     resources:
       requests:
@@ -33,6 +54,8 @@ prometheus:
 
 alertmanager:
   enabled: true
+  # networkPolicy:
+  #   enabled: true
   alertmanagerSpec:
     resources:
       requests:
@@ -62,6 +85,8 @@ alertmanager:
             value: /
 
 grafana:
+  # networkPolicy:
+  #   enabled: true
   persistence:
     enabled: true
     storageClassName: do-block-storage
