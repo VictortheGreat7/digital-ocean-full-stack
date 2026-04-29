@@ -14,6 +14,6 @@ output "doks_cluster_id" {
 }
 
 output "tokenValue" {
-  value = kubernetes_token_request_v1.headlamp-admin.token
+  value     = kubernetes_token_request_v1.headlamp-admin.token
   sensitive = true
 }

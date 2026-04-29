@@ -48,6 +48,8 @@ resource "helm_release" "parent_app" {
     helm_release.external_dns,
     kubernetes_secret_v1.postgres_pass,
     kubernetes_secret_v1.pgbouncer_auth,
-    kubernetes_secret_v1.datadog_secret
+    kubernetes_secret_v1.datadog_secret,
+    helm_release.descheduler,
+    kubernetes_token_request_v1.headlamp-admin
   ]
 }

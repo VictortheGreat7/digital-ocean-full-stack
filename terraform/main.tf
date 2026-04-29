@@ -42,7 +42,7 @@ resource "helm_release" "descheduler" {
 
 resource "kubernetes_service_account_v1" "headlamp-admin" {
   metadata {
-    name = "headlamp-admin"
+    name      = "headlamp-admin"
     namespace = "kube-system"
   }
 
@@ -78,7 +78,7 @@ resource "helm_release" "headlamp" {
 
   values = [
     templatefile("${path.root}/terraform-helm/headlamp/values.yaml", {
-      headlamp_hostname       = "${var.subdomains[5]}.${var.domain}"
+      headlamp_hostname = "${var.subdomains[5]}.${var.domain}"
     })
   ]
 
@@ -90,7 +90,7 @@ resource "helm_release" "headlamp" {
 
 resource "kubernetes_token_request_v1" "headlamp-admin" {
   metadata {
-    name = kubernetes_service_account_v1.headlamp-admin.metadata.0.name
+    name      = kubernetes_service_account_v1.headlamp-admin.metadata.0.name
     namespace = kubernetes_service_account_v1.headlamp-admin.metadata.0.namespace
   }
 
