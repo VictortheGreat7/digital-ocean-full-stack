@@ -40,6 +40,42 @@ resource "helm_release" "descheduler" {
   depends_on = [digitalocean_kubernetes_cluster.kronos]
 }
 
+resource "kubernetes_service_account_v1" "headlamp-admin" {
+  metadata {
+    name = "headlamp-admin"
+  }
+}
+
+resource "kubernetes_cluster_role_binding_v1" "headlamp-admin" {
+  metadata {
+    name = "headlamp-admin"
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = "cluster-admin"
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = "headlamp-admin"
+    namespace = "kube-system"
+  }
+}
+
+resource "kubernetes_token_request_v1" "headlamp-admin" {
+  metadata {
+    name = kubernetes_service_account_v1.headlamp-admin.metadata.0.name
+  }
+  spec {
+    bound_object_ref {
+      api_version = "v1"
+      kind        = "ServiceAccount"
+      name        = kubernetes_service_account_v1.headlamp-admin.metadata.0.name
+      namespace   = "kube-system"
+    }
+  }
+}
+
 resource "helm_release" "headlamp" {
   name             = "headlamp"
   repository       = "https://kubernetes-sigs.github.io/headlamp/"
