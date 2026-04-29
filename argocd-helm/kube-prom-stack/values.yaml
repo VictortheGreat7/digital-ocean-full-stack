@@ -9,11 +9,11 @@ prometheusOperator:
   prometheusConfigReloader:
     resources:
       limits:
-        cpu: 200m
+        cpu: 5m
         memory: 50Mi
       requests:
-        cpu: 25m
-        memory: 50Mi
+        cpu: 1m
+        memory: 25Mi
   # networkPolicy:
   #   enabled: true
 
@@ -93,18 +93,18 @@ grafana:
     size: 10Gi
   resources:
     limits:
-      cpu: "40m"
+      cpu: "50m"
       memory: "384Mi"
     requests:
       cpu: "20m"
-      memory: "256Mi"
+      memory: "200Mi"
   sidecar:
     resources:
       limits:
         cpu: "40m"
         memory: "160Mi"
       requests:
-        cpu: "20m"
+        cpu: "5m"
         memory: "96Mi"
     dashboards:
       enabled: true

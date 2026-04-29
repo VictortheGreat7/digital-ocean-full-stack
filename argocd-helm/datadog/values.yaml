@@ -95,22 +95,22 @@ agents:
     traceAgent:
       resources:
         limits:
-          cpu: 100m
+          cpu: 50m
           memory: 200Mi
     otelAgent:
       resources:
         limits:
-          cpu: 100m
+          cpu: 50m
           memory: 200Mi
     processAgent:
       resources:
         limits:
-          cpu: 100m
+          cpu: 50m
           memory: 200Mi
     systemProbe:
       resources:
         limits:
-          cpu: 300m
+          cpu: 50m
           memory: 400Mi
 
 operator:
