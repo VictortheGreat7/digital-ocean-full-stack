@@ -92,7 +92,9 @@ resource "kubernetes_token_request_v1" "headlamp-admin" {
   metadata {
     name = kubernetes_service_account_v1.headlamp-admin.metadata.0.name
   }
-  spec {}
+  spec {
+    audiences       = ["https://kubernetes.default.svc"]
+  }
 
   depends_on = [helm_release.headlamp]
 }
