@@ -44,6 +44,8 @@ resource "kubernetes_service_account_v1" "headlamp-admin" {
   metadata {
     name = "headlamp-admin"
   }
+
+  depends_on = [digitalocean_kubernetes_cluster.kronos]
 }
 
 resource "kubernetes_cluster_role_binding_v1" "headlamp-admin" {
@@ -60,19 +62,8 @@ resource "kubernetes_cluster_role_binding_v1" "headlamp-admin" {
     name      = "headlamp-admin"
     namespace = "kube-system"
   }
-}
 
-resource "kubernetes_token_request_v1" "headlamp-admin" {
-  metadata {
-    name = kubernetes_service_account_v1.headlamp-admin.metadata.0.name
-  }
-  spec {
-    bound_object_ref {
-      api_version = "v1"
-      kind        = "ServiceAccount"
-      name        = kubernetes_service_account_v1.headlamp-admin.metadata.0.name
-    }
-  }
+  depends_on = [kubernetes_service_account_v1.headlamp-admin]
 }
 
 resource "helm_release" "headlamp" {
@@ -93,7 +84,22 @@ resource "helm_release" "headlamp" {
   wait    = true
   timeout = 600
 
-  depends_on = [digitalocean_kubernetes_cluster.kronos]
+  depends_on = [kubernetes_cluster_role_binding_v1.headlamp-admin]
+}
+
+resource "kubernetes_token_request_v1" "headlamp-admin" {
+  metadata {
+    name = kubernetes_service_account_v1.headlamp-admin.metadata.0.name
+  }
+  spec {
+    bound_object_ref {
+      api_version = "v1"
+      kind        = "ServiceAccount"
+      name        = kubernetes_service_account_v1.headlamp-admin.metadata.0.name
+    }
+  }
+
+  depends_on = [helm_release.headlamp]
 }
 
 # resource "digitalocean_project" "kronos" {
