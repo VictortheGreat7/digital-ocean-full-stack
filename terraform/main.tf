@@ -71,7 +71,6 @@ resource "kubernetes_token_request_v1" "headlamp-admin" {
       api_version = "v1"
       kind        = "ServiceAccount"
       name        = kubernetes_service_account_v1.headlamp-admin.metadata.0.name
-      namespace   = "kube-system"
     }
   }
 }
