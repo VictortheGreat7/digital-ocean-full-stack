@@ -43,6 +43,7 @@ resource "helm_release" "descheduler" {
 resource "kubernetes_service_account_v1" "headlamp-admin" {
   metadata {
     name = "headlamp-admin"
+    namespace = "kube-system"
   }
 
   depends_on = [digitalocean_kubernetes_cluster.kronos]
@@ -91,13 +92,7 @@ resource "kubernetes_token_request_v1" "headlamp-admin" {
   metadata {
     name = kubernetes_service_account_v1.headlamp-admin.metadata.0.name
   }
-  spec {
-    bound_object_ref {
-      api_version = "v1"
-      kind        = "ServiceAccount"
-      name        = kubernetes_service_account_v1.headlamp-admin.metadata.0.name
-    }
-  }
+  spec {}
 
   depends_on = [helm_release.headlamp]
 }
