@@ -5,3 +5,6 @@ httpRoute:
       namespace: kube-system
   hostnames:
     - ${headlamp_hostname}
+
+clusterRoleBinding:
+  create: false
