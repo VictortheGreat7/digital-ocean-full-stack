@@ -203,11 +203,11 @@ jobs:
         env:
           TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
         run: |
+          set -e
+
           mkdir -p ${{ github.workspace }}/.terraform.d/plugin-cache
           echo "plugin_cache_dir = \"${{ github.workspace }}/.terraform.d/plugin-cache\"" > ~/.terraformrc
 
-          terraform init
-          terraform validate
 
           cat <<EOF > terraform.tfvars.json
           {
@@ -220,6 +220,8 @@ jobs:
           }
           EOF
 
+          terraform init
+          terraform validate
           terraform apply --auto-approve
 
           DOKS_ID=$(terraform output -raw doks_cluster_id)
