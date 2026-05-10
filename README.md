@@ -287,6 +287,8 @@ terraform output -raw doks_connect
 doctl kubernetes cluster kubeconfig save YOUR_CLUSTER_NAME
 ```
 
+![Cluster Authentication](./screenshots/kubeconfig.png)
+
 #### Step 2: UI URL Access
 
 - You can get all relevant URLs (application, ArgoCD UI, Headlamp UI, Grafana UI, Prometheus UI, Alertmanager UI) with the following command:
@@ -294,6 +296,8 @@ doctl kubernetes cluster kubeconfig save YOUR_CLUSTER_NAME
 ```bash
 kubectl get httproutes -A
 ```
+
+![URLs](./screenshots/urls.png)
 
 #### Step 3: ArgoCD UI Access
 
@@ -303,11 +307,19 @@ kubectl get httproutes -A
 kubectl get secret argocd-initial-admin-secret -n knative-cd -o jsonpath="{.data.password}" | base64 -d; echo
 ```
 
+![ArgoCD Initial Password](./screenshots/argo2.png)
+
 - The default username is `admin`. You can log in to the ArgoCD UI with these credentials and the URL retrieved from the previous step.
+
+![ArgoCD Login](./screenshots/argo.png)
 
 - After logging in, you will be able see resources being deployed in real time and the status of the application.
 
+![ArgoCD UI](./screenshots/argo3.png)
+
 - Once they are all healthy, [log in to the Grafana UI](#step-5-grafana-ui-access) to see useful dashboards. For example, to visualize the k6 load test you can [import](https://grafana.com/docs/grafana/latest/visualizations/dashboards/build-dashboards/import-dashboards/) the dashboard [here](https://grafana.com/grafana/dashboards/21542-k6-prome-load-test/).
+
+![Grafana k6 Load Test Dashboard](./screenshots/grafana3.png)
 
 #### Step 4: Headlamp UI Access
 
@@ -323,14 +335,16 @@ terraform output -raw tokenValue
 kubectl create token headlamp-admin -n kube-system
 ```
 
+![Headlamp Login](./screenshots/headlamp.png)
+
 #### Step 5: Grafana UI Access
 
 - The initial admin password for Grafana is `admin`. You can log in to the Grafana UI with this password and the URL retrieved from [Step 2](#step-2-ui-url-access). After logging in, you will be prompted to change the password.
 
-## 📸 Screenshots/Demo
+![Grafana Login](./screenshots/grafana.png)
+![Grafana Password Change](./screenshots/grafana2.png)
 
-![Architecture Diagram](./screenshots/architecture.png)  
-![Grafana Dashboard](./screenshots/grafana.png)
+<!-- ## 📸 Screenshots/Demo -->
 
 ## 🔮 Future Improvements & Lessons Learned
 
