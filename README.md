@@ -38,27 +38,48 @@ Here's a breakdown of the key technologies, grouped for clarity, with rationale 
 - **Monitoring:** Dashboards for metrics, logs, and traces.
 - **SSL Ingress Encryption** Secure HTTPS access with auto-renewing certificates.
 - **Chaos Engineering:** Chaos testing to simulate outages and verify resilience.
-- **Incident Management:** Read my [Post-Mortem: Severe Latency During Stress Test](./docs/post-mortems/2026-02-25-load-test-failure.md) to see how I analyze, document, and learn from system failures.
+- **Incident Management:** Read my [Post-Mortem: Severe Latency During Stress Test](./docs/post-mortems/2026-04-29-spike-test-errors.md) to see how I analyze, document, and learn from system failures.
 
-## 🏗️ Getting Started: How to Spin Up the Project?
+## 🏗️ Getting Started: How to Spin Up the Kronos Project
 
-Follow these steps to set up locally or deploy to Digital Ocean. Prerequisites: Docker, Node.js, Python, Terraform, kubectl, Helm, and accounts/API keys for Digital Ocean, Docker Hub, Cloudflare, and GitHub.
+Fork this repo and clone the fork in your local environment. Then, follow these steps to set up locally or deploy on Digital Ocean.
+
+**Tools and Prerequisites:**
+
+- Install Node.js and Python only, if you only want to test locally.
+- Install Docker too, if your want to test locally with containers.
+- In addition to that, install GitHub CLI, Terraform, kubectl and Helm if you want to test with manual or automated cloud deployment. Get accounts and API keys for Terraform Cloud, Digital Ocean, Docker Hub, Cloudflare, and GitHub. Check [Required Values/Secrets](#required-valuessecrets) for details.
+
+**Required Tokens/Secrets**:
+
+- `TF_API_TOKEN`: [Terraform API token](https://developer.hashicorp.com/terraform/cloud-docs/users-teams-organizations/api-tokens) (if using HCP for remote state)
+- `DOCKER_USERNAME`: [Docker Hub](https://docs.docker.com/accounts/create-account/) username
+- `DOCKER_PASSWORD`: [Docker Hub](https://docs.docker.com/accounts/create-account/) password
+- `DO_API_TOKEN`: [Digital Ocean API](https://docs.digitalocean.com/reference/api/create-personal-access-token/) token with appropriate permissions
+- `CLOUDFLARE_TOKEN`: [Cloudflare API token](https://developers.cloudflare.com/api/tokens/create/) with DNS edit permissions
+- `CLOUDFLARE_ZONE_ID`: [Cloudflare Zone ID](https://developers.cloudflare.com/fundamentals/account/find-account-and-zone-ids/) for your domain
+- `DATADOG_API_KEY`: [Datadog API key](https://docs.datadoghq.com/account_management/api-app-keys/#create-an-api-key-and-an-application-key)
+- `DATADOG_APP_KEY`: [Datadog Application key](https://docs.datadoghq.com/account_management/api-app-keys/#create-an-api-key-and-an-application-key)
+- `POSTGRES_PASS`: A strong password for the PostgreSQL database
 
 ### Running the Application Locally
 
 ```bash
-# Backend
+# Run Backend
 cd backend
 pip install -r requirements.txt
 flask run
+```
 
-# Frontend (in a new terminal)
+```bash
+# Run Frontend (in a new terminal)
 cd frontend
 npm install
 npm run dev
 ```
 
-Access the application
+#### Access the application
+
 Frontend: `http://localhost:5173` (or the port shown in terminal)
 API: `http://localhost:5000/world-clocks`
 
@@ -69,16 +90,22 @@ API: `http://localhost:5000/world-clocks`
 cd backend
 docker build -t kronos:backend .
 docker run -d -p 5000:5000 --name kronos-backend-local kronos:backend
+```
 
+```bash
 # Build the frontend image
 cd frontend
 docker build -t kronos:frontend .
 docker run -d -p 5173:80 --name kronos-frontend-local kronos:frontend
+```
 
+```bash
 # Test the endpoint
 curl http://localhost:5000/world-clocks
 # and access http://localhost:80 in your browser to check frontend
+```
 
+```bash
 # Clean up
 docker stop kronos-frontend-local
 docker stop kronos-backend-local
@@ -88,16 +115,36 @@ docker rm kronos-backend-local
 
 ### Manual Cloud Deployment
 
-```bash
-# Login to Digital Ocean
-doctl auth init -t YOUR_DIGITAL_OCEAN_API_TOKEN
+#### Step 1: Authenticate CLIs and Set Terraform Variables
 
-# Login to Terraform CLI (if using HCP for remote state). Edit the remote state configuration in terraform/backend.tf to your organization and workspace name too
+- Login to Digital Ocean CLI with your API token.
+
+```bash
+doctl auth init -t YOUR_DIGITAL_OCEAN_API_TOKEN
+```
+
+- Login to Terraform CLI (if you decide to use Terraform Cloud for the remote state) by running this and following the prompts.
+
+```bash
 terraform login
 ```
 
+- Edit the remote state configuration in [terraform/backend.tf](./terraform/backend.tf) with your Terraform Cloud [organization](https://developer.hashicorp.com/terraform/tutorials/cloud/cloud-sign-up#create-an-organization) and [workspace](https://developer.hashicorp.com/terraform/tutorials/cloud/projects) names.
+
+```tf
+terraform {
+  backend "remote" {
+    organization = "YOUR_TERRAFORM_CLOUD_ORGANIZATION_NAME"
+    workspaces {
+      name = "YOUR_TERRAFORM_CLOUD_WORKSPACE_NAME"
+    }
+  }
+}
+```
+
+- Set Terraform variables in [terraform/terraform.tfvar.json](./terraform/terraform.tfvar.json) with the appropriate values.
+
 ```json
-// Update Terraform variables in terraform/terraform.tfvar.json
 {
    "region": "YOUR_DESIRED_DIGITAL_OCEAN_REGION",
    "do_token": "YOUR_DIGITAL_OCEAN_API_TOKEN",
@@ -106,53 +153,114 @@ terraform login
    "datadog_api_key": "YOUR_DATADOG_API_KEY",
    "datadog_app_key": "YOUR_DATADOG_APP_KEY",
    "postgres_pass": "YOUR_CHOSEN_POSTGRES_PASSWORD",
-   "subdomain": "YOUR_DESIRED_SUBDOMAIN", // e.g. "kronos" if you want kronos.yourdomain.com
-   "domain": "YOUR_DOMAIN", // e.g. "mywonderworks.tech"
+   "domain": "YOUR_DOMAIN", // e.g. "example.dev"
    "email": "YOUR_EMAIL_FOR_ACME_CERTS"
 }
 ```
 
-### Automated Cloud Deployment
+#### Step 2: Build and Push Docker Images
+
+- Build and push the backend and frontend Docker images to Docker Hub. Make sure to replace the image names with your own in the respective Dockerfiles and Terraform configuration.
 
 ```bash
-# Login to GitHub CLI using the browser. Authenticate and copy one-time OAuth code to clipboard
-gh auth login --web --clipboard
+# Build and push backend image
+cd CLONED_REPO_DIRECTORY/backend
+docker build -t YOUR_DOCKERHUB_USERNAME/kronos-backend:latest .
+docker push YOUR_DOCKERHUB_USERNAME/kronos-backend:latest
 
-# Set up the required GitHub repository secrets. You can use the provided script in the terraform/scripts
-cd terraform/scripts
-chmod +x gh_secret.sh
+# Build and push frontend image
+cd CLONED_REPO_DIRECTORY/frontend
+docker build -t YOUR_DOCKERHUB_USERNAME/kronos-frontend:latest .
+docker push YOUR_DOCKERHUB_USERNAME/kronos-frontend:latest
 ```
 
-**Required Values/Secrets**:
+#### Step 3: Update Image References in `kronos-app` Manifest Files
 
-- `TF_API_TOKEN`: [Terraform API token](https://developer.hashicorp.com/terraform/cloud-docs/users-teams-organizations/api-tokens) (if using HCP for remote state)
-- `DOCKER_USERNAME`: Docker Hub username
-- `DOCKER_PASSWORD`: Docker Hub password
-- `DO_API_TOKEN`: Digital Ocean API token with appropriate permissions
-- `CLOUDFLARE_TOKEN`: [Cloudflare API token](https://developers.cloudflare.com/api/tokens/create/) with DNS edit permissions
-- `CLOUDFLARE_ZONE_ID`: [Cloudflare Zone ID](https://developers.cloudflare.com/fundamentals/account/find-account-and-zone-ids/) for your domain
-- `DATADOG_API_KEY`: [Datadog API key](https://docs.datadoghq.com/account_management/api-app-keys/#create-an-api-key-and-an-application-key)
-- `DATADOG_APP_KEY`: [Datadog Application key](https://docs.datadoghq.com/account_management/api-app-keys/#create-an-api-key-and-an-application-key)
-- `POSTGRES_PASS`: A strong password for the PostgreSQL database
+- Update the Kubernetes manifest files in [manifests/kronos-app](./manifests/kronos-app) to reference your Docker Hub images.
+
+```yaml
+# Example for backend deployment manifest
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kronos-backend
+  namespace: kronos
+spec:
+  template:
+    spec:
+      containers:
+        - name: backend
+          image: YOUR_DOCKERHUB_USERNAME/kronos-backend:latest
+```
+
+#### Step 4: Provision Infrastructure with Terraform
+
+- Run Terraform commands to provision the infrastructure on Digital Ocean.
 
 ```bash
-# Edit the script with your secret values first
+cd CLONED_REPO_DIRECTORY/terraform
+terraform init
+terraform apply
+```
+
+#### Step 5: Install Metrics Server with doctl
+
+- After the cluster is provisioned, install the Kubernetes Metrics Server using doctl.
+
+```bash
+DOKS_ID=$(terraform output -raw doks_cluster_id)
+doctl kubernetes 1-click install $DOKS_ID --1-clicks metrics-server
+```
+
+**Note:** This is important for the Horizontal Pod Autoscalers to function properly.
+
+### Automated Cloud Deployment
+
+#### Step 1: Authenticate CLIs and Set GitHub Repository Secrets
+
+- Follow [Step 1](#step-1-authenticate-clis-and-set-terraform-variables) in the [manual deployment instructions](#manual-cloud-deployment) to authenticate CLIs but leave the Terraform variables in `terraform.tfvar.json` empty or with placeholder values.
+
+- Authenticate into GitHub CLI by running this and following the prompts.
+
+```bash
+gh auth login --web
+```
+
+- Set up the required GitHub repository secrets. You can use the provided script in the `terraform/scripts` directory.
+
+- Edit the [script](./terraform/scripts/gh_secret.sh) with your secret values and run it to set the needed secrets in your GitHub repository.
+
+```bash
+cd terraform/scripts
+
+chmod +x gh_secret.sh
 ./gh_secret.sh
 ```
 
+#### Step 2: Configure GitHub Actions Workflow and Push Changes
+
+- Set workflow trigger to on push to main branch to enable automated deployment on push. You can find the workflows in [.github/workflows/](./.github/workflows/).
+
+- Ensure only one workflow is triggered on push to main at a time, to avoid conflicts. The trigger should look like this:
+
 ```yaml
-# To deploy, uncomment or add on-push trigger in .github/workflows/build.yaml and ensure other workflows will not trigger on push (ditto for .github/workflows/integrate.yaml after the first build).
 on:
   push:
     branches:
       - main
 ```
 
+- [build.yaml](./.github/workflows/build.yaml) is for building from scratch and deploying to a new cluster, while [integrate.yaml](./.github/workflows/integrate.yaml) is for subsequent changes to the cluster after it has been provisioned. You can choose to use either based on your needs.
+
+- Push your changes to trigger the GitHub Actions workflow.
+
+- Make sure you remote origin url is set to the forked GitHub repo before pushing.
+
 ```bash
-# Push your changes to trigger the GitHub Actions workflow
 git add .
 git commit -m "[YOUR COMMIT MESSAGE]"
-# Make sure you forked the repo and set the remote to your fork before pushing
+
+git remote set-url origin https://github.com/YOUR_USERNAME/YOUR_FORKED_REPO.git
 git push origin main
 ```
 
@@ -160,7 +268,64 @@ The build workflow will:
 
 1. Check for changes in the backend and frontend directories to determine if new Docker images need to be built and pushed to Docker Hub
 2. If there are changes, build, test and push new Docker images to Docker Hub
-3. Provision a Digital Ocean Kubernetes cluster with helm releases for Cert-Manager, Gateway, Kubernetes Reflector, External DNS and ArgoCD applictions using Terraform
+3. Provision a Digital Ocean Kubernetes cluster with helm releases for Cert-Manager, Gateway, Kubernetes Reflector, External DNS, Headlamp and ArgoCD applications using Terraform
+
+### Authentication and Access
+
+#### Step 1: Cluster Authentication
+
+- After completing a manual or automated deployment successfully, a doctl command for authentication to the cluster will be provided as a terraform output.
+
+```bash
+# Retrieve the command by running
+terraform output -raw doks_connect
+```
+
+- Copy and run the command in your terminal to authenticate kubectl with the cluster. The command will look like this:
+
+```bash
+doctl kubernetes cluster kubeconfig save YOUR_CLUSTER_NAME
+```
+
+#### Step 2: UI URL Access
+
+- You can get all relevant URLs (application, ArgoCD UI, Headlamp UI, Grafana UI, Prometheus UI, Alertmanager UI) with the following command:
+
+```bash
+kubectl get httproutes -A
+```
+
+#### Step 3: ArgoCD UI Access
+
+- The initial admin password for ArgoCD will be generated as a secret. You can retrieve it with the following command:
+
+```bash
+kubectl get secret argocd-initial-admin-secret -n knative-cd -o jsonpath="{.data.password}" | base64 -d; echo
+```
+
+- The default username is `admin`. You can log in to the ArgoCD UI with these credentials and the URL retrieved from the previous step.
+
+- After logging in, you will be able see resources being deployed in real time and the status of the application.
+
+- Once they are all healthy, [log in to the Grafana UI](#step-5-grafana-ui-access) to see useful dashboards. For example, to visualize the k6 load test you can [import](https://grafana.com/docs/grafana/latest/visualizations/dashboards/build-dashboards/import-dashboards/) the dashboard [here](https://grafana.com/grafana/dashboards/21542-k6-prome-load-test/).
+
+#### Step 4: Headlamp UI Access
+
+- You'll be asked for a token when you access the Headlamp UI. You can retrieve a token with the following command:
+
+```bash
+terraform output -raw tokenValue
+```
+
+- If it doesn't work, you can create a new token with the following command:
+
+```bash
+kubectl create token headlamp-admin -n kube-system
+```
+
+#### Step 5: Grafana UI Access
+
+- The initial admin password for Grafana is `admin`. You can log in to the Grafana UI with this password and the URL retrieved from [Step 2](#step-2-ui-url-access). After logging in, you will be prompted to change the password.
 
 ## 📸 Screenshots/Demo
 
