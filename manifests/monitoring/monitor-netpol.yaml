@@ -21,14 +21,26 @@ spec:
   - fromEntities:
     - world
     icmps:
-    - family: IPv4
-      type: 8
+    - fields:
+      - family: IPv4
+        type: 8
   - fromEndpoints:
     - matchExpressions:
       - key: k8s:io.kubernetes.pod.namespace
         operator: Exists
-    - matchLabels: {}
-    fromEntities:
+    toPorts:
+    - ports:
+      - port: '4317'
+        protocol: TCP
+      - port: '4318'
+        protocol: TCP
+      - port: '8125'
+        protocol: UDP
+      - port: '8126'
+        protocol: TCP
+      - port: '5555'
+        protocol: TCP
+  - fromEntities:
     - host
     - remote-node
     - cluster
