@@ -22,6 +22,24 @@ resource "digitalocean_kubernetes_cluster" "kronos" {
   tags = [digitalocean_tag.kronos.name]
 }
 
+resource "helm_release" "metrics-server" {
+  name       = "metrics-server"
+  repository = "https://kubernetes-sigs.github.io/metrics-server/"
+  chart      = "metrics-server"
+
+  namespace        = "metrics-server"
+  create_namespace = true
+
+  atomic          = true
+  cleanup_on_fail = true
+
+  values = [file("${path.root}/terraform-helm/metrics-server/values.yaml")]
+
+  timeout = 600
+
+  depends_on = [digitalocean_kubernetes_cluster.kronos]
+}
+
 resource "helm_release" "descheduler" {
   name       = "descheduler"
   repository = "https://kubernetes-sigs.github.io/descheduler/"
