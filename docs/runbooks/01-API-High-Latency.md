@@ -8,8 +8,8 @@ This alert triggers when the 99th percentile (p99) latency for the backend API e
 
 ## 📊 Dashboards & Links
 
-* [Datadog APM Dashboard](https://www.google.com/search?q=link-to-your-datadog)
-* [Datadog Continuous Profiler](https://www.google.com/search?q=link-to-datadog-profiles) *(Crucial for diagnosing Event Loop blocks)*
+* [Datadog APM Dashboard](http://us5.datadoghq.com/)
+* [Datadog Continuous Profiler](http://us5.datadoghq.com/) *(Crucial for diagnosing Event Loop blocks)*
 * [ArgoCD UI](https://www.google.com/search?q=link-to-argocd)
 * [NGINX / Ingress Controller Metrics](https://www.google.com/search?q=link-to-ingress-dashboard)
 
