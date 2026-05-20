@@ -1,9 +1,9 @@
 name: Subsequent Builds and Deployments
 
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
   workflow_dispatch:
 
 jobs:
@@ -227,7 +227,6 @@ jobs:
           EOF
 
           terraform init
-          terraform providers
           terraform validate
 
           terraform apply -auto-approve
