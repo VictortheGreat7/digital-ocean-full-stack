@@ -13,9 +13,7 @@ spec:
     - fromEntities:
         - world
       icmps:
-      - fields:
-        - type: 8
-          family: IPv4
+      - {}
     # Allow inbound telemetry from any pod across any namespace + host/remote-node
     - fromEndpoints:
       - matchExpressions:
