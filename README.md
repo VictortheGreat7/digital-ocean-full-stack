@@ -354,6 +354,7 @@ kubectl create token headlamp-admin -n kube-system
 - [ ] Set up useful alerts and notifications.
 - [ ] Secrets are currently stored in GitHub secrets and injected into Terraform, which is not ideal. A better approach would be to use a dedicated secrets manager like Azure Key Vault or AWS Secrets Manager, and integrate it with External Secret Operator on Kubernetes for secure secret management.
 - [ ] Deploy a separate OpenTelemetry Collector to handle trace exporting from the backend.
+- [ ] Install Metrics Server with Terraform instead of doctl to avoid having to do it manually after provisioning the cluster.
 
 ### Lessons
 
