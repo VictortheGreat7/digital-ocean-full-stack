@@ -13,7 +13,7 @@ spec:
     - fromEntities:
         - world
       icmps:
-      - {}
+        - {}
     # Allow inbound telemetry from any pod across any namespace + host/remote-node
     - fromEndpoints:
       - matchExpressions:
@@ -47,7 +47,6 @@ spec:
         - host
         - remote-node
         - cluster
-        # - all
 
 ---
 apiVersion: cilium.io/v2
@@ -86,7 +85,6 @@ spec:
         - host
         - remote-node
         - cluster
-        # - all
 
 ---
 apiVersion: cilium.io/v2
