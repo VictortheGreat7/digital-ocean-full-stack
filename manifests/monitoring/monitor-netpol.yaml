@@ -9,40 +9,21 @@ spec:
     matchLabels:
       app: datadog
   ingress:
-    - fromEndpoints:
-      - {} # Allow any pod to push metrics
+    - fromEntities:
+        - cluster
+        - host
+        - remote-node
       toPorts:
       - ports:
         - port: "4317"
-          protocol: TCP # OTLP gRPC
-        - port: "4318"
-          protocol: TCP # OTLP HTTP
-        - port: "8125"
-          protocol: UDP # DogStatsD
-        - port: "8126"
-          protocol: TCP # Datadog Trace
-        - port: "5555"
-          protocol: TCP # IPC
-  egress:
-    - toEntities:
-      - world
-      toPorts:
-      - ports:
-        - port: "443"
           protocol: TCP
-    - toEndpoints:
-      - matchLabels:
-          k8s:io.kubernetes.pod.namespace: kube-system
-          k8s:k8s-app: kube-dns
-      toPorts:
-      - ports:
-        - port: "53"
-          protocol: ANY
-    - toEntities:
-      - host
-      toPorts:
-      - ports:
-        - port: "10250"
+        - port: "4318"
+          protocol: TCP
+        - port: "8125"
+          protocol: UDP
+        - port: "8126"
+          protocol: TCP
+        - port: "5555"
           protocol: TCP
 
 ---
@@ -56,31 +37,16 @@ spec:
     matchLabels:
       app.kubernetes.io/name: prometheus
   ingress:
-    - fromEndpoints:
-      - {}
+    - fromEntities:
+        - cluster
+        - host
+        - remote-node
       toPorts:
       - ports:
         - port: "9090"
           protocol: TCP
         - port: "8080"
           protocol: TCP
-  egress:
-    - toEndpoints:
-      - {} # Scrape anything in the cluster
-    - toEntities:
-      - host # Scrape kubelet metrics
-      toPorts:
-      - ports:
-        - port: "10250"
-          protocol: TCP
-    - toEndpoints:
-      - matchLabels:
-          k8s:io.kubernetes.pod.namespace: kube-system
-          k8s:k8s-app: kube-dns
-      toPorts:
-      - ports:
-        - port: "53"
-          protocol: ANY
 
 ---
 apiVersion: cilium.io/v2
@@ -93,30 +59,17 @@ spec:
     matchLabels:
       app.kubernetes.io/name: grafana
   ingress:
-    - fromEndpoints:
-      - {} # Accessed via ingress or port-Forward
+    - fromEntities:
+        - cluster
+        - world
+        - host
+        - remote-node
       toPorts:
       - ports:
         - port: "80"
           protocol: TCP
         - port: "3000"
           protocol: TCP
-  egress:
-    - toEndpoints:
-      - matchLabels:
-          app.kubernetes.io/name: prometheus # Grafana needs to query Prometheus
-      toPorts:
-      - ports:
-        - port: "9090"
-          protocol: TCP
-    - toEndpoints:
-      - matchLabels:
-          k8s:io.kubernetes.pod.namespace: kube-system
-          k8s:k8s-app: kube-dns
-      toPorts:
-      - ports:
-        - port: "53"
-          protocol: ANY
 
 ---
 apiVersion: cilium.io/v2
@@ -129,8 +82,8 @@ spec:
     matchLabels:
       app.kubernetes.io/name: alertmanager
   ingress:
-    - fromEndpoints:
-      - {} 
+    - fromEntities:
+        - cluster
       toPorts:
       - ports:
         - port: "9093"
@@ -151,9 +104,10 @@ spec:
     matchLabels:
       app.kubernetes.io/name: prometheus-node-exporter
   ingress:
-    - fromEndpoints:
-      - matchLabels:
-          app.kubernetes.io/name: prometheus # Only scraped by Prometheus
+    - fromEntities:
+        - cluster
+        - host
+        - remote-node
       toPorts:
       - ports:
         - port: "9100"
@@ -170,9 +124,8 @@ spec:
     matchLabels:
       app.kubernetes.io/name: kube-state-metrics
   ingress:
-    - fromEndpoints:
-      - matchLabels:
-          app.kubernetes.io/name: prometheus # Only scraped by Prometheus 
+    - fromEntities:
+        - cluster
       toPorts:
       - ports:
         - port: "8080"
@@ -189,17 +142,14 @@ spec:
     matchLabels:
       app: datadog-cluster-agent
   ingress:
-    - fromEndpoints:
-      - matchLabels:
-          app: datadog # Node agents talk to cluster agent
+    - fromEntities:
+        - cluster
+        - host
+        - remote-node
       toPorts:
       - ports:
         - port: "5005"
           protocol: TCP
-    - fromEndpoints:
-      - {} # Webhook/API
-      toPorts:
-      - ports:
         - port: "443"
           protocol: TCP
 
@@ -214,8 +164,10 @@ spec:
     matchLabels:
       app.kubernetes.io/name: kube-prometheus-stack-prometheus-operator
   ingress:
-    - fromEndpoints:
-      - {} # Kubernetes API talks to it for webhooks
+    - fromEntities:
+        - cluster
+        - host
+        - remote-node
       toPorts:
       - ports:
         - port: "443"
