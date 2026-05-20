@@ -47,7 +47,7 @@ spec:
         - host
         - remote-node
         - cluster
-        - all
+        # - all
 
 ---
 apiVersion: cilium.io/v2
@@ -86,7 +86,7 @@ spec:
         - host
         - remote-node
         - cluster
-        - all
+        # - all
 
 ---
 apiVersion: cilium.io/v2
