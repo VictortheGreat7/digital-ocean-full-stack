@@ -1,53 +1,49 @@
----
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
   name: datadog-agent-netpol
   namespace: monitoring
 spec:
+  egress:
+  - toEndpoints:
+    - matchExpressions:
+      - key: k8s:io.kubernetes.pod.namespace
+        operator: Exists
+  - toEntities:
+    - world
+    - host
+    - remote-node
+    - cluster
   endpointSelector:
     matchLabels:
       app: datadog
   ingress:
-    # Allow ICMPv4 from world
-    - fromEntities:
-        - world
-      icmps:
-        - {}
-    # Allow inbound telemetry from any pod across any namespace + host/remote-node
-    - fromEndpoints:
-      - matchExpressions:
-        - key: "k8s:io.kubernetes.pod.namespace"
-          operator: Exists
-      - matchLabels: {}
-      fromEntities:
-        - host
-        - remote-node
-        - cluster
-      toPorts:
-      - ports:
-        - port: "4317"
-          protocol: TCP
-        - port: "4318"
-          protocol: TCP
-        - port: "8125"
-          protocol: UDP
-        - port: "8126"
-          protocol: TCP
-        - port: "5555"
-          protocol: TCP
-  egress:
-    # Open egress so Datadog agents can scrape nodes, external APIs, and cloud provider
-    - toEndpoints:
-      - matchExpressions:
-        - key: "k8s:io.kubernetes.pod.namespace"
-          operator: Exists
-    - toEntities:
-        - world
-        - host
-        - remote-node
-        - cluster
-
+  - fromEntities:
+    - world
+    icmps:
+    - family: IPv4
+      type: 8
+  - fromEndpoints:
+    - matchExpressions:
+      - key: k8s:io.kubernetes.pod.namespace
+        operator: Exists
+    - matchLabels: {}
+    fromEntities:
+    - host
+    - remote-node
+    - cluster
+    toPorts:
+    - ports:
+      - port: '4317'
+        protocol: TCP
+      - port: '4318'
+        protocol: TCP
+      - port: '8125'
+        protocol: UDP
+      - port: '8126'
+        protocol: TCP
+      - port: '5555'
+        protocol: TCP
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -55,37 +51,35 @@ metadata:
   name: prometheus-netpol
   namespace: monitoring
 spec:
+  egress:
+  - toEndpoints:
+    - matchExpressions:
+      - key: k8s:io.kubernetes.pod.namespace
+        operator: Exists
+  - toEntities:
+    - world
+    - host
+    - remote-node
+    - cluster
   endpointSelector:
     matchLabels:
       app.kubernetes.io/name: prometheus
   ingress:
-    - fromEndpoints:
-      - matchExpressions:
-        - key: "k8s:io.kubernetes.pod.namespace"
-          operator: Exists
-      - matchLabels: {}
-      fromEntities:
-        - host
-        - remote-node
-        - cluster
-      toPorts:
-      - ports:
-        - port: "9090"
-          protocol: TCP
-        - port: "8080"
-          protocol: TCP
-  egress:
-    # Open egress so Prometheus can scrape metrics across all components
-    - toEndpoints:
-      - matchExpressions:
-        - key: "k8s:io.kubernetes.pod.namespace"
-          operator: Exists
-    - toEntities:
-        - world
-        - host
-        - remote-node
-        - cluster
-
+  - fromEndpoints:
+    - matchExpressions:
+      - key: k8s:io.kubernetes.pod.namespace
+        operator: Exists
+    - matchLabels: {}
+    fromEntities:
+    - host
+    - remote-node
+    - cluster
+    toPorts:
+    - ports:
+      - port: '9090'
+        protocol: TCP
+      - port: '8080'
+        protocol: TCP
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -97,24 +91,23 @@ spec:
     matchLabels:
       app: datadog-cluster-agent
   ingress:
-    - fromEndpoints:
-      - matchExpressions:
-        - key: "k8s:io.kubernetes.pod.namespace"
-          operator: Exists
-      - matchLabels: {}
-      fromEntities:
-        - host
-        - remote-node
-        - cluster
-      toPorts:
-      - ports:
-        - port: "5000"
-          protocol: TCP
-        - port: "5005"
-          protocol: TCP
-        - port: "443"
-          protocol: TCP
-
+  - fromEndpoints:
+    - matchExpressions:
+      - key: k8s:io.kubernetes.pod.namespace
+        operator: Exists
+    - matchLabels: {}
+    fromEntities:
+    - host
+    - remote-node
+    - cluster
+    toPorts:
+    - ports:
+      - port: '5000'
+        protocol: TCP
+      - port: '5005'
+        protocol: TCP
+      - port: '443'
+        protocol: TCP
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -126,23 +119,22 @@ spec:
     matchLabels:
       app.kubernetes.io/name: grafana
   ingress:
-    - fromEndpoints:
-      - matchExpressions:
-        - key: "k8s:io.kubernetes.pod.namespace"
-          operator: Exists
-      - matchLabels: {}
-      fromEntities:
-        - world
-        - host
-        - remote-node
-        - cluster
-      toPorts:
-      - ports:
-        - port: "80"
-          protocol: TCP
-        - port: "3000"
-          protocol: TCP
-
+  - fromEndpoints:
+    - matchExpressions:
+      - key: k8s:io.kubernetes.pod.namespace
+        operator: Exists
+    - matchLabels: {}
+    fromEntities:
+    - world
+    - host
+    - remote-node
+    - cluster
+    toPorts:
+    - ports:
+      - port: '80'
+        protocol: TCP
+      - port: '3000'
+        protocol: TCP
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -154,24 +146,23 @@ spec:
     matchLabels:
       app.kubernetes.io/name: alertmanager
   ingress:
-    - fromEndpoints:
-      - matchExpressions:
-        - key: "k8s:io.kubernetes.pod.namespace"
-          operator: Exists
-      - matchLabels: {}
-      fromEntities:
-        - cluster
-        - host
-        - remote-node
-      toPorts:
-      - ports:
-        - port: "9093"
-          protocol: TCP
-        - port: "9094"
-          protocol: ANY
-        - port: "8080"
-          protocol: TCP
-
+  - fromEndpoints:
+    - matchExpressions:
+      - key: k8s:io.kubernetes.pod.namespace
+        operator: Exists
+    - matchLabels: {}
+    fromEntities:
+    - cluster
+    - host
+    - remote-node
+    toPorts:
+    - ports:
+      - port: '9093'
+        protocol: TCP
+      - port: '9094'
+        protocol: ANY
+      - port: '8080'
+        protocol: TCP
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -183,20 +174,19 @@ spec:
     matchLabels:
       app.kubernetes.io/name: prometheus-node-exporter
   ingress:
-    - fromEndpoints:
-      - matchExpressions:
-        - key: "k8s:io.kubernetes.pod.namespace"
-          operator: Exists
-      - matchLabels: {}
-      fromEntities:
-        - cluster
-        - host
-        - remote-node
-      toPorts:
-      - ports:
-        - port: "9100"
-          protocol: TCP
-
+  - fromEndpoints:
+    - matchExpressions:
+      - key: k8s:io.kubernetes.pod.namespace
+        operator: Exists
+    - matchLabels: {}
+    fromEntities:
+    - cluster
+    - host
+    - remote-node
+    toPorts:
+    - ports:
+      - port: '9100'
+        protocol: TCP
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -208,20 +198,19 @@ spec:
     matchLabels:
       app.kubernetes.io/name: kube-state-metrics
   ingress:
-    - fromEndpoints:
-      - matchExpressions:
-        - key: "k8s:io.kubernetes.pod.namespace"
-          operator: Exists
-      - matchLabels: {}
-      fromEntities:
-        - cluster
-        - host
-        - remote-node
-      toPorts:
-      - ports:
-        - port: "8080"
-          protocol: TCP
-
+  - fromEndpoints:
+    - matchExpressions:
+      - key: k8s:io.kubernetes.pod.namespace
+        operator: Exists
+    - matchLabels: {}
+    fromEntities:
+    - cluster
+    - host
+    - remote-node
+    toPorts:
+    - ports:
+      - port: '8080'
+        protocol: TCP
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -233,20 +222,20 @@ spec:
     matchLabels:
       app.kubernetes.io/name: kube-prometheus-stack-prometheus-operator
   ingress:
-    - fromEndpoints:
-      - matchExpressions:
-        - key: "k8s:io.kubernetes.pod.namespace"
-          operator: Exists
-      - matchLabels: {}
-      fromEntities:
-        - cluster
-        - host
-        - remote-node
-      toPorts:
-      - ports:
-        - port: "443"
-          protocol: TCP
-        - port: "8443"
-          protocol: TCP
-        - port: "10250"
-          protocol: TCP
+  - fromEndpoints:
+    - matchExpressions:
+      - key: k8s:io.kubernetes.pod.namespace
+        operator: Exists
+    - matchLabels: {}
+    fromEntities:
+    - cluster
+    - host
+    - remote-node
+    toPorts:
+    - ports:
+      - port: '443'
+        protocol: TCP
+      - port: '8443'
+        protocol: TCP
+      - port: '10250'
+        protocol: TCP
