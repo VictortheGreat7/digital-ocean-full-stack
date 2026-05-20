@@ -9,6 +9,11 @@ spec:
     matchLabels:
       app: datadog
   ingress:
+    # Allow ICMPv4 from world
+    - fromEntities:
+        - world
+      icmps:
+        - family: IPv4
     # Allow inbound telemetry from any pod across any namespace + host/remote-node
     - fromEndpoints:
       - matchExpressions:
