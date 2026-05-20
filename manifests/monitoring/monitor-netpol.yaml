@@ -1,0 +1,226 @@
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: datadog-agent-netpol
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app: datadog
+  ingress:
+    - fromEndpoints:
+      - {} # Allow any pod to push metrics
+      toPorts:
+      - ports:
+        - port: "4317"
+          protocol: TCP # OTLP gRPC
+        - port: "4318"
+          protocol: TCP # OTLP HTTP
+        - port: "8125"
+          protocol: UDP # DogStatsD
+        - port: "8126"
+          protocol: TCP # Datadog Trace
+        - port: "5555"
+          protocol: TCP # IPC
+  egress:
+    - toEntities:
+      - world
+      toPorts:
+      - ports:
+        - port: "443"
+          protocol: TCP
+    - toEndpoints:
+      - matchLabels:
+          k8s:io.kubernetes.pod.namespace: kube-system
+          k8s:k8s-app: kube-dns
+      toPorts:
+      - ports:
+        - port: "53"
+          protocol: ANY
+    - toEntities:
+      - host
+      toPorts:
+      - ports:
+        - port: "10250"
+          protocol: TCP
+
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: prometheus-netpol
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus
+  ingress:
+    - fromEndpoints:
+      - {}
+      toPorts:
+      - ports:
+        - port: "9090"
+          protocol: TCP
+        - port: "8080"
+          protocol: TCP
+  egress:
+    - toEndpoints:
+      - {} # Scrape anything in the cluster
+    - toEntities:
+      - host # Scrape kubelet metrics
+      toPorts:
+      - ports:
+        - port: "10250"
+          protocol: TCP
+    - toEndpoints:
+      - matchLabels:
+          k8s:io.kubernetes.pod.namespace: kube-system
+          k8s:k8s-app: kube-dns
+      toPorts:
+      - ports:
+        - port: "53"
+          protocol: ANY
+
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: grafana-netpol
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: grafana
+  ingress:
+    - fromEndpoints:
+      - {} # Accessed via ingress or port-Forward
+      toPorts:
+      - ports:
+        - port: "80"
+          protocol: TCP
+        - port: "3000"
+          protocol: TCP
+  egress:
+    - toEndpoints:
+      - matchLabels:
+          app.kubernetes.io/name: prometheus # Grafana needs to query Prometheus
+      toPorts:
+      - ports:
+        - port: "9090"
+          protocol: TCP
+    - toEndpoints:
+      - matchLabels:
+          k8s:io.kubernetes.pod.namespace: kube-system
+          k8s:k8s-app: kube-dns
+      toPorts:
+      - ports:
+        - port: "53"
+          protocol: ANY
+
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: alertmanager-netpol
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: alertmanager
+  ingress:
+    - fromEndpoints:
+      - {} 
+      toPorts:
+      - ports:
+        - port: "9093"
+          protocol: TCP
+        - port: "9094"
+          protocol: ANY
+        - port: "8080"
+          protocol: TCP
+
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: node-exporter-netpol
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus-node-exporter
+  ingress:
+    - fromEndpoints:
+      - matchLabels:
+          app.kubernetes.io/name: prometheus # Only scraped by Prometheus
+      toPorts:
+      - ports:
+        - port: "9100"
+          protocol: TCP
+
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: kube-state-metrics-netpol
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: kube-state-metrics
+  ingress:
+    - fromEndpoints:
+      - matchLabels:
+          app.kubernetes.io/name: prometheus # Only scraped by Prometheus 
+      toPorts:
+      - ports:
+        - port: "8080"
+          protocol: TCP
+
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: datadog-cluster-agent-netpol
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app: datadog-cluster-agent
+  ingress:
+    - fromEndpoints:
+      - matchLabels:
+          app: datadog # Node agents talk to cluster agent
+      toPorts:
+      - ports:
+        - port: "5005"
+          protocol: TCP
+    - fromEndpoints:
+      - {} # Webhook/API
+      toPorts:
+      - ports:
+        - port: "443"
+          protocol: TCP
+
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: prometheus-operator-netpol
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: kube-prometheus-stack-prometheus-operator
+  ingress:
+    - fromEndpoints:
+      - {} # Kubernetes API talks to it for webhooks
+      toPorts:
+      - ports:
+        - port: "443"
+          protocol: TCP
+        - port: "8443"
+          protocol: TCP
+        - port: "10250"
+          protocol: TCP
