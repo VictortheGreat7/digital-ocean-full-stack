@@ -34,7 +34,7 @@ _pool: pool.ThreadedConnectionPool | None = None
 _log_queue: Queue = Queue(maxsize=5000)
 
 # Sentinel value to signal worker thread shutdown
-_SENTINEL = object() 
+_SENTINEL = object()
 
 # Worker thread and shutdown flags
 _db_thread: Thread | None = None
@@ -122,7 +122,7 @@ def _flush_batch(rows: list[tuple]) -> None:
 
 def _db_worker() -> None:
     """Background thread that drains *_log_queue* into the ``requests`` table."""
-    from telemetry import tracer # deferred to avoid circular import
+    from telemetry import tracer  # deferred to avoid circular import
 
     while True:
         item = _log_queue.get()
@@ -171,6 +171,7 @@ def shutdown_db() -> None:
         _pool = None
     logger.info("DB pool closed")
 
+
 def init_db(app=None) -> None:
     """Create the threaded connection pool."""
     global _pool, _db_thread, _shutdown_registered
@@ -188,14 +189,14 @@ def init_db(app=None) -> None:
             raise
     else:
         logger.debug("DB pool already initialized")
-    
+
     if _db_thread is None or not _db_thread.is_alive():
         _db_thread = Thread(target=_db_worker, daemon=True, name="db-log-writer")
         _db_thread.start()
         logger.info("DB log worker thread started")
     else:
         logger.debug("DB log worker thread already running")
-    
+
     if not _shutdown_registered:
         atexit.register(shutdown_db)
         _shutdown_registered = True

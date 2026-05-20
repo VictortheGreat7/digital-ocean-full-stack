@@ -41,12 +41,14 @@ from config import (
 set_global_textmap(TraceContextTextMapPropagator())
 
 # ── Resource identity ──────────────────────────────────────────────────
-_resource = Resource(attributes={
-    "service.name": SERVICE_NAME,
-    "service.namespace": SERVICE_NAMESPACE,
-    "deployment.environment": DEPLOYMENT_ENV,
-    "service.version": SERVICE_VERSION,
-})
+_resource = Resource(
+    attributes={
+        "service.name": SERVICE_NAME,
+        "service.namespace": SERVICE_NAMESPACE,
+        "deployment.environment": DEPLOYMENT_ENV,
+        "service.version": SERVICE_VERSION,
+    }
+)
 
 # ── Tracer provider + OTLP exporter ───────────────────────────────────
 tracer_provider = TracerProvider(resource=_resource)
@@ -56,11 +58,7 @@ _otlp_exporter = OTLPSpanExporter(endpoint=OTEL_EXPORTER_OTLP_ENDPOINT, timeout=
 # We handle adding the BatchSpanProcessor in gunicorn.conf.py's post_fork hook
 # to ensure the background thread survives the worker processes.
 
-prof = Profiler(
-    env="dev",
-    service="kronos-backend",
-    version="1.0.0"
-)
+prof = Profiler(env="dev", service="kronos-backend", version="1.0.0")
 
 _runtime_metrics_enabled = False
 _profiler_enabled = False
@@ -91,11 +89,13 @@ def init_telemetry(app) -> None:
 
     # Structured log handler with trace context
     handler = logging.StreamHandler()
-    handler.setFormatter(logging.Formatter(
-        "%(asctime)s - %(name)s - "
-        "[trace_id=%(otelTraceID)s span_id=%(otelSpanID)s] - "
-        "%(levelname)s - %(message)s"
-    ))
+    handler.setFormatter(
+        logging.Formatter(
+            "%(asctime)s - %(name)s - "
+            "[trace_id=%(otelTraceID)s span_id=%(otelSpanID)s] - "
+            "%(levelname)s - %(message)s"
+        )
+    )
     app.logger.handlers.clear()
     app.logger.addHandler(handler)
     app.logger.setLevel(logging.INFO)

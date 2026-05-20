@@ -39,10 +39,10 @@ def get_time():
 @time_bp.route("/timezones", methods=["GET"])
 def get_timezones():
     """List every IANA timezone grouped by region."""
-    
+
     cached = _timezones_cache["data"]
     expires_at = _timezones_cache["expires_at"]
-    
+
     ttl = CACHE_TTL_TIMEZONES
     now = monotonic()
 
@@ -55,9 +55,12 @@ def get_timezones():
         span.set_attribute("cache.hit", False)
 
     with _timezones_lock:
-        if _timezones_cache["data"] is not None and now < _timezones_cache["expires_at"]:
+        if (
+            _timezones_cache["data"] is not None
+            and now < _timezones_cache["expires_at"]
+        ):
             return jsonify(_timezones_cache["data"])
-        
+
         with tracer.start_as_current_span("all_tz__fetch") as span:
             try:
                 all_tz = sorted(available_timezones())
@@ -97,18 +100,21 @@ def get_world_clocks():
         with tracer.start_as_current_span("cache.world_clocks") as span:
             span.set_attribute("cache.hit", True)
         return jsonify(cached)
-    
+
     with tracer.start_as_current_span("cache.world_clocks") as span:
         span.set_attribute("cache.hit", False)
 
     with _world_clocks_lock:
         # Double-check: another thread may have refreshed while we waited
-        if _world_clocks_cache["data"] is not None and now < _world_clocks_cache["expires_at"]:
+        if (
+            _world_clocks_cache["data"] is not None
+            and now < _world_clocks_cache["expires_at"]
+        ):
             return jsonify(_world_clocks_cache["data"])
 
         cities_data: list[dict] = []
 
-        with tracer.start_as_current_span("background_refresh.world_clocks")as span:
+        with tracer.start_as_current_span("background_refresh.world_clocks") as span:
             span.set_attribute("cities_count", len(MAJOR_CITIES))
             for city, tz_name in MAJOR_CITIES.items():
                 try:

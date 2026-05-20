@@ -32,6 +32,7 @@ custom_request_latency = Histogram(
 
 _metrics: PrometheusMetrics | None = None
 
+
 # ── Hooks ───────────────────────────────────────────────────────────────
 def _start_timer() -> None:
     g.start_time = monotonic()
@@ -47,9 +48,13 @@ def _record_metrics(response):
     status = response.status_code
 
     # Prometheus
-    custom_request_latency.labels(method=request.method, path=path, status=status).observe(duration)
+    custom_request_latency.labels(
+        method=request.method, path=path, status=status
+    ).observe(duration)
     if status >= 400:
-        custom_request_errors.labels(method=request.method, path=path, status=status).inc()
+        custom_request_errors.labels(
+            method=request.method, path=path, status=status
+        ).inc()
 
     # Enrich the active span
     root_span = trace.get_current_span()
@@ -70,12 +75,13 @@ def _record_metrics(response):
         method=request.method,
         status=status,
         latency_ms=int(duration * 1000),
-        timezone = request.args.get("timezone") if path == "/time" else None,
+        timezone=request.args.get("timezone") if path == "/time" else None,
         trace_id=trace_id,
         span_context=root_span.get_span_context() if root_span else None,
     )
 
     return response
+
 
 def init_metrics(app: Flask) -> None:
     """Initialize Prometheus metrics and Flask exporter."""
