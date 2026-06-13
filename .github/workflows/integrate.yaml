@@ -82,7 +82,7 @@ jobs:
         with:
           image-ref: kronos-backend:${{ github.sha }}
           format: 'table'
-          exit-code: '0'
+          exit-code: '1'
           scanners: 'vuln,secret,misconfig,license'
           severity: 'CRITICAL'
       - name: Test backend container
@@ -271,6 +271,17 @@ jobs:
         run: |
           mkdir -p ${{ github.workspace }}/.terraform.d/plugin-cache
           echo "plugin_cache_dir = \"${{ github.workspace }}/.terraform.d/plugin-cache\"" > ~/.terraformrc
+
+          cat <<EOF > terraform.tfvars.json
+          {
+            "do_token": "${{ secrets.DO_API_TOKEN }}",
+            "cloudflare_api_token": "${{ secrets.CLOUDFLARE_TOKEN }}",
+            "cloudflare_zone_id": "${{ secrets.CLOUDFLARE_ZONE_ID }}",
+            "datadog_api_key": "${{ secrets.DATADOG_API_KEY }}",
+            "datadog_app_key": "${{ secrets.DATADOG_APP_KEY }}",
+            "postgres_pass": "${{ secrets.POSTGRES_PASS }}"
+          }
+          EOF
 
           terraform init
         working-directory: ./terraform
