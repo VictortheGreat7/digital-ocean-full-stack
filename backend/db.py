@@ -22,7 +22,9 @@ from opentelemetry.trace import SpanContext
 
 from config import DB_CONFIG, BATCH_SIZE, BATCH_FLUSH_SECONDS
 
-# patch_psycopg() should be called before any psycopg2 connections are created. It monkey-patches psycopg2 to make it cooperative with gevent's green threads to prevent blocking of the server during db operations.
+# patch_psycopg() should be called before any psycopg2 connections are created.
+# It monkey-patches psycopg2 to make it cooperative with gevent's green threads
+# to prevent blocking of the server during db operations.
 patch_psycopg()
 
 logger = logging.getLogger(__name__)

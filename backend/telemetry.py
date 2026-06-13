@@ -15,7 +15,8 @@ from opentelemetry.instrumentation.logging import LoggingInstrumentor
 from opentelemetry.instrumentation.psycopg2 import Psycopg2Instrumentor
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 
-# HTTP exporter uses standard Python sockets, which gevent can monkey-patch to be non-blocking. This allows spans to be exported in the background without blocking the main application.
+# HTTP exporter uses standard Python sockets, which gevent can monkey-patch to be non-blocking.
+# This allows spans to be exported in the background without blocking the main application.
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 
 from opentelemetry.propagate import set_global_textmap
@@ -58,7 +59,7 @@ _otlp_exporter = OTLPSpanExporter(endpoint=OTEL_EXPORTER_OTLP_ENDPOINT, timeout=
 # We handle adding the BatchSpanProcessor in gunicorn.conf.py's post_fork hook
 # to ensure the background thread survives the worker processes.
 
-prof = Profiler(env="dev", service="kronos-backend", version="1.0.0")
+prof = Profiler(env=DEPLOYMENT_ENV, service=SERVICE_NAME, version=SERVICE_VERSION)
 
 _runtime_metrics_enabled = False
 _profiler_enabled = False

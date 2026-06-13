@@ -14,7 +14,7 @@ def post_fork(server, worker):
     server.log.info(
         "Worker spawned (pid: %s) -> Patching DNS for IPv4 and init OpenTelemetry",
         worker.pid,
-     )
+    )
 
     # 0. Force gevent to patch EVERYTHING before any OpenTelemetry/urllib3 imports occur
     import gevent.monkey
