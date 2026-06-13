@@ -1,7 +1,7 @@
 # Multi-stage build for optimized the production image
 
 # Stage 1: Build dependencies and compile Python wheels
-FROM python:3.14-slim AS builder
+FROM python:3.14-slim-bookworm AS builder
 
 # Disable pip caching, log buffering, and .pyc files.
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -22,7 +22,7 @@ RUN pip wheel --wheel-dir /wheels -r requirements.txt
 
 
 # Stage 2: Create the final runtime image
-FROM python:3.14-slim
+FROM python:3.14-slim-bookworm
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
