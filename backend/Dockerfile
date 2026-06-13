@@ -20,6 +20,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
+
 # Build wheels for all dependencies
 RUN pip wheel --wheel-dir /wheels -r requirements.txt
 
@@ -43,6 +44,7 @@ RUN addgroup --system app && adduser --system --ingroup app app
 
 # Enable Prometheus client to use the multiprocess mode
 ENV PROMETHEUS_MULTIPROC_DIR=/tmp/prometheus_multiproc
+
 # Create the directory and give ownership to the 'app' user
 RUN mkdir -p /tmp/prometheus_multiproc && chown app:app /tmp/prometheus_multiproc
 
