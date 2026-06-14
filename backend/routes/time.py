@@ -58,15 +58,20 @@ def _refresh_timezones_loop():
                 span.record_exception(exc)
                 return jsonify({"error": "Failed to fetch timezones"}), 500
 
-            payload = json_dumps(
+            # payload = json_dumps(
+            #     {
+            #         "count": len(all_tz),
+            #         "regions": regions,
+            #     }
+            # )
+
+            # Serialize the dictionary to a JSON string exactly once per TTL cycle
+            _timezones_cache_json = json_dumps(
                 {
                     "count": len(all_tz),
                     "regions": regions,
                 }
             )
-
-            # Serialize the dictionary to a JSON string exactly once per TTL cycle
-            _timezones_cache_json = json_dumps(payload)
 
             # Signal that the cache is successfully populated
             _timezones_ready.set()
@@ -114,8 +119,10 @@ def _refresh_world_clocks_loop():
                     span.record_exception(exc)
                     cities_data.append({"city": city, "error": str(exc)})
 
-            payload = {"cities": cities_data, "count": len(cities_data)}
-            _world_clocks_cache_json = json_dumps(payload)
+            # payload = json_dumps({"cities": cities_data, "count": len(cities_data)})
+            _world_clocks_cache_json = json_dumps(
+                {"cities": cities_data, "count": len(cities_data)}
+            )
             _world_clocks_ready.set()
 
         sleep(CACHE_TTL_WORLD_CLOCKS)
