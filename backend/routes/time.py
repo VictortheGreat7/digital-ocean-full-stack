@@ -32,8 +32,11 @@ def get_time():
 
 
 # Store the pre-serialized JSON string instead of a dictionary
-_timezones_cache: str | None = None
-_world_clocks_cache: str | None = None
+# _timezones_cache: str | None = None
+# _world_clocks_cache: str | None = None
+
+_timezones_cache_json: str | None = None
+_world_clocks_cache_json: str | None = None
 
 # An event flag to ensure the API doesn't return empty data on startup
 _timezones_ready = Event()
@@ -42,7 +45,8 @@ _world_clocks_ready = Event()
 
 def _refresh_timezones_loop():
     """Background worker that continuously regenerates the timezones payload."""
-    global _timezones_cache
+    # global _timezones_cache
+    global _timezones_cache_json
 
     while True:
         with tracer.start_as_current_span("background_refresh.timezones") as span:
@@ -58,18 +62,14 @@ def _refresh_timezones_loop():
                 span.record_exception(exc)
                 return jsonify({"error": "Failed to fetch timezones"}), 500
 
-            _timezones_cache = {
+            payload = {
                 "count": len(all_tz),
                 "regions": regions,
             }
+            # _timezones_cache = payload
 
             # # Serialize the dictionary to a JSON string exactly once per TTL cycle
-            # _timezones_cache = json_dumps(
-            #     {
-            #         "count": len(all_tz),
-            #         "regions": regions,
-            #     }
-            # )
+            _timezones_cache_json = json_dumps(payload)
 
             # Signal that the cache is successfully populated
             _timezones_ready.set()
@@ -96,12 +96,14 @@ def get_timezones():
         span.set_attribute("cache.hit", True)
 
     # Return the raw, pre-calculated JSON string directly to the WSGI server
-    return jsonify(_timezones_cache)
+    # return jsonify(_timezones_cache)
+    return Response(_timezones_cache_json, mimetype="application/json")
 
 
 def _refresh_world_clocks_loop():
     """Background worker that continuously regenerates the world clocks payload."""
-    global _world_clocks_cache
+    # global _world_clocks_cache
+    global _world_clocks_cache_json
 
     while True:
         with tracer.start_as_current_span("background_refresh.world_clocks") as span:
@@ -117,10 +119,9 @@ def _refresh_world_clocks_loop():
                     span.record_exception(exc)
                     cities_data.append({"city": city, "error": str(exc)})
 
-            _world_clocks_cache = {"cities": cities_data, "count": len(cities_data)}
-            # _world_clocks_cache = json_dumps(
-            #     {"cities": cities_data, "count": len(cities_data)}
-            # )
+            payload = {"cities": cities_data, "count": len(cities_data)}
+            # _world_clocks_cache = payload
+            _world_clocks_cache_json = json_dumps(payload)
             _world_clocks_ready.set()
 
         sleep(CACHE_TTL_WORLD_CLOCKS)
@@ -140,7 +141,8 @@ def get_world_clocks():
     with tracer.start_as_current_span("cache.world_clocks") as span:
         span.set_attribute("cache.hit", True)
 
-    return jsonify(_world_clocks_cache)
+    return Response(_world_clocks_cache_json, mimetype="application/json")
+    # return jsonify(_world_clocks_cache)
 
 
 @time_bp.route("/legacy/time", methods=["GET"])
