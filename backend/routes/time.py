@@ -32,9 +32,6 @@ def get_time():
 
 
 # Store the pre-serialized JSON string instead of a dictionary
-# _timezones_cache: str | None = None
-# _world_clocks_cache: str | None = None
-
 _timezones_cache_json: str | None = None
 _world_clocks_cache_json: str | None = None
 
@@ -45,34 +42,44 @@ _world_clocks_ready = Event()
 
 def _refresh_timezones_loop():
     """Background worker that continuously regenerates the timezones payload."""
-    # global _timezones_cache
     global _timezones_cache_json
 
     while True:
-        with tracer.start_as_current_span("background_refresh.timezones") as span:
-            try:
-                all_tz = sorted(available_timezones())
-                regions: dict[str, list[str]] = {}
-                for tz in all_tz:
-                    if "/" in tz:
-                        region = tz.split("/")[0]
-                        regions.setdefault(region, []).append(tz)
-            except Exception as exc:
-                span.set_attribute("error", True)
-                span.record_exception(exc)
-                return jsonify({"error": "Failed to fetch timezones"}), 500
+        try:
+            with tracer.start_as_current_span(
+                "background_refresh.timezones.calculate"
+            ) as span:
+                try:
+                    all_tz = sorted(available_timezones())
+                    regions: dict[str, list[str]] = {}
+                    for tz in all_tz:
+                        if "/" in tz:
+                            region = tz.split("/")[0]
+                            regions.setdefault(region, []).append(tz)
+                except Exception as exc:
+                    span.set_attribute("error", True)
+                    span.record_exception(exc)
+                    return jsonify({"error": "Failed to fetch timezones"}), 500
 
             payload = {
                 "count": len(all_tz),
                 "regions": regions,
             }
-            # _timezones_cache = payload
 
-            # # Serialize the dictionary to a JSON string exactly once per TTL cycle
-            _timezones_cache_json = json_dumps(payload)
+            with tracer.start_as_current_span("background_refresh.timezones.serialize"):
+                new_cache_json = json_dumps(payload)
+
+            # Serialize the dictionary to a JSON string exactly once per TTL cycle
+            _timezones_cache_json = new_cache_json
 
             # Signal that the cache is successfully populated
             _timezones_ready.set()
+        except Exception as exc:
+            # If ANYTHING fails (serialization, memory issue, etc.), the thread catches it,
+            # logs the error, and survives to try again on the next TTL cycle.
+            return jsonify(
+                {"error": f"Critical failure in background timezone refresh: {exc}"}
+            ), 500
 
         # Sleep for the configured TTL before refreshing again
         sleep(CACHE_TTL_TIMEZONES)
@@ -96,33 +103,43 @@ def get_timezones():
         span.set_attribute("cache.hit", True)
 
     # Return the raw, pre-calculated JSON string directly to the WSGI server
-    # return jsonify(_timezones_cache)
     return Response(_timezones_cache_json, mimetype="application/json")
 
 
 def _refresh_world_clocks_loop():
     """Background worker that continuously regenerates the world clocks payload."""
-    # global _world_clocks_cache
     global _world_clocks_cache_json
 
     while True:
-        with tracer.start_as_current_span("background_refresh.world_clocks") as span:
-            span.set_attribute("cities_count", len(MAJOR_CITIES))
-            cities_data: list[dict] = []
+        try:
+            with tracer.start_as_current_span(
+                "background_refresh.world_clocks.calculate"
+            ) as span:
+                span.set_attribute("cities_count", len(MAJOR_CITIES))
+                cities_data: list[dict] = []
 
-            for city, tz_obj in MAJOR_CITIES.items():
-                try:
-                    data = format_time_response(str(tz_obj), tz=tz_obj, city=city)
-                    cities_data.append(data)
-                except Exception as exc:
-                    span.set_attribute("error", True)
-                    span.record_exception(exc)
-                    cities_data.append({"city": city, "error": str(exc)})
+                for city, tz_obj in MAJOR_CITIES.items():
+                    try:
+                        data = format_time_response(str(tz_obj), tz=tz_obj, city=city)
+                        cities_data.append(data)
+                    except Exception as exc:
+                        span.set_attribute("error", True)
+                        span.record_exception(exc)
+                        cities_data.append({"city": city, "error": str(exc)})
 
             payload = {"cities": cities_data, "count": len(cities_data)}
-            # _world_clocks_cache = payload
-            _world_clocks_cache_json = json_dumps(payload)
+
+            with tracer.start_as_current_span(
+                "background_refresh.world_clocks.serialize"
+            ):
+                new_cache_json = json_dumps(payload)
+
+            _world_clocks_cache_json = new_cache_json
             _world_clocks_ready.set()
+        except Exception as exc:
+            return jsonify(
+                {"error": f"Critical failure in background clock refresh: {exc}"}
+            ), 500
 
         sleep(CACHE_TTL_WORLD_CLOCKS)
 
@@ -142,7 +159,6 @@ def get_world_clocks():
         span.set_attribute("cache.hit", True)
 
     return Response(_world_clocks_cache_json, mimetype="application/json")
-    # return jsonify(_world_clocks_cache)
 
 
 @time_bp.route("/legacy/time", methods=["GET"])
