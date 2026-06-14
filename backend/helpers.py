@@ -50,6 +50,7 @@ def validate_timezone(timezone: str) -> ZoneInfo:
     except (ZoneInfoNotFoundError, KeyError) as exc:
         raise ValueError(f"Unknown timezone: {timezone}") from exc
 
+
 # --- Major Cities (Dynamically Generated) ---
 def _generate_all_cities() -> dict[str, str]:
     cities = {}
@@ -57,11 +58,11 @@ def _generate_all_cities() -> dict[str, str]:
         # Optional: Filter out generic, legacy, or non-geographic timezones
         if tz.startswith(("Etc/", "SystemV/", "US/", "posix/", "right/", "Factory")):
             continue
-            
+
         # Extract the final part of the string and replace underscores with spaces
         # e.g., "America/Argentina/Buenos_Aires" -> "Buenos Aires"
         # e.g., "Europe/London" -> "London"
         city_name = tz.split("/")[-1].replace("_", " ")
         cities[city_name] = ZoneInfo(tz)
-        
+
     return cities
