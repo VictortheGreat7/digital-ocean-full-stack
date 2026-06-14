@@ -18,6 +18,19 @@ from config import CACHE_TTL_TIMEZONES, CACHE_TTL_WORLD_CLOCKS, MAJOR_CITIES
 time_bp = Blueprint("time", __name__)
 
 
+@time_bp.route("/time", methods=["GET"])
+def get_time():
+    """Return the current time for a given timezone (default: UTC)."""
+    timezone = request.args.get("timezone", "UTC")
+
+    try:
+        tz = validate_timezone(timezone)
+        data = format_time_response(timezone, tz=tz)
+        return jsonify(data)
+    except ValueError:
+        return jsonify({"error": f"Unknown timezone: {timezone}"}), 400
+
+
 # Store the pre-serialized JSON string instead of a dictionary
 _timezones_cache_json: str | None = None
 _world_clocks_cache_json: str | None = None
@@ -67,19 +80,6 @@ _timezone_refresh_thread = Thread(target=_refresh_timezones_loop, daemon=True)
 _timezone_refresh_thread.start()
 
 
-@time_bp.route("/time", methods=["GET"])
-def get_time():
-    """Return the current time for a given timezone (default: UTC)."""
-    timezone = request.args.get("timezone", "UTC")
-
-    try:
-        tz = validate_timezone(timezone)
-        data = format_time_response(timezone, tz=tz)
-        return jsonify(data)
-    except ValueError:
-        return jsonify({"error": f"Unknown timezone: {timezone}"}), 400
-
-
 @time_bp.route("/timezones", methods=["GET"])
 def get_timezones():
     """List every IANA timezone grouped by region."""
@@ -105,9 +105,9 @@ def _refresh_world_clocks_loop():
             span.set_attribute("cities_count", len(MAJOR_CITIES))
             cities_data: list[dict] = []
 
-            for city, tz_name in MAJOR_CITIES.items():
+            for city, tz_obj in MAJOR_CITIES.items():
                 try:
-                    data = format_time_response(tz_name, city=city)
+                    data = format_time_response(str(tz_obj), tz=tz_obj, city=city)
                     cities_data.append(data)
                 except Exception as exc:
                     span.set_attribute("error", True)
