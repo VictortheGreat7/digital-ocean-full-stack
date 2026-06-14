@@ -3,6 +3,7 @@ Application configuration — environment variables, constants, and shared setti
 """
 
 import os
+from zoneinfo import available_timezones
 
 
 # --- Database ---
@@ -33,24 +34,42 @@ EXCLUDED_PATHS: set[str] = {
     "/ready",
 }
 
-# --- Major Cities ---
-MAJOR_CITIES: dict[str, str] = {
-    "New York": "America/New_York",
-    "London": "Europe/London",
-    "Tokyo": "Asia/Tokyo",
-    "Sydney": "Australia/Sydney",
-    "Dubai": "Asia/Dubai",
-    "Singapore": "Asia/Singapore",
-    "São Paulo": "America/Sao_Paulo",
-    "Mumbai": "Asia/Kolkata",
-    "Paris": "Europe/Paris",
-    "Los Angeles": "America/Los_Angeles",
-    "Hong Kong": "Asia/Hong_Kong",
-    "Berlin": "Europe/Berlin",
-}
+# --- Major Cities (Dynamically Generated) ---
+def _generate_all_cities() -> dict[str, str]:
+    cities = {}
+    for tz in available_timezones():
+        # Optional: Filter out generic, legacy, or non-geographic timezones
+        if tz.startswith(("Etc/", "SystemV/", "US/", "posix/", "right/", "Factory")):
+            continue
+            
+        # Extract the final part of the string and replace underscores with spaces
+        # e.g., "America/Argentina/Buenos_Aires" -> "Buenos Aires"
+        # e.g., "Europe/London" -> "London"
+        city_name = tz.split("/")[-1].replace("_", " ")
+        cities[city_name] = tz
+        
+    return cities
+
+MAJOR_CITIES: dict[str, str] = _generate_all_cities()
+
+# # --- Major Cities ---
+# MAJOR_CITIES: dict[str, str] = {
+#     "New York": "America/New_York",
+#     "London": "Europe/London",
+#     "Tokyo": "Asia/Tokyo",
+#     "Sydney": "Australia/Sydney",
+#     "Dubai": "Asia/Dubai",
+#     "Singapore": "Asia/Singapore",
+#     "São Paulo": "America/Sao_Paulo",
+#     "Mumbai": "Asia/Kolkata",
+#     "Paris": "Europe/Paris",
+#     "Los Angeles": "America/Los_Angeles",
+#     "Hong Kong": "Asia/Hong_Kong",
+#     "Berlin": "Europe/Berlin",
+# }
 
 # --- Endpoint-specific Cache TTLs ---
-CACHE_TTL_WORLD_CLOCKS: int = int(os.getenv("CACHE_TTL_WORLD_CLOCKS", "2"))
+CACHE_TTL_WORLD_CLOCKS: int = int(os.getenv("CACHE_TTL_WORLD_CLOCKS", "30"))
 CACHE_TTL_TIMEZONES: int = int(os.getenv("CACHE_TTL_TIMEZONES", "86400"))
 
 # --- Telemetry toggles ---
