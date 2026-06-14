@@ -69,7 +69,7 @@ MAJOR_CITIES: dict[str, str] = _generate_all_cities()
 # }
 
 # --- Endpoint-specific Cache TTLs ---
-CACHE_TTL_WORLD_CLOCKS: int = int(os.getenv("CACHE_TTL_WORLD_CLOCKS", "30"))
+CACHE_TTL_WORLD_CLOCKS: int = int(os.getenv("CACHE_TTL_WORLD_CLOCKS", "86400"))
 CACHE_TTL_TIMEZONES: int = int(os.getenv("CACHE_TTL_TIMEZONES", "86400"))
 
 # --- Telemetry toggles ---

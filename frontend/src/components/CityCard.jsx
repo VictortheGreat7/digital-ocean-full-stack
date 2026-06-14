@@ -16,9 +16,9 @@ function CityCard({ city, is24Hour, animationDelay }) {
 
   const formatTime = (date) => {
     // Calculate the city's local time using UTC + offset
-    const utcTime = date.getTime();
+    const timestamp = date.getTime();
     const offsetMillis = city.offset_hours * 60 * 60 * 1000;
-    const cityTime = new Date(utcTime + offsetMillis);
+    const cityTime = new Date(timestamp + offsetMillis);
     
     if (is24Hour) {
       return cityTime.toLocaleTimeString('en-US', { 
@@ -41,9 +41,9 @@ function CityCard({ city, is24Hour, animationDelay }) {
 
   const formatDate = (date) => {
     // Calculate the city's local date using UTC + offset
-    const utcTime = date.getTime();
+    const timestamp = date.getTime();
     const offsetMillis = city.offset_hours * 60 * 60 * 1000;
-    const cityTime = new Date(utcTime + offsetMillis);
+    const cityTime = new Date(timestamp + offsetMillis);
     
     return cityTime.toLocaleDateString('en-US', {
       weekday: 'short',
