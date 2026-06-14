@@ -115,18 +115,12 @@ def _refresh_world_clocks_loop():
                     cities_data.append({"city": city, "error": str(exc)})
 
             payload = {"cities": cities_data, "count": len(cities_data)}
-
-            # Serialize the dictionary to a JSON string exactly once per TTL cycle
             _world_clocks_cache_json = json_dumps(payload)
-
-            # Signal that the cache is successfully populated
             _world_clocks_ready.set()
 
-        # Sleep for the configured TTL before refreshing again
         sleep(CACHE_TTL_WORLD_CLOCKS)
 
 
-# Start the background thread immediately upon module import
 _world_clocks_refresh_thread = Thread(target=_refresh_world_clocks_loop, daemon=True)
 _world_clocks_refresh_thread.start()
 
@@ -135,15 +129,12 @@ _world_clocks_refresh_thread.start()
 def get_world_clocks():
     """Return the current time for every city in ``MAJOR_CITIES``."""
 
-    # Wait up to 5 seconds for the background thread to populate the cache on initial startup
     if not _world_clocks_ready.wait(timeout=5.0):
         return jsonify({"error": "Service warming up, please try again."}), 503
 
     with tracer.start_as_current_span("cache.world_clocks") as span:
-        # Since the background thread handles all misses, the API always hits
         span.set_attribute("cache.hit", True)
 
-    # Return the raw, pre-calculated JSON string directly to the WSGI server
     return Response(_world_clocks_cache_json, mimetype="application/json")
 
 
