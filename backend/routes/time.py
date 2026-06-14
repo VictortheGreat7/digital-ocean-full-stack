@@ -9,7 +9,8 @@ from threading import Lock
 from telemetry import tracer
 from datetime import datetime
 from zoneinfo import available_timezones
-from flask import Blueprint, jsonify, request
+from json import dumps as json_dumps
+from flask import Blueprint, jsonify, request, Response
 from helpers import format_time_response, validate_timezone
 from config import CACHE_TTL_TIMEZONES, CACHE_TTL_WORLD_CLOCKS, MAJOR_CITIES
 
@@ -49,7 +50,7 @@ def get_timezones():
     if cached is not None and now < expires_at:
         with tracer.start_as_current_span("cache.timezones") as span:
             span.set_attribute("cache.hit", True)
-        return jsonify(cached)
+        return Response(cached, mimetype='application/json')
 
     with tracer.start_as_current_span("cache.timezones") as span:
         span.set_attribute("cache.hit", False)
@@ -59,7 +60,7 @@ def get_timezones():
             _timezones_cache["data"] is not None
             and now < _timezones_cache["expires_at"]
         ):
-            return jsonify(_timezones_cache["data"])
+            return Response(_timezones_cache["data"], mimetype='application/json')
 
         with tracer.start_as_current_span("all_tz__fetch") as span:
             try:
@@ -79,7 +80,7 @@ def get_timezones():
             "regions": regions,
         }
 
-        _timezones_cache["data"] = payload
+        _timezones_cache["data"] = json_dumps(payload)
         _timezones_cache["expires_at"] = now + ttl
 
     return jsonify(payload)
@@ -99,7 +100,7 @@ def get_world_clocks():
     if cached is not None and now < expires_at:
         with tracer.start_as_current_span("cache.world_clocks") as span:
             span.set_attribute("cache.hit", True)
-        return jsonify(cached)
+        return Response(cached, mimetype='application/json')
 
     with tracer.start_as_current_span("cache.world_clocks") as span:
         span.set_attribute("cache.hit", False)
@@ -110,7 +111,7 @@ def get_world_clocks():
             _world_clocks_cache["data"] is not None
             and now < _world_clocks_cache["expires_at"]
         ):
-            return jsonify(_world_clocks_cache["data"])
+            return Response(_world_clocks_cache["data"], mimetype='application/json')
 
         cities_data: list[dict] = []
 
@@ -126,7 +127,7 @@ def get_world_clocks():
                     cities_data.append({"city": city, "error": str(exc)})
 
         payload = {"cities": cities_data, "count": len(cities_data)}
-        _world_clocks_cache["data"] = payload
+        _world_clocks_cache["data"] = json_dumps(payload)
         _world_clocks_cache["expires_at"] = now + ttl
 
     return jsonify(payload)
