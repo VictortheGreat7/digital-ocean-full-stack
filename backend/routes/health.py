@@ -36,7 +36,7 @@ def ready():
                 "checks": {"database": "up"},
             }
         ), 200
-    
+
     except OperationalError as exc:
         conn_healthy = False  # connection is likely unusable
         logger.exception("Database connection failed: %s", exc)
