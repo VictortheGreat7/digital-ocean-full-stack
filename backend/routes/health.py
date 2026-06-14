@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import logging
 from flask import Blueprint, jsonify
+from psycopg2 import OperationalError
 from db import get_connection, put_connection
 
 
@@ -23,6 +24,7 @@ def health():
 def ready():
     """Readiness probe — returns 200 only if critical dependencies are reachable."""
     conn = None
+    conn_healthy = True
     try:
         conn = get_connection()
         with conn.cursor() as cur:
@@ -34,6 +36,17 @@ def ready():
                 "checks": {"database": "up"},
             }
         ), 200
+    
+    except OperationalError as exc:
+        conn_healthy = False  # connection is likely unusable
+        logger.exception("Database connection failed: %s", exc)
+
+        return jsonify(
+            {
+                "status": "not_ready",
+                "checks": {"database": "not_reachable"},
+            }
+        ), 503
 
     except Exception as exc:
         logger.exception("Readiness check failed: %s", exc)
@@ -46,4 +59,4 @@ def ready():
 
     finally:
         if conn is not None:
-            put_connection(conn)
+            put_connection(conn, close=not conn_healthy)

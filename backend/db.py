@@ -13,7 +13,7 @@ from time import monotonic
 from threading import Thread
 from queue import Queue, Full, Empty
 
-from psycopg2 import pool
+from psycopg2 import pool, OperationalError, InterfaceError
 from psycopg2.extras import execute_values
 from psycogreen.gevent import patch_psycopg
 
@@ -91,14 +91,15 @@ def get_connection():
     return _pool.getconn()
 
 
-def put_connection(conn) -> None:
+def put_connection(conn, close=None) -> None:
     """Return a connection to the pool."""
     if _pool is not None:
-        _pool.putconn(conn)
+        _pool.putconn(conn, close=close)
 
 
 def _flush_batch(rows: list[tuple]) -> None:
     conn = get_connection()
+    conn_healthy = True
     try:
         with conn.cursor() as cur:
             execute_values(
@@ -112,14 +113,24 @@ def _flush_batch(rows: list[tuple]) -> None:
                 page_size=50,
             )
         conn.commit()
+    except (OperationalError, InterfaceError) as exc:
+        logger.error("Database connection error: %s", exc)
+        conn_healthy = False
+
+        try:
+            conn.rollback()
+        except Exception:
+            pass
+
     except Exception as exc:
         logger.error("DB batch write error: %s", exc)
+
         try:
             conn.rollback()
         except Exception:
             pass
     finally:
-        put_connection(conn)
+        put_connection(conn, close=not conn_healthy)
 
 
 def _db_worker() -> None:
