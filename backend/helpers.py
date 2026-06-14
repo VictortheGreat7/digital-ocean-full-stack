@@ -62,6 +62,6 @@ def _generate_all_cities() -> dict[str, str]:
         # e.g., "America/Argentina/Buenos_Aires" -> "Buenos Aires"
         # e.g., "Europe/London" -> "London"
         city_name = tz.split("/")[-1].replace("_", " ")
-        cities[city_name] = tz
+        cities[city_name] = ZoneInfo(tz)
         
     return cities

@@ -117,9 +117,9 @@ def get_world_clocks():
 
         with tracer.start_as_current_span("background_refresh.world_clocks") as span:
             span.set_attribute("cities_count", len(MAJOR_CITIES))
-            for city, tz_name in MAJOR_CITIES.items():
+            for city, tz_obj in MAJOR_CITIES.items():
                 try:
-                    data = format_time_response(tz_name, city=city)
+                    data = format_time_response(str(tz_obj), tz=tz_obj, city=city)
                     cities_data.append(data)
                 except Exception as exc:
                     span.set_attribute("error", True)
