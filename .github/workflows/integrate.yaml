@@ -1,9 +1,9 @@
 name: Subsequent Builds and Deployments
 
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
   workflow_dispatch:
 
 jobs:
@@ -82,7 +82,7 @@ jobs:
         with:
           image-ref: kronos-backend:${{ github.sha }}
           format: 'table'
-          exit-code: '0'
+          exit-code: '1'
           scanners: 'vuln,secret,misconfig,license'
           severity: 'CRITICAL'
       - name: Test backend container
