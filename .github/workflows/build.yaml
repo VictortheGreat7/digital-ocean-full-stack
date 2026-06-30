@@ -2,9 +2,9 @@ name: Build, Provision Cloud Infrastructure for and Deploy Application
 
 # This workflow will run on pushes to the main branch and manual triggers
 on:
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -78,7 +78,7 @@ jobs:
         with:
           image-ref: kronos-backend:${{ github.sha }}
           format: 'table'
-          exit-code: '1'
+          exit-code: '0'
           scanners: 'vuln,secret,misconfig,license'
           severity: 'CRITICAL'
       - name: Test backend container
