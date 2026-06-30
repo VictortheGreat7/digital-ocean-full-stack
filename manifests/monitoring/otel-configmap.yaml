@@ -26,7 +26,7 @@ data:
               honor_labels: true
               params:
                 'match[]':
-                  - '{__name__=~"k6_.*", job=~"kronos-loadtest-.*"}'
+                  - '{__name__=~"k6_.*", job_name=~"kronos-loadtest-.*"}'
               static_configs:
                 - targets:
                     - kube-prom-stack-kube-prome-prometheus.monitoring.svc.cluster.local:9090
