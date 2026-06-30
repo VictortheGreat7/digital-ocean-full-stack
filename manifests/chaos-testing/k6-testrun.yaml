@@ -32,7 +32,7 @@ spec:
       - name: TEST_TYPE
         value: soak
       - name: K6_OUT
-        value: experimental-prometheus-rw, experimental-opentelemetry
+        value: experimental-prometheus-rw, opentelemetry
       - name: K6_PROMETHEUS_RW_PUSH_INTERVAL
         value: 10s
       - name: K6_PROMETHEUS_RW_SERVER_URL
