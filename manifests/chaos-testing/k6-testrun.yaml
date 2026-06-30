@@ -32,11 +32,17 @@ spec:
       - name: TEST_TYPE
         value: soak
       - name: K6_OUT
-        value: experimental-prometheus-rw
+        value: experimental-prometheus-rw, experimental-opentelemetry
       - name: K6_PROMETHEUS_RW_PUSH_INTERVAL
         value: 10s
       - name: K6_PROMETHEUS_RW_SERVER_URL
         value: http://kube-prom-stack-kube-prome-prometheus.monitoring.svc.cluster.local:9090/api/v1/write
+      - name: K6_OTEL_GRPC_EXPORTER_ENDPOINT
+        value: datadog.monitoring.svc.cluster.local:4317
+      - name: K6_OTEL_GRPC_EXPORTER_INSECURE
+        value: "true"
+      - name: K6_OTEL_METRIC_PREFIX
+        value: "direct_k6_"
       - name: K6_PROMETHEUS_RW_TREND_STATS
         value: p(95),p(99),min,max,avg
       - name: K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM
