@@ -3,7 +3,7 @@ Application configuration — environment variables, constants, and shared setti
 """
 
 import os
-from helpers import _generate_all_cities
+# from helpers import _generate_all_cities
 
 
 # --- Database ---
@@ -34,23 +34,23 @@ EXCLUDED_PATHS: set[str] = {
     "/ready",
 }
 
-MAJOR_CITIES: dict[str, str] = _generate_all_cities()
+# MAJOR_CITIES: dict[str, str] = _generate_all_cities()
 
-# # --- Major Cities ---
-# MAJOR_CITIES: dict[str, str] = {
-#     "New York": "America/New_York",
-#     "London": "Europe/London",
-#     "Tokyo": "Asia/Tokyo",
-#     "Sydney": "Australia/Sydney",
-#     "Dubai": "Asia/Dubai",
-#     "Singapore": "Asia/Singapore",
-#     "São Paulo": "America/Sao_Paulo",
-#     "Mumbai": "Asia/Kolkata",
-#     "Paris": "Europe/Paris",
-#     "Los Angeles": "America/Los_Angeles",
-#     "Hong Kong": "Asia/Hong_Kong",
-#     "Berlin": "Europe/Berlin",
-# }
+# --- Major Cities ---
+MAJOR_CITIES: dict[str, str] = {
+    "New York": "America/New_York",
+    "London": "Europe/London",
+    "Tokyo": "Asia/Tokyo",
+    "Sydney": "Australia/Sydney",
+    "Dubai": "Asia/Dubai",
+    "Singapore": "Asia/Singapore",
+    "São Paulo": "America/Sao_Paulo",
+    "Mumbai": "Asia/Kolkata",
+    "Paris": "Europe/Paris",
+    "Los Angeles": "America/Los_Angeles",
+    "Hong Kong": "Asia/Hong_Kong",
+    "Berlin": "Europe/Berlin",
+}
 
 # --- Endpoint-specific Cache TTLs ---
 CACHE_TTL_WORLD_CLOCKS: int = int(os.getenv("CACHE_TTL_WORLD_CLOCKS", "86400"))
