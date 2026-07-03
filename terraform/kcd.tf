@@ -2,7 +2,7 @@ resource "helm_release" "argo_cd" {
   name             = "argocd"
   repository       = "https://argoproj.github.io/argo-helm"
   chart            = "argo-cd"
-  namespace        = "knative-cd"
+  namespace        = "gitops"
   create_namespace = true
   atomic           = true
   cleanup_on_fail  = true
@@ -25,7 +25,7 @@ resource "helm_release" "parent_app" {
   name             = "parent"
   repository       = "https://argoproj.github.io/argo-helm"
   chart            = "argocd-apps"
-  namespace        = "knative-cd"
+  namespace        = "gitops"
   create_namespace = false
   atomic           = true
   cleanup_on_fail  = true

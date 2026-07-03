@@ -1,6 +1,6 @@
 applications:
   http-redirect:
-    namespace: knative-cd
+    namespace: gitops
     finalizers:
     - resources-finalizer.argocd.argoproj.io
     additionalAnnotations:
@@ -17,7 +17,7 @@ applications:
       server: https://kubernetes.default.svc
       namespace: kube-system
   parent:
-    namespace: knative-cd
+    namespace: gitops
     finalizers:
     - resources-finalizer.argocd.argoproj.io
     additionalAnnotations:
@@ -81,4 +81,4 @@ applications:
                   - ${kronos_hostname}
     destination:
       server: https://kubernetes.default.svc
-      namespace: knative-cd
+      namespace: gitops

@@ -1,6 +1,6 @@
 projects:
   monitoring:
-    namespace: knative-cd
+    namespace: gitops
     description: Project for monitoring applications
     additionalAnnotations:
       argocd.argoproj.io/sync-wave: "0"
@@ -32,7 +32,7 @@ projects:
 
 applications:
   otel-config:
-    namespace: knative-cd
+    namespace: gitops
     project: monitoring
     additionalAnnotations:
       argocd.argoproj.io/sync-wave: "1"
@@ -53,7 +53,7 @@ applications:
       namespace: monitoring
 
   kube-prom-stack:
-    namespace: knative-cd
+    namespace: gitops
     project: monitoring
     additionalAnnotations:
       argocd.argoproj.io/depends-on: "otel-config"
@@ -90,7 +90,7 @@ applications:
       namespace: monitoring
 
   datadog:
-    namespace: knative-cd
+    namespace: gitops
     project: monitoring
     additionalAnnotations:
       argocd.argoproj.io/depends-on: "otel-config"

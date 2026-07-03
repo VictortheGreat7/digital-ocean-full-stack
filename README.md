@@ -304,7 +304,7 @@ kubectl get httproutes -A
 - The initial admin password for ArgoCD will be generated as a secret. You can retrieve it with the following command:
 
 ```bash
-kubectl get secret argocd-initial-admin-secret -n knative-cd -o jsonpath="{.data.password}" | base64 -d; echo
+kubectl get secret argocd-initial-admin-secret -n gitops -o jsonpath="{.data.password}" | base64 -d; echo
 ```
 
 ![ArgoCD Initial Password](./screenshots/argo2.png)

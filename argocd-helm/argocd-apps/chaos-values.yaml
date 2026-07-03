@@ -1,6 +1,6 @@
 projects:
   chaos-testing:
-    namespace: knative-cd
+    namespace: gitops
     description: Project for chaos testing applications
     finalizers:
       - resources-finalizer.argocd.argoproj.io
@@ -27,7 +27,7 @@ projects:
       kind: ClusterRoleBinding
 applications:
   chaos-operator:
-    namespace: knative-cd
+    namespace: gitops
     project: chaos-testing
     additionalAnnotations:
       argocd.argoproj.io/sync-wave: "7"
@@ -54,7 +54,7 @@ applications:
       namespace: chaos
 
   chaos-test:
-    namespace: knative-cd
+    namespace: gitops
     project: chaos-testing
     additionalAnnotations:
       argocd.argoproj.io/depends-on: chaos-operator

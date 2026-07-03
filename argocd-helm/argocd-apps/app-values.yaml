@@ -1,6 +1,6 @@
 projects:
   kronos:
-    namespace: knative-cd
+    namespace: gitops
     description: Project for Kronos World Clock application
     finalizers:
       - resources-finalizer.argocd.argoproj.io
@@ -16,7 +16,7 @@ projects:
       kind: Namespace
 applications:
   kronos:
-    namespace: knative-cd
+    namespace: gitops
     project: kronos
     additionalAnnotations:
       argocd.argoproj.io/sync-wave: "5"
