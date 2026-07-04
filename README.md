@@ -362,3 +362,4 @@ kubectl create token headlamp-admin -n kube-system
 - It would seem rollout restarts affect latency.
 - Beware of CPU throttling. Enabling telemetry logging into database in a background thread with an aggressive flush interval (polling 20x a second) caused severe CPU starvation. Rollout restarts during load tests also causes CPU throttling as new pods could not start up in time to share the load, which caused latency spikes and request timeouts.
 - Keep Node CPU utilizaton under 80%. During load testing, I observed that when CPU utilization on the Kubernetes nodes approached 80%, latency started to increase significantly.
+- `jsonify` python function is more CPU-intensive than using `json.dumps` with `Response`

@@ -19,7 +19,9 @@ def format_time_response(
 
     Raises ``ZoneInfoNotFoundError`` if the timezone is invalid.
     """
-    if tz is None:
+    if isinstance(tz, str):
+        tz = ZoneInfo(tz)
+    elif tz is None:
         tz = ZoneInfo(timezone)
     now = datetime.now(tz)
 
