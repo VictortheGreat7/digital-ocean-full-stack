@@ -4,25 +4,19 @@ Time-related endpoints.
 
 from __future__ import annotations
 
-from time import sleep, monotonic
-from threading import Thread, Event, Lock
+from time import sleep
+from threading import Thread, Event
 from telemetry import tracer
 from datetime import datetime
 from zoneinfo import available_timezones
-from json import dumps as json_dumps
+# from json import dumps as json_dumps
+from orjson import dumps as json_dumps
 from flask import Blueprint, jsonify, request, Response
 from helpers import format_time_response, validate_timezone
 from config import CACHE_TTL_TIMEZONES, CACHE_TTL_WORLD_CLOCKS, MAJOR_CITIES
 
 
 time_bp = Blueprint("time", __name__)
-
-
-# # Setup cache and lock at the module level
-# _timezones_lock = Lock()
-# _timezones_cache = {"data": None, "expires_at": 0}
-# _world_clocks_cache = {"data": None, "expires_at": 0}
-# _world_clocks_lock = Lock()
 
 
 @time_bp.route("/time", methods=["GET"])
@@ -113,57 +107,6 @@ def get_timezones():
     return Response(_timezones_cache_json, mimetype="application/json")
 
 
-# @time_bp.route("/timezones", methods=["GET"])
-# def get_timezones():
-#     """List every IANA timezone grouped by region."""
-
-#     cached = _timezones_cache["data"]
-#     expires_at = _timezones_cache["expires_at"]
-
-#     ttl = CACHE_TTL_TIMEZONES
-#     now = monotonic()
-
-#     if cached is not None and now < expires_at:
-#         with tracer.start_as_current_span("cache.timezones") as span:
-#             span.set_attribute("cache.hit", True)
-#         return Response(cached, mimetype="application/json")
-
-#     with tracer.start_as_current_span("cache.timezones") as span:
-#         span.set_attribute("cache.hit", False)
-
-#     with _timezones_lock:
-#         if (
-#             _timezones_cache["data"] is not None
-#             and now < _timezones_cache["expires_at"]
-#         ):
-#             return Response(_timezones_cache["data"], mimetype="application/json")
-
-#         with tracer.start_as_current_span("all_tz__fetch") as span:
-#             try:
-#                 all_tz = sorted(available_timezones())
-#                 regions: dict[str, list[str]] = {}
-#                 for tz in all_tz:
-#                     if "/" in tz:
-#                         region = tz.split("/")[0]
-#                         regions.setdefault(region, []).append(tz)
-#             except Exception as exc:
-#                 span.set_attribute("error", True)
-#                 span.record_exception(exc)
-#                 return jsonify({"error": "Failed to fetch timezones"}), 500
-
-#         payload = json_dumps(
-#             {
-#                 "count": len(all_tz),
-#                 "regions": regions,
-#             }
-#         )
-
-#         _timezones_cache["data"] = payload
-#         _timezones_cache["expires_at"] = now + ttl
-
-#     return Response(payload, mimetype="application/json")
-
-
 def _refresh_world_clocks_loop():
     """Background worker that continuously regenerates the world clocks payload."""
     global _world_clocks_cache_json
@@ -208,7 +151,41 @@ _world_clocks_refresh_thread.start()
 
 @time_bp.route("/world-clocks", methods=["GET"])
 def get_world_clocks():
-    """Return the current time for every city in ``MAJOR_CITIES``."""
+    """Return the current time for every city in ``MAJOR_CITIES``, or searched cities."""
+
+    search_query = request.args.get("search", "").strip().lower()
+
+    if search_query:
+        with tracer.start_as_current_span("search.world_clocks") as span:
+            span.set_attribute("search_query", search_query)
+
+            all_tzs = available_timezones()
+            # Filter timezones (e.g., "Lagos" matches "Africa/Lagos")
+            matched_tzs = [tz for tz in all_tzs if search_query in tz.lower()]
+
+            # Limit results to prevent expensive dynamic formattingif query is too broad
+            # (e.g., typing "a" would match almost all timezones)
+            matched_tzs = matched_tzs[:15]
+
+            cities_data: list[dict] = []
+            for tz_name in matched_tzs:
+                # Extract a readable city from the IANA string
+                # e.g., "America/Port-au-Prince" -> "Port-au-Prince"
+                city_name = tz_name.split("/")[-1].replace("_", " ")
+
+                try:
+                    tz_obj = validate_timezone(tz_name)
+                    data = format_time_response(tz_name, tz=tz_obj, city=city_name)
+                    cities_data.append(data)
+                except Exception as exc:
+                    span.record_exception(exc)
+                    continue
+
+            # payload = json_dumps({"cities": cities_data, "count": len(cities_data)})
+            # return Response(payload, mimetype="application/json")
+
+            # Return dynamic JSON
+            return jsonify({"cities": cities_data, "count": len(cities_data)})
 
     if not _world_clocks_ready.wait(timeout=5.0):
         return jsonify({"error": "Service warming up, please try again."}), 503
@@ -217,53 +194,6 @@ def get_world_clocks():
         span.set_attribute("cache.hit", True)
 
     return Response(_world_clocks_cache_json, mimetype="application/json")
-
-
-# @time_bp.route("/world-clocks", methods=["GET"])
-# def get_world_clocks():
-#     """Return the current time for every city in ``MAJOR_CITIES``."""
-
-#     # Fast path: read without lock
-#     cached = _world_clocks_cache["data"]
-#     expires_at = _world_clocks_cache["expires_at"]
-
-#     ttl = CACHE_TTL_WORLD_CLOCKS
-#     now = monotonic()
-
-#     if cached is not None and now < expires_at:
-#         with tracer.start_as_current_span("cache.world_clocks") as span:
-#             span.set_attribute("cache.hit", True)
-#         return Response(cached, mimetype="application/json")
-
-#     with tracer.start_as_current_span("cache.world_clocks") as span:
-#         span.set_attribute("cache.hit", False)
-
-#     with _world_clocks_lock:
-#         # Double-check: another thread may have refreshed while we waited
-#         if (
-#             _world_clocks_cache["data"] is not None
-#             and now < _world_clocks_cache["expires_at"]
-#         ):
-#             return Response(_world_clocks_cache["data"], mimetype="application/json")
-
-#         cities_data: list[dict] = []
-
-#         with tracer.start_as_current_span("background_refresh.world_clocks") as span:
-#             span.set_attribute("cities_count", len(MAJOR_CITIES))
-#             for city, tz_name in MAJOR_CITIES.items():
-#                 try:
-#                     data = format_time_response(tz_name, city=city)
-#                     cities_data.append(data)
-#                 except Exception as exc:
-#                     span.set_attribute("error", True)
-#                     span.record_exception(exc)
-#                     cities_data.append({"city": city, "error": str(exc)})
-
-#         payload = json_dumps({"cities": cities_data, "count": len(cities_data)})
-#         _world_clocks_cache["data"] = payload
-#         _world_clocks_cache["expires_at"] = now + ttl
-
-#     return Response(payload, mimetype="application/json")
 
 
 @time_bp.route("/legacy/time", methods=["GET"])

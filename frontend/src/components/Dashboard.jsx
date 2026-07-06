@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import CityCard from './CityCard';
 import './Dashboard.css';
 
@@ -15,21 +15,22 @@ function Dashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [is24Hour, setIs24Hour] = useState(true);
 
-  useEffect(() => {
-    fetchWorldClocks();
-    // Update clocks every 75 seconds
-    const interval = setInterval(fetchWorldClocks, 75000);
-    return () => clearInterval(interval);
-  }, []);
+  // Track timeout debouncing
+  const debounceRef = useRef(null);
 
-  const fetchWorldClocks = async () => {
-    setLoading(true);
+  const fetchWorldClocks = useCallback(async (query = '') => {
+    // Only show loading spinner on initial load, not during silent background polling
+    if (!cities.length) setLoading(true);
     setError(null);
-    
+
     try {
-      const response = await fetch(`${API_URL}/world-clocks`);
+      const url = query
+        ? `${API_URL}/world-clocks?search=${encodeURIComponent(query)}`
+        : `${API_URL}/world-clocks`;
+      
+      const response = await fetch(url);
       if (!response.ok) {
-        throw new Error(`Failed to fetch world clocks: ${response.status} ${response.statusText}`);
+        throw new Error(`Failed to fetch world clocks: ${response.status}`);
       }
       const data = await response.json();
       setCities(data.cities);
@@ -38,11 +39,38 @@ function Dashboard() {
     } finally {
       setLoading(false);
     }
+  }, [cities.length]);
+
+  // Handle Debounced Search Input
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+
+    // Clear the previous timer if the user is still typing
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    // Set a new timer to fetch data after 300ms of inactivity
+    debounceRef.current = setTimeout(() => {
+      fetchWorldClocks(value);
+    }, 300);
   };
 
-  const filteredCities = cities.filter(city =>
-    city.city.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    // Initial fetch
+    fetchWorldClocks(searchTerm);
+
+    // Background polling (only poll if they aren't actively searching)
+    const interval = setInterval(() => {
+      if (!searchTerm) {
+        fetchWorldClocks('');
+      }
+    }, 75000);
+
+    return () => {
+      clearInterval(interval);
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [fetchWorldClocks, searchTerm]);
 
   if (loading) {
     return (
@@ -60,7 +88,7 @@ function Dashboard() {
       <div className="dashboard">
         <div className="error">
           <p>Error: {error}</p>
-          <button onClick={fetchWorldClocks}>Retry</button>
+          <button onClick={() => fetchWorldClocks(searchTerm)}>Retry</button>
         </div>
       </div>
     );
@@ -83,7 +111,7 @@ function Dashboard() {
               type="text"
               placeholder="Search cities..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={handleSearchChange}  {/* Updated to use the debounce function */}
               className="search-input"
             />
           </div>
@@ -98,7 +126,8 @@ function Dashboard() {
       </header>
 
       <div className="cities-grid">
-        {filteredCities.map((city, index) => (
+        {/* Render directly from the 'cities' state */}
+        {cities.map((city, index) => (
           <CityCard
             key={city.city}
             city={city}
@@ -108,7 +137,7 @@ function Dashboard() {
         ))}
       </div>
 
-      {filteredCities.length === 0 && (
+      {cities.length === 0 && (
         <div className="no-results">
           <p>No cities found matching "{searchTerm}"</p>
         </div>
