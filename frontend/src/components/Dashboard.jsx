@@ -111,7 +111,8 @@ function Dashboard() {
               type="text"
               placeholder="Search cities..."
               value={searchTerm}
-              onChange={handleSearchChange}  {/* Updated to use the debounce function */}
+              // Updated to use the debounce function
+              onChange={handleSearchChange}
               className="search-input"
             />
           </div>
