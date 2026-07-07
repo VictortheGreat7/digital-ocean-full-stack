@@ -4,6 +4,7 @@ Time-related endpoints.
 
 from __future__ import annotations
 
+import logging
 from time import sleep
 from threading import Thread, Event
 from telemetry import tracer
@@ -16,6 +17,7 @@ from config import CACHE_TTL_TIMEZONES, CACHE_TTL_WORLD_CLOCKS, MAJOR_CITIES
 
 
 time_bp = Blueprint("time", __name__)
+logger = logging.getLogger(__name__)
 
 
 @time_bp.route("/time", methods=["GET"])
@@ -39,10 +41,12 @@ _world_clocks_cache_json: str | None = None
 _timezones_ready = Event()
 _world_clocks_ready = Event()
 
+_all_timezones_sorted: list[str] | None = None
+
 
 def _refresh_timezones_loop():
     """Background worker that continuously regenerates the timezones payload."""
-    global _timezones_cache_json
+    global _timezones_cache_json, _all_timezones_sorted
 
     while True:
         try:
@@ -72,14 +76,14 @@ def _refresh_timezones_loop():
             # Serialize the dictionary to a JSON string exactly once per TTL cycle
             _timezones_cache_json = new_cache_json
 
+            _all_timezones_sorted = all_tz 
+
             # Signal that the cache is successfully populated
             _timezones_ready.set()
         except Exception as exc:
             # If ANYTHING fails (serialization, memory issue, etc.), the thread catches it,
             # logs the error, and survives to try again on the next TTL cycle.
-            return jsonify(
-                {"error": f"Critical failure in background timezone refresh: {exc}"}
-            ), 500
+            logger.error("Critical failure in background timezone refresh: %s", exc)
 
         # Sleep for the configured TTL before refreshing again
         sleep(CACHE_TTL_TIMEZONES)
@@ -137,9 +141,7 @@ def _refresh_world_clocks_loop():
             _world_clocks_cache_json = new_cache_json
             _world_clocks_ready.set()
         except Exception as exc:
-            return jsonify(
-                {"error": f"Critical failure in background clock refresh: {exc}"}
-            ), 500
+            logger.error("Critical failure in background clock refresh: %s", exc)
 
         sleep(CACHE_TTL_WORLD_CLOCKS)
 
@@ -158,9 +160,12 @@ def get_world_clocks():
         with tracer.start_as_current_span("search.world_clocks") as span:
             span.set_attribute("search_query", search_query)
 
-            all_tzs = available_timezones()
+            all_tzs = _all_timezones_sorted or []
             # Filter timezones (e.g., "Lagos" matches "Africa/Lagos")
-            matched_tzs = [tz for tz in all_tzs if search_query in tz.lower()]
+            matched_tzs = [
+                tz for tz in all_tzs
+                if search_query in tz.split("/")[-1].replace("_", " ").lower()
+            ]
 
             # Limit results to prevent expensive dynamic formattingif query is too broad
             # (e.g., typing "a" would match almost all timezones)
