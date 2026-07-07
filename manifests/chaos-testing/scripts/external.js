@@ -19,6 +19,14 @@ const TIMEZONES = new SharedArray('timezones', function() {
   ];
 });
 
+const SEARCH_QUERIES = new SharedArray('searchQueries', function() {
+  return [
+    'lagos', 'london', 'tokyo', 'new york', 'africa', 
+    'america', 'pacific', 'lon', 'ber', 'syd', 'dub', 'los',
+    'x' // Intentionally testing a query that might return few/no results
+  ];
+});
+
 // Custom Metrics
 const sliErrorBudgetBurn = new Rate('sli_error_budget_burn');
 const sliLatencyVsSloRatio = new Trend('sli_latency_vs_slo_ratio');
@@ -114,9 +122,11 @@ export let options = {
 };
 
 export default function () {
+  // Generate a SINGLE random number to accurately route traffic
+  const rand = Math.random(); 
 
-  if (Math.random() < 0.8) {
-    // World Clocks API Endpoint. 80% of traffic, expected to be the most common endpoint hit by users
+  if (rand < 0.75) {
+    // 75% of traffic: Cached World Clocks (The "Appetizer" fast path)
     group('world clocks endpoint', () => {
       let res = http.get(`${BASE_URL}/api/world-clocks`, {
         tags: { name: 'world-clocks', endpoint: 'world-clocks' },
@@ -127,8 +137,24 @@ export default function () {
       });
       recordSli(res, 'world-clocks', 500);
     });
-  } else if (Math.random() < 0.9) {
-    // Timezones Endpoint. 12% of traffic, expected to be common but less than API calls
+
+  } else if (rand < 0.85) {
+    // 10% of traffic: Dynamic Search (The "Menu" CPU-bound path)
+    group('dashboard search endpoint', () => {
+      let query = SEARCH_QUERIES[Math.floor(Math.random() * SEARCH_QUERIES.length)];
+      let res = http.get(`${BASE_URL}/api/world-clocks?search=${encodeURIComponent(query)}`, {
+        // Tagging this differently so it doesn't skew your cached world-clocks metrics
+        tags: { name: 'world-clocks-search', endpoint: 'world-clocks-search' }, 
+      });
+      check(res, {
+        'search status 200': (r) => r.status === 200,
+        'search latency < 500ms': (r) => r.timings.duration < 500,
+      });
+      recordSli(res, 'world-clocks-search', 500);
+    });
+
+  } else if (rand < 0.95) {
+    // 10% of traffic: Timezones Endpoint
     group('timezones endpoint', () => {
       let res = http.get(`${BASE_URL}/api/timezones`, {
         tags: { name: 'timezones', endpoint: 'timezones' },
@@ -139,8 +165,9 @@ export default function () {
       });
       recordSli(res, 'timezones', 500);
     });
+
   } else {
-    // Current Time API Endpoint. Also 2% of traffic, expected to be common but less than world clocks endpoint
+    // 5% of traffic: Specific Time Endpoint
     group('time endpoint', () => {
       let tz = TIMEZONES[Math.floor(Math.random() * TIMEZONES.length)];
       let res = http.get(`${BASE_URL}/api/time?timezone=${tz}`, {

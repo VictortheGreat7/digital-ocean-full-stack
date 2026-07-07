@@ -181,11 +181,11 @@ def get_world_clocks():
                     span.record_exception(exc)
                     continue
 
-            # payload = json_dumps({"cities": cities_data, "count": len(cities_data)})
-            # return Response(payload, mimetype="application/json")
+            # return jsonify({"cities": cities_data, "count": len(cities_data)})
 
             # Return dynamic JSON
-            return jsonify({"cities": cities_data, "count": len(cities_data)})
+            payload = json_dumps({"cities": cities_data, "count": len(cities_data)})
+            return Response(payload, mimetype="application/json")
 
     if not _world_clocks_ready.wait(timeout=5.0):
         return jsonify({"error": "Service warming up, please try again."}), 503
