@@ -99,10 +99,10 @@ def _refresh_timezones_loop():
             if redis_cache.is_cache_ready():
                 data_key = redis_cache.build_cache_key("timezones", "latest")
                 redis_cache.set_raw_bytes(data_key, new_cache_bytes, CACHE_TTL_TIMEZONES + 5)
-            else:
-                _timezones_cache_json = new_cache_bytes
-                # Signal that the cache is successfully populated
-                _timezones_ready.set()
+
+            _timezones_cache_json = new_cache_bytes
+            # Signal that the cache is successfully populated
+            _timezones_ready.set()
 
         except Exception as exc:
             # If ANYTHING fails (serialization, memory issue, etc.), the thread catches it,
@@ -135,7 +135,7 @@ def get_timezones():
                 return Response(cached_bytes, mimetype="application/json")
         
         # 2. Fallback to Local Memory Path
-        elif _timezones_ready.wait(timeout=5.0):
+        if _timezones_ready.wait(timeout=5.0):
             span.set_attribute("cache.hit", True)
             span.set_attribute("cache.type", "memory")
             return Response(_timezones_cache_json, mimetype="application/json")
@@ -186,9 +186,9 @@ def _refresh_world_clocks_loop():
                 if redis_cache.is_cache_ready():
                     data_key = redis_cache.build_cache_key("world-clocks", "latest")
                     redis_cache.set_raw_bytes(data_key, new_cache_bytes, CACHE_TTL_WORLD_CLOCKS + 5)
-                else:
-                    _world_clocks_cache_json = new_cache_bytes
-                    _world_clocks_ready.set()
+
+                _world_clocks_cache_json = new_cache_bytes
+                _world_clocks_ready.set()
 
         except Exception as exc:
             logger.error("Critical failure in background clock refresh: %s", exc)
@@ -250,7 +250,7 @@ def get_world_clocks():
                 return Response(cached_bytes, mimetype="application/json")
         
         # 2. Fallback to Local Memory Path
-        elif _world_clocks_ready.wait(timeout=5.0):
+        if _world_clocks_ready.wait(timeout=5.0):
             span.set_attribute("cache.hit", True)
             span.set_attribute("cache.type", "memory")
             return Response(_world_clocks_cache_json, mimetype="application/json")
