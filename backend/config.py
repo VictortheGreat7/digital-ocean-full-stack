@@ -3,8 +3,6 @@ Application configuration — environment variables, constants, and shared setti
 """
 
 import os
-# from helpers import _generate_all_cities
-
 
 # --- Database ---
 DB_CONFIG: dict[str, str] = {
@@ -33,8 +31,6 @@ EXCLUDED_PATHS: set[str] = {
     "/favicon.ico",
     "/ready",
 }
-
-# MAJOR_CITIES: dict[str, str] = _generate_all_cities()
 
 # --- Major Cities ---
 MAJOR_CITIES: dict[str, str] = {

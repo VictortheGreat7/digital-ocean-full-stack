@@ -5,7 +5,7 @@ Shared helpers — timezone formatting, validation, etc.
 from __future__ import annotations
 
 from datetime import datetime
-from zoneinfo import ZoneInfo, ZoneInfoNotFoundError, available_timezones
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from typing import Any
 
 
@@ -51,20 +51,3 @@ def validate_timezone(timezone: str) -> ZoneInfo:
         return ZoneInfo(timezone)
     except (ZoneInfoNotFoundError, KeyError) as exc:
         raise ValueError(f"Unknown timezone: {timezone}") from exc
-
-
-# # --- Major Cities (Dynamically Generated) ---
-# def _generate_all_cities() -> dict[str, str]:
-#     cities = {}
-#     for tz in available_timezones():
-#         # Optional: Filter out generic, legacy, or non-geographic timezones
-#         if tz.startswith(("Etc/", "SystemV/", "US/", "posix/", "right/", "Factory")):
-#             continue
-
-#         # Extract the final part of the string and replace underscores with spaces
-#         # e.g., "America/Argentina/Buenos_Aires" -> "Buenos Aires"
-#         # e.g., "Europe/London" -> "London"
-#         city_name = tz.split("/")[-1].replace("_", " ")
-#         cities[city_name] = ZoneInfo(tz)
-
-#     return cities

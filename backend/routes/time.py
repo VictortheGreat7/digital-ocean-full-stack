@@ -9,7 +9,6 @@ from threading import Thread, Event
 from telemetry import tracer
 from datetime import datetime
 from zoneinfo import available_timezones
-# from json import dumps as json_dumps
 from orjson import dumps as json_dumps
 from flask import Blueprint, jsonify, request, Response
 from helpers import format_time_response, validate_timezone
@@ -180,8 +179,6 @@ def get_world_clocks():
                 except Exception as exc:
                     span.record_exception(exc)
                     continue
-
-            # return jsonify({"cities": cities_data, "count": len(cities_data)})
 
             # Return dynamic JSON
             payload = json_dumps({"cities": cities_data, "count": len(cities_data)})
