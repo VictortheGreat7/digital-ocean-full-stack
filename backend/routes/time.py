@@ -9,8 +9,8 @@ from threading import Thread, Event
 from telemetry import tracer
 from datetime import datetime
 from zoneinfo import available_timezones
-from json import dumps as json_dumps
-# from orjson import dumps as json_dumps
+# from json import dumps as json_dumps
+from orjson import dumps as json_dumps
 from flask import Blueprint, jsonify, request, Response
 from helpers import format_time_response, validate_timezone
 from config import CACHE_TTL_TIMEZONES, CACHE_TTL_WORLD_CLOCKS, MAJOR_CITIES
