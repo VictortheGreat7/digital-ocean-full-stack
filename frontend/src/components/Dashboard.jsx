@@ -12,15 +12,16 @@ function Dashboard() {
   const [error, setError] = useState(null);
   
   const [searchTerm, setSearchTerm] = useState('');
-  // Use a ref to track the search term for the background interval 
-  // without triggering the useEffect to re-run
-  const searchRef = useRef(''); 
+  const searchRef = useRef(''); // Silently tracks search for the interval
   
   const [is24Hour, setIs24Hour] = useState(true);
   const debounceRef = useRef(null);
 
-  const fetchWorldClocks = useCallback(async (query = '') => {
-    if (!cities.length) setLoading(true);
+  const fetchWorldClocks = useCallback(async (query = '', isBackgroundPoll = false) => {
+    // Only show the loading spinner if this is a direct user action or initial load
+    if (!isBackgroundPoll) {
+      setLoading(true);
+    }
     setError(null);
 
     try {
@@ -37,40 +38,42 @@ function Dashboard() {
     } catch (err) {
       setError(err.message);
     } finally {
-      setLoading(false);
+      if (!isBackgroundPoll) {
+        setLoading(false);
+      }
     }
-  }, [cities.length]);
+  }, []);
 
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
-    searchRef.current = value; // Silently update the ref for the interval to read
+    searchRef.current = value; 
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
     debounceRef.current = setTimeout(() => {
-      fetchWorldClocks(value);
+      // Direct user action, so isBackgroundPoll defaults to false
+      fetchWorldClocks(value); 
     }, 300);
   };
 
   useEffect(() => {
-    // 1. Initial fetch on component mount only
+    // Initial fetch on mount
     fetchWorldClocks('');
 
-    // 2. Set up the 75-second polling interval
     const interval = setInterval(() => {
-      // Check the ref to see if the user is currently searching
+      // Check the ref. Only poll if the search bar is empty.
       if (!searchRef.current) {
-        fetchWorldClocks('');
+        // Pass `true` so the background poll happens silently without triggering the loading UI
+        fetchWorldClocks('', true); 
       }
     }, 75000);
 
-    // 3. Cleanup
     return () => {
       clearInterval(interval);
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [fetchWorldClocks]); // Notice searchTerm is entirely removed from here
+  }, [fetchWorldClocks]);
 
   if (loading) {
     return (
