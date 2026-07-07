@@ -8,6 +8,7 @@ projects:
       argocd.argoproj.io/sync-wave: "4"
     sourceRepos:
       - "https://github.com/VictortheGreat7/digital-ocean-full-stack.git"
+      - "https://charts.bitnami.com/bitnami"
     destinations:
       - server: https://kubernetes.default.svc
         namespace: kronos
@@ -15,11 +16,36 @@ projects:
     - group: ''
       kind: Namespace
 applications:
+  redis:
+    namespace: knative-cd
+    project: kronos
+    additionalAnnotations:
+      argocd.argoproj.io/sync-wave: "5"
+    finalizers:
+    - resources-finalizer.argocd.argoproj.io
+    syncPolicy:
+      automated:
+        selfHeal: true
+      syncOptions:
+        - CreateNamespace=true
+    sources:
+      - repoURL: https://github.com/VictortheGreat7/digital-ocean-full-stack.git
+        targetRevision: main
+        ref: values
+      - repoURL: https://charts.bitnami.com/bitnami
+        chart: redis
+        targetRevision: 25.3.2
+        helm:
+          valueFiles:
+            - $values/argocd-helm/redis/values.yaml
+    destination:
+      server: https://kubernetes.default.svc
+      namespace: kronos
   kronos:
     namespace: gitops
     project: kronos
     additionalAnnotations:
-      argocd.argoproj.io/sync-wave: "5"
+      argocd.argoproj.io/sync-wave: "6"
     finalizers:
     - resources-finalizer.argocd.argoproj.io
     syncPolicy:
