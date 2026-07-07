@@ -34,7 +34,7 @@ applications:
         ref: values
       - repoURL: https://charts.bitnami.com/bitnami
         chart: redis
-        targetRevision: 25.3.2
+        targetRevision: 27.0.14
         helm:
           valueFiles:
             - $values/argocd-helm/redis/values.yaml
