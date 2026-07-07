@@ -2,8 +2,6 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import CityCard from './CityCard';
 import './Dashboard.css';
 
-// In production, the API is behind the same ingress at /api
-// In development, use localhost:5000
 const API_URL = import.meta.env.VITE_API_URL || (
   import.meta.env.DEV ? 'http://localhost:5000' : ''
 );
@@ -12,14 +10,16 @@ function Dashboard() {
   const [cities, setCities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
   const [searchTerm, setSearchTerm] = useState('');
+  // Use a ref to track the search term for the background interval 
+  // without triggering the useEffect to re-run
+  const searchRef = useRef(''); 
+  
   const [is24Hour, setIs24Hour] = useState(true);
-
-  // Track timeout debouncing
   const debounceRef = useRef(null);
 
   const fetchWorldClocks = useCallback(async (query = '') => {
-    // Only show loading spinner on initial load, not during silent background polling
     if (!cities.length) setLoading(true);
     setError(null);
 
@@ -41,36 +41,36 @@ function Dashboard() {
     }
   }, [cities.length]);
 
-  // Handle Debounced Search Input
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
+    searchRef.current = value; // Silently update the ref for the interval to read
 
-    // Clear the previous timer if the user is still typing
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
-    // Set a new timer to fetch data after 300ms of inactivity
     debounceRef.current = setTimeout(() => {
       fetchWorldClocks(value);
     }, 300);
   };
 
   useEffect(() => {
-    // Initial fetch
-    fetchWorldClocks(searchTerm);
+    // 1. Initial fetch on component mount only
+    fetchWorldClocks('');
 
-    // Background polling (only poll if they aren't actively searching)
+    // 2. Set up the 75-second polling interval
     const interval = setInterval(() => {
-      if (!searchTerm) {
+      // Check the ref to see if the user is currently searching
+      if (!searchRef.current) {
         fetchWorldClocks('');
       }
     }, 75000);
 
+    // 3. Cleanup
     return () => {
       clearInterval(interval);
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [fetchWorldClocks, searchTerm]);
+  }, [fetchWorldClocks]); // Notice searchTerm is entirely removed from here
 
   if (loading) {
     return (
