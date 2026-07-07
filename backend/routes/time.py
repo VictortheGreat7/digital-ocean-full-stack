@@ -153,39 +153,39 @@ _world_clocks_refresh_thread.start()
 def get_world_clocks():
     """Return the current time for every city in ``MAJOR_CITIES``, or searched cities."""
 
-    search_query = request.args.get("search", "").strip().lower()
+    # search_query = request.args.get("search", "").strip().lower()
 
-    if search_query:
-        with tracer.start_as_current_span("search.world_clocks") as span:
-            span.set_attribute("search_query", search_query)
+    # if search_query:
+    #     with tracer.start_as_current_span("search.world_clocks") as span:
+    #         span.set_attribute("search_query", search_query)
 
-            all_tzs = available_timezones()
-            # Filter timezones (e.g., "Lagos" matches "Africa/Lagos")
-            matched_tzs = [tz for tz in all_tzs if search_query in tz.lower()]
+    #         all_tzs = available_timezones()
+    #         # Filter timezones (e.g., "Lagos" matches "Africa/Lagos")
+    #         matched_tzs = [tz for tz in all_tzs if search_query in tz.lower()]
 
-            # Limit results to prevent expensive dynamic formattingif query is too broad
-            # (e.g., typing "a" would match almost all timezones)
-            matched_tzs = matched_tzs[:15]
+    #         # Limit results to prevent expensive dynamic formattingif query is too broad
+    #         # (e.g., typing "a" would match almost all timezones)
+    #         matched_tzs = matched_tzs[:15]
 
-            cities_data: list[dict] = []
-            for tz_name in matched_tzs:
-                # Extract a readable city from the IANA string
-                # e.g., "America/Port-au-Prince" -> "Port-au-Prince"
-                city_name = tz_name.split("/")[-1].replace("_", " ")
+    #         cities_data: list[dict] = []
+    #         for tz_name in matched_tzs:
+    #             # Extract a readable city from the IANA string
+    #             # e.g., "America/Port-au-Prince" -> "Port-au-Prince"
+    #             city_name = tz_name.split("/")[-1].replace("_", " ")
 
-                try:
-                    tz_obj = validate_timezone(tz_name)
-                    data = format_time_response(tz_name, tz=tz_obj, city=city_name)
-                    cities_data.append(data)
-                except Exception as exc:
-                    span.record_exception(exc)
-                    continue
+    #             try:
+    #                 tz_obj = validate_timezone(tz_name)
+    #                 data = format_time_response(tz_name, tz=tz_obj, city=city_name)
+    #                 cities_data.append(data)
+    #             except Exception as exc:
+    #                 span.record_exception(exc)
+    #                 continue
 
-            # payload = json_dumps({"cities": cities_data, "count": len(cities_data)})
-            # return Response(payload, mimetype="application/json")
+    #         # payload = json_dumps({"cities": cities_data, "count": len(cities_data)})
+    #         # return Response(payload, mimetype="application/json")
 
-            # Return dynamic JSON
-            return jsonify({"cities": cities_data, "count": len(cities_data)})
+    #         # Return dynamic JSON
+    #         return jsonify({"cities": cities_data, "count": len(cities_data)})
 
     if not _world_clocks_ready.wait(timeout=5.0):
         return jsonify({"error": "Service warming up, please try again."}), 503
