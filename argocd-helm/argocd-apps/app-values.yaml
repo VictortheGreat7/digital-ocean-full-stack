@@ -17,7 +17,7 @@ projects:
       kind: Namespace
 applications:
   redis:
-    namespace: knative-cd
+    namespace: gitops
     project: kronos
     additionalAnnotations:
       argocd.argoproj.io/sync-wave: "5"
