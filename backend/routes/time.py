@@ -5,6 +5,7 @@ Time-related endpoints.
 from __future__ import annotations
 
 import logging
+import redis_cache
 from time import sleep
 from threading import Thread, Event
 from telemetry import tracer
@@ -48,22 +49,42 @@ def _refresh_timezones_loop():
     """Background worker that continuously regenerates the timezones payload."""
     global _timezones_cache_json, _all_timezones_sorted
 
+    # Brief pause on startup to allow Redis connections to settle
+    sleep(2)
+
     while True:
         try:
-            with tracer.start_as_current_span(
-                "background_refresh.timezones.calculate"
-            ) as span:
-                try:
-                    all_tz = sorted(available_timezones())
-                    regions: dict[str, list[str]] = {}
-                    for tz in all_tz:
-                        if "/" in tz:
-                            region = tz.split("/")[0]
-                            regions.setdefault(region, []).append(tz)
-                except Exception as exc:
-                    span.set_attribute("error", True)
-                    span.record_exception(exc)
-                    return jsonify({"error": "Failed to fetch timezones"}), 500
+            is_leader = False
+
+            # 1. Determine if this worker should do the calculation
+            if redis_cache.is_cache_ready():
+                # REDIS MODE: Leader Election (2-second lock)
+                lock_key = redis_cache.build_cache_key("timezones-lock")
+                is_leader = redis_cache._client.set(lock_key, "locked", nx=True, ex=2)
+            else:
+                # LOCAL MODE: Every worker calculates its own cache
+                is_leader = True
+
+            # 2. Only the leader (or local workers) spend CPU calculating
+            if is_leader:
+                with tracer.start_as_current_span(
+                    "background_refresh.timezones.calculate"
+                ) as span:
+                    try:
+                        all_tz = sorted(available_timezones())
+                        regions: dict[str, list[str]] = {}
+                        for tz in all_tz:
+                            if "/" in tz:
+                                region = tz.split("/")[0]
+                                regions.setdefault(region, []).append(tz)
+                    except Exception as exc:
+                        span.set_attribute("error", True)
+                        span.record_exception(exc)
+                        logger.error("Failed to calculate timezones: %s", exc)
+                        sleep(5)
+                        continue
+
+            _all_timezones_sorted = all_tz
 
             payload = {
                 "count": len(all_tz),
@@ -71,21 +92,25 @@ def _refresh_timezones_loop():
             }
 
             with tracer.start_as_current_span("background_refresh.timezones.serialize"):
-                new_cache_json = json_dumps(payload)
+                # Serialize the dictionary to a JSON string exactly once per TTL cycle
+                new_cache_bytes = json_dumps(payload)
+            
+            # 3. Save to the appropriate storage
+            if redis_cache.is_cache_ready():
+                data_key = redis_cache.build_cache_key("timezones", "latest")
+                redis_cache.set_raw_bytes(data_key, new_cache_bytes, CACHE_TTL_TIMEZONES + 5)
+            else:
+                _timezones_cache_json = new_cache_bytes
+                # Signal that the cache is successfully populated
+                _timezones_ready.set()
 
-            # Serialize the dictionary to a JSON string exactly once per TTL cycle
-            _timezones_cache_json = new_cache_json
-
-            _all_timezones_sorted = all_tz 
-
-            # Signal that the cache is successfully populated
-            _timezones_ready.set()
         except Exception as exc:
             # If ANYTHING fails (serialization, memory issue, etc.), the thread catches it,
             # logs the error, and survives to try again on the next TTL cycle.
             logger.error("Critical failure in background timezone refresh: %s", exc)
 
-        # Sleep for the configured TTL before refreshing again
+        # Sleep for the TTL. (If Redis is active, the followers sleep too, 
+        # waking up exactly when the cache expires to elect a new leader).
         sleep(CACHE_TTL_TIMEZONES)
 
 
@@ -98,48 +123,73 @@ _timezone_refresh_thread.start()
 def get_timezones():
     """List every IANA timezone grouped by region."""
 
-    # Wait up to 5 seconds for the background thread to populate the cache on initial startup
-    if not _timezones_ready.wait(timeout=5.0):
-        return jsonify({"error": "Service warming up, please try again."}), 503
-
     with tracer.start_as_current_span("cache.timezones") as span:
-        # Since the background thread handles all misses, the API always hits
-        span.set_attribute("cache.hit", True)
+        
+        # 1. Try Redis Fast Path
+        if redis_cache.is_cache_ready():
+            data_key = redis_cache.build_cache_key("timezones", "latest")
+            cached_bytes = redis_cache.get_raw_bytes(data_key)
+            if cached_bytes:
+                span.set_attribute("cache.hit", True)
+                span.set_attribute("cache.type", "redis")
+                return Response(cached_bytes, mimetype="application/json")
+        
+        # 2. Fallback to Local Memory Path
+        elif _timezones_ready.wait(timeout=5.0):
+            span.set_attribute("cache.hit", True)
+            span.set_attribute("cache.type", "memory")
+            return Response(_timezones_cache_json, mimetype="application/json")
 
-    # Return the raw, pre-calculated JSON string directly to the WSGI server
-    return Response(_timezones_cache_json, mimetype="application/json")
+        span.set_attribute("cache.hit", False)
+
+    return jsonify({"error": "Service warming up or cache unavailable."}), 503
 
 
 def _refresh_world_clocks_loop():
     """Background worker that continuously regenerates the world clocks payload."""
     global _world_clocks_cache_json
+    sleep(2)
 
     while True:
         try:
-            with tracer.start_as_current_span(
-                "background_refresh.world_clocks.calculate"
-            ) as span:
-                span.set_attribute("cities_count", len(MAJOR_CITIES))
-                cities_data: list[dict] = []
+            is_leader = False
 
-                for city, tz_obj in MAJOR_CITIES.items():
-                    try:
-                        data = format_time_response(str(tz_obj), tz=tz_obj, city=city)
-                        cities_data.append(data)
-                    except Exception as exc:
-                        span.set_attribute("error", True)
-                        span.record_exception(exc)
-                        cities_data.append({"city": city, "error": str(exc)})
+            if redis_cache.is_cache_ready():
+                lock_key = redis_cache.build_cache_key("world-clocks-lock")
+                is_leader = redis_cache._client.set(lock_key, "locked", nx=True, ex=2)
+            else:
+                is_leader = True
 
-            payload = {"cities": cities_data, "count": len(cities_data)}
+            if is_leader:
+                with tracer.start_as_current_span(
+                    "background_refresh.world_clocks.calculate"
+                ) as span:
+                    span.set_attribute("cities_count", len(MAJOR_CITIES))
+                    cities_data: list[dict] = []
 
-            with tracer.start_as_current_span(
-                "background_refresh.world_clocks.serialize"
-            ):
-                new_cache_json = json_dumps(payload)
+                    for city, tz_obj in MAJOR_CITIES.items():
+                        try:
+                            data = format_time_response(str(tz_obj), tz=tz_obj, city=city)
+                            cities_data.append(data)
+                        except Exception as exc:
+                            span.set_attribute("error", True)
+                            span.record_exception(exc)
+                            cities_data.append({"city": city, "error": str(exc)})
 
-            _world_clocks_cache_json = new_cache_json
-            _world_clocks_ready.set()
+                payload = {"cities": cities_data, "count": len(cities_data)}
+
+                with tracer.start_as_current_span(
+                    "background_refresh.world_clocks.serialize"
+                ):
+                    new_cache_bytes = json_dumps(payload)
+
+                if redis_cache.is_cache_ready():
+                    data_key = redis_cache.build_cache_key("world-clocks", "latest")
+                    redis_cache.set_raw_bytes(data_key, new_cache_bytes, CACHE_TTL_WORLD_CLOCKS + 5)
+                else:
+                    _world_clocks_cache_json = new_cache_bytes
+                    _world_clocks_ready.set()
+
         except Exception as exc:
             logger.error("Critical failure in background clock refresh: %s", exc)
 
@@ -160,14 +210,14 @@ def get_world_clocks():
         with tracer.start_as_current_span("search.world_clocks") as span:
             span.set_attribute("search_query", search_query)
 
-            all_tzs = _all_timezones_sorted or []
+            all_tzs = _all_timezones_sorted or available_timezones()
             # Filter timezones (e.g., "Lagos" matches "Africa/Lagos")
             matched_tzs = [
                 tz for tz in all_tzs
                 if search_query in tz.split("/")[-1].replace("_", " ").lower()
             ]
 
-            # Limit results to prevent expensive dynamic formattingif query is too broad
+            # Limit results to prevent expensive dynamic formatting if query is too broad
             # (e.g., typing "a" would match almost all timezones)
             matched_tzs = matched_tzs[:15]
 
@@ -189,13 +239,25 @@ def get_world_clocks():
             payload = json_dumps({"cities": cities_data, "count": len(cities_data)})
             return Response(payload, mimetype="application/json")
 
-    if not _world_clocks_ready.wait(timeout=5.0):
-        return jsonify({"error": "Service warming up, please try again."}), 503
-
     with tracer.start_as_current_span("cache.world_clocks") as span:
-        span.set_attribute("cache.hit", True)
+        # 1. Try Redis Fast Path
+        if redis_cache.is_cache_ready():
+            data_key = redis_cache.build_cache_key("world-clocks", "latest")
+            cached_bytes = redis_cache.get_raw_bytes(data_key)
+            if cached_bytes:
+                span.set_attribute("cache.hit", True)
+                span.set_attribute("cache.type", "redis")
+                return Response(cached_bytes, mimetype="application/json")
+        
+        # 2. Fallback to Local Memory Path
+        elif _world_clocks_ready.wait(timeout=5.0):
+            span.set_attribute("cache.hit", True)
+            span.set_attribute("cache.type", "memory")
+            return Response(_world_clocks_cache_json, mimetype="application/json")
 
-    return Response(_world_clocks_cache_json, mimetype="application/json")
+        span.set_attribute("cache.hit", False)
+
+    return jsonify({"error": "Service warming up or cache unavailable."}), 503
 
 
 @time_bp.route("/legacy/time", methods=["GET"])
