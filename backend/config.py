@@ -13,6 +13,21 @@ DB_CONFIG: dict[str, str] = {
     "password": os.getenv("DB_PASSWORD", "dev-password-change-in-prod"),
 }
 
+# --- Redis / Cache ---
+REDIS_SENTINELS_RAW: str = os.getenv(
+    "REDIS_SENTINELS",
+    "redis-node-0.redis-headless.kronos.svc.cluster.local:26379,"
+    "redis-node-1.redis-headless.kronos.svc.cluster.local:26379,"
+    "redis-node-2.redis-headless.kronos.svc.cluster.local:26379",
+)
+REDIS_MASTER_SET: str = os.getenv("REDIS_MASTER_SET", "foreman")
+REDIS_PASSWORD: str = os.getenv("REDIS_PASSWORD", "")
+REDIS_DB: int = int(os.getenv("REDIS_DB", "0"))
+REDIS_SOCKET_TIMEOUT: float = float(os.getenv("REDIS_SOCKET_TIMEOUT", "0.1"))
+
+CACHE_ENABLED: bool = os.getenv("CACHE_ENABLED", "true").lower() == "true"
+CACHE_KEY_PREFIX: str = os.getenv("CACHE_KEY_PREFIX", "kronos:cache")
+
 # --- Telemetry ---
 OTEL_EXPORTER_OTLP_ENDPOINT: str = os.getenv(
     "OTEL_EXPORTER_OTLP_ENDPOINT",
