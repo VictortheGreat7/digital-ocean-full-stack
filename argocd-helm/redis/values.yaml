@@ -7,6 +7,10 @@ auth:
   sentinel: true
 
 master:
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: DoNotSchedule
   count: 1
   persistence:
     enabled: true
@@ -20,6 +24,10 @@ master:
       memory: 512Mi
 
 replica:
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: DoNotSchedule
   replicaCount: 3
   persistence:
     enabled: true
