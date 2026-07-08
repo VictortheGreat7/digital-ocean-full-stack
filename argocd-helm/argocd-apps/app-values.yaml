@@ -16,31 +16,31 @@ projects:
     - group: ''
       kind: Namespace
 applications:
-  redis:
-    namespace: gitops
-    project: kronos
-    additionalAnnotations:
-      argocd.argoproj.io/sync-wave: "5"
-    finalizers:
-    - resources-finalizer.argocd.argoproj.io
-    syncPolicy:
-      automated:
-        selfHeal: true
-      syncOptions:
-        - CreateNamespace=true
-    sources:
-      - repoURL: https://github.com/VictortheGreat7/digital-ocean-full-stack.git
-        targetRevision: main
-        ref: values
-      - repoURL: https://charts.bitnami.com/bitnami
-        chart: redis
-        targetRevision: 27.0.14
-        helm:
-          valueFiles:
-            - $values/argocd-helm/redis/values.yaml
-    destination:
-      server: https://kubernetes.default.svc
-      namespace: kronos
+  # redis:
+  #   namespace: gitops
+  #   project: kronos
+  #   additionalAnnotations:
+  #     argocd.argoproj.io/sync-wave: "5"
+  #   finalizers:
+  #   - resources-finalizer.argocd.argoproj.io
+  #   syncPolicy:
+  #     automated:
+  #       selfHeal: true
+  #     syncOptions:
+  #       - CreateNamespace=true
+  #   sources:
+  #     - repoURL: https://github.com/VictortheGreat7/digital-ocean-full-stack.git
+  #       targetRevision: main
+  #       ref: values
+  #     - repoURL: https://charts.bitnami.com/bitnami
+  #       chart: redis
+  #       targetRevision: 27.0.14
+  #       helm:
+  #         valueFiles:
+  #           - $values/argocd-helm/redis/values.yaml
+  #   destination:
+  #     server: https://kubernetes.default.svc
+  #     namespace: kronos
   kronos:
     namespace: gitops
     project: kronos
