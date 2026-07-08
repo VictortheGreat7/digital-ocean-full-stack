@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 _client: redis.Redis | None = None
 _ready = False
 
+
 def _parse_sentinels(raw: str) -> list[tuple[str, int]]:
     sentinels: list[tuple[str, int]] = []
     for item in raw.split(","):
@@ -33,6 +34,7 @@ def _parse_sentinels(raw: str) -> list[tuple[str, int]]:
         host, port = item.rsplit(":", 1)
         sentinels.append((host.strip(), int(port)))
     return sentinels
+
 
 REDIS_SENTINELS: list[tuple[str, int]] = _parse_sentinels(REDIS_SENTINELS_RAW)
 
@@ -87,6 +89,7 @@ def get_raw_bytes(key: str) -> bytes | None:
     except Exception as exc:
         logger.warning("Redis GET failed for key=%s: %s", key, exc)
         return None
+
 
 def set_raw_bytes(key: str, raw_bytes: bytes | str, ttl_seconds: int) -> None:
     """Store pre-serialized strings/bytes directly."""
