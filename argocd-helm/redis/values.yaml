@@ -28,7 +28,7 @@ replica:
     - maxSkew: 1
       topologyKey: kubernetes.io/hostname
       whenUnsatisfiable: DoNotSchedule
-  replicaCount: 3
+  replicaCount: 1
   persistence:
     enabled: true
     size: 8Gi
@@ -43,7 +43,7 @@ replica:
 sentinel:
   enabled: true
   masterSet: foreman
-  quorum: 2
+  quorum: 1
   automateClusterRecovery: true
 
 metrics:
