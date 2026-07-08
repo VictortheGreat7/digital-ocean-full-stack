@@ -58,62 +58,62 @@ resource "helm_release" "descheduler" {
   depends_on = [digitalocean_kubernetes_cluster.kronos]
 }
 
-resource "kubernetes_service_account_v1" "headlamp-admin" {
-  metadata {
-    name      = "headlamp-admin"
-    namespace = "kube-system"
-  }
+# resource "kubernetes_service_account_v1" "headlamp-admin" {
+#   metadata {
+#     name      = "headlamp-admin"
+#     namespace = "kube-system"
+#   }
 
-  depends_on = [digitalocean_kubernetes_cluster.kronos]
-}
+#   depends_on = [digitalocean_kubernetes_cluster.kronos]
+# }
 
-resource "kubernetes_cluster_role_binding_v1" "headlamp-admin" {
-  metadata {
-    name = "headlamp-admin"
-  }
-  role_ref {
-    api_group = "rbac.authorization.k8s.io"
-    kind      = "ClusterRole"
-    name      = "cluster-admin"
-  }
-  subject {
-    kind      = "ServiceAccount"
-    name      = "headlamp-admin"
-    namespace = "kube-system"
-  }
+# resource "kubernetes_cluster_role_binding_v1" "headlamp-admin" {
+#   metadata {
+#     name = "headlamp-admin"
+#   }
+#   role_ref {
+#     api_group = "rbac.authorization.k8s.io"
+#     kind      = "ClusterRole"
+#     name      = "cluster-admin"
+#   }
+#   subject {
+#     kind      = "ServiceAccount"
+#     name      = "headlamp-admin"
+#     namespace = "kube-system"
+#   }
 
-  depends_on = [kubernetes_service_account_v1.headlamp-admin]
-}
+#   depends_on = [kubernetes_service_account_v1.headlamp-admin]
+# }
 
-resource "helm_release" "headlamp" {
-  name             = "headlamp"
-  repository       = "https://kubernetes-sigs.github.io/headlamp/"
-  chart            = "headlamp"
-  namespace        = "kube-system"
-  create_namespace = false
-  atomic           = true
-  cleanup_on_fail  = true
+# resource "helm_release" "headlamp" {
+#   name             = "headlamp"
+#   repository       = "https://kubernetes-sigs.github.io/headlamp/"
+#   chart            = "headlamp"
+#   namespace        = "kube-system"
+#   create_namespace = false
+#   atomic           = true
+#   cleanup_on_fail  = true
 
-  values = [
-    templatefile("${path.root}/terraform-helm/headlamp/values.yaml", {
-      headlamp_hostname = "${var.subdomains[5]}.${var.domain}"
-    })
-  ]
+#   values = [
+#     templatefile("${path.root}/terraform-helm/headlamp/values.yaml", {
+#       headlamp_hostname = "${var.subdomains[5]}.${var.domain}"
+#     })
+#   ]
 
-  wait    = true
-  timeout = 600
+#   wait    = true
+#   timeout = 600
 
-  depends_on = [kubernetes_cluster_role_binding_v1.headlamp-admin]
-}
+#   depends_on = [kubernetes_cluster_role_binding_v1.headlamp-admin]
+# }
 
-resource "kubernetes_token_request_v1" "headlamp-admin" {
-  metadata {
-    name      = kubernetes_service_account_v1.headlamp-admin.metadata.0.name
-    namespace = kubernetes_service_account_v1.headlamp-admin.metadata.0.namespace
-  }
+# resource "kubernetes_token_request_v1" "headlamp-admin" {
+#   metadata {
+#     name      = kubernetes_service_account_v1.headlamp-admin.metadata.0.name
+#     namespace = kubernetes_service_account_v1.headlamp-admin.metadata.0.namespace
+#   }
 
-  depends_on = [helm_release.headlamp]
-}
+#   depends_on = [helm_release.headlamp]
+# }
 
 # resource "digitalocean_project" "kronos" {
 #   name        = "kronos"

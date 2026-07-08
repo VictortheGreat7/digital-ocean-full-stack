@@ -52,6 +52,6 @@ resource "helm_release" "parent_app" {
     kubernetes_secret_v1.datadog_secret,
     helm_release.metrics-server,
     helm_release.descheduler,
-    kubernetes_token_request_v1.headlamp-admin
+    # kubernetes_token_request_v1.headlamp-admin
   ]
 }
