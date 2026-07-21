@@ -43,6 +43,7 @@
 
 // export default provider;
 
+
 import { datadogRum } from '@datadog/browser-rum'
 
 datadogRum.init({
