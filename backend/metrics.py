@@ -9,13 +9,18 @@ from __future__ import annotations
 from time import monotonic
 
 from flask import Flask, g, request
-from opentelemetry import trace
-from opentelemetry.trace import format_trace_id
 from prometheus_client import Counter, Histogram
 from prometheus_flask_exporter import PrometheusMetrics
 
 from config import EXCLUDED_PATHS
-from db import enqueue_request_log
+from request_observability import (
+    build_request_observation,
+    enrich_active_span,
+    get_active_span,
+    get_observed_path,
+    publish_request_observation,
+    should_observe_request,
+)
 
 # ── Custom application metrics ─────────────────────────────────────────
 custom_request_errors = Counter(
@@ -40,10 +45,10 @@ def _start_timer() -> None:
 
 def _record_metrics(response):
     """Observe latency/error metrics and enqueue an async DB log entry."""
-    if request.path in EXCLUDED_PATHS:
+    if not should_observe_request(request.path, EXCLUDED_PATHS):
         return response
 
-    path = request.url_rule.rule if request.url_rule else request.path
+    path = get_observed_path(request)
     duration = monotonic() - g.start_time
     status = response.status_code
 
@@ -57,27 +62,17 @@ def _record_metrics(response):
         ).inc()
 
     # Enrich the active span
-    root_span = trace.get_current_span()
-    if root_span and root_span.get_span_context().is_valid:
-        root_span.set_attribute("http.route", path)
-        root_span.set_attribute("http.method", request.method)
-        root_span.set_attribute("http.status_code", status)
+    root_span = get_active_span()
+    enrich_active_span(root_span, path=path, method=request.method, status=status)
 
-    trace_id = (
-        format_trace_id(root_span.get_span_context().trace_id)
-        if root_span and root_span.get_span_context().is_valid
-        else None
-    )
-
-    # Non-blocking DB log
-    enqueue_request_log(
-        path=path,
-        method=request.method,
-        status=status,
-        latency_ms=int(duration * 1000),
-        timezone=request.args.get("timezone") if path == "/time" else None,
-        trace_id=trace_id,
-        span_context=root_span.get_span_context() if root_span else None,
+    publish_request_observation(
+        build_request_observation(
+            request,
+            duration_seconds=duration,
+            status_code=status,
+            path=path,
+            span=root_span,
+        )
     )
 
     return response

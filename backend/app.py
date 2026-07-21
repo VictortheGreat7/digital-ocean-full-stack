@@ -13,6 +13,7 @@ from flask_cors import CORS
 
 from db import init_db
 from metrics import init_metrics
+from request_log_writer import init_request_log_writer
 from routes import register_routes
 from telemetry import init_telemetry
 
@@ -33,6 +34,9 @@ def create_app() -> Flask:
 
     # Database
     init_db(app)
+
+    # Request logs
+    init_request_log_writer()
 
     # Route blueprints
     register_routes(app)

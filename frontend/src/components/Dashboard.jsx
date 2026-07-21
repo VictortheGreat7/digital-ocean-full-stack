@@ -1,79 +1,20 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState } from 'react';
 import CityCard from './CityCard';
+import useWorldClocks from '../hooks/useWorldClocks';
 import './Dashboard.css';
 
-const API_URL = import.meta.env.VITE_API_URL || (
-  import.meta.env.DEV ? 'http://localhost:5000' : ''
-);
-
 function Dashboard() {
-  const [cities, setCities] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  
-  const [searchTerm, setSearchTerm] = useState('');
-  const searchRef = useRef(''); // Silently tracks search for the interval
-  
+  const {
+    cities,
+    count,
+    loading,
+    error,
+    searchTerm,
+    handleSearchChange,
+    retry,
+  } = useWorldClocks();
+
   const [is24Hour, setIs24Hour] = useState(true);
-  const debounceRef = useRef(null);
-
-  const fetchWorldClocks = useCallback(async (query = '', isBackgroundPoll = false) => {
-    // Only show the loading spinner if this is a direct user action or initial load
-    if (!isBackgroundPoll) {
-      setLoading(true);
-    }
-    setError(null);
-
-    try {
-      const url = query
-        ? `${API_URL}/world-clocks?search=${encodeURIComponent(query)}`
-        : `${API_URL}/world-clocks`;
-      
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch world clocks: ${response.status}`);
-      }
-      const data = await response.json();
-      setCities(data.cities);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      if (!isBackgroundPoll) {
-        setLoading(false);
-      }
-    }
-  }, []);
-
-  const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-    searchRef.current = value; 
-
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-
-    debounceRef.current = setTimeout(() => {
-      // Direct user action, so isBackgroundPoll defaults to false
-      fetchWorldClocks(value); 
-    }, 300);
-  };
-
-  useEffect(() => {
-    // Initial fetch on mount
-    fetchWorldClocks('');
-
-    const interval = setInterval(() => {
-      // Check the ref. Only poll if the search bar is empty.
-      if (!searchRef.current) {
-        // Pass `true` so the background poll happens silently without triggering the loading UI
-        fetchWorldClocks('', true); 
-      }
-    }, 75000);
-
-    return () => {
-      clearInterval(interval);
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [fetchWorldClocks]);
 
   if (loading) {
     return (
@@ -91,7 +32,7 @@ function Dashboard() {
       <div className="dashboard">
         <div className="error">
           <p>Error: {error}</p>
-          <button onClick={() => fetchWorldClocks(searchTerm)}>Retry</button>
+          <button onClick={retry}>Retry</button>
         </div>
       </div>
     );
@@ -141,7 +82,7 @@ function Dashboard() {
         ))}
       </div>
 
-      {cities.length === 0 && (
+      {count === 0 && (
         <div className="no-results">
           <p>No cities found matching "{searchTerm}"</p>
         </div>

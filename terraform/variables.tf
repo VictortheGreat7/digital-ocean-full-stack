@@ -46,6 +46,12 @@ variable "redis_pass" {
   sensitive   = true
 }
 
+# variable "oci_credentials_json" {
+#   description = "OCI credentials JSON string for the Crossplane provider"
+#   type        = string
+#   sensitive   = true
+# }
+
 variable "subdomains" {
   description = "List of subdomains to create"
   type        = list(string)

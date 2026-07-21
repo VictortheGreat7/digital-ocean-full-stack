@@ -8,6 +8,12 @@ prev_attempts/
 /*.py
 id_rsa
 
+/docs/agents
+AGENTS.md
+CONTEXT.md
+skills-lock.json
+.agents
+
 # Node
 node_modules/
 npm-debug.log*

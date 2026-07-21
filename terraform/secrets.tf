@@ -131,3 +131,22 @@ resource "kubernetes_secret_v1" "redis_pass" {
 
   depends_on = [helm_release.reflector]
 }
+
+# resource "kubernetes_secret_v1" "oci_creds" {
+#   metadata {
+#     name      = "oci-creds"
+#     namespace = "secrets"
+#     annotations = {
+#       "reflector.v1.k8s.emberstack.com/reflection-auto-enabled"       = "true"
+#       "reflector.v1.k8s.emberstack.com/reflection-auto-namespaces"    = "crossplane-system"
+#       "reflector.v1.k8s.emberstack.com/reflection-allowed"            = "true"
+#       "reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces" = "crossplane-system"
+#     }
+#   }
+
+#   data = {
+#     "credentials" = var.oci_credentials_json
+#   }
+
+#   type = "Opaque"
+# }
