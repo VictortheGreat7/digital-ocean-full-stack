@@ -13,10 +13,10 @@ from redis_cache import is_cache_ready, build_cache_key, get_raw_bytes
 from world_clocks import build_world_clocks_payload
 from refresh_loops import (
     _timezones_ready,
-    _timezones_cache_json,
     _sorted_tz,
     _world_clocks_ready,
-    _world_clocks_cache_json,
+    get_timezones_cache_json,
+    get_world_clocks_cache_json,
 )
 
 time_bp = Blueprint("time", __name__)
@@ -53,7 +53,7 @@ def get_timezones():
         if _timezones_ready.wait(timeout=5.0):
             span.set_attribute("cache.hit", True)
             span.set_attribute("cache.type", "memory")
-            return Response(_timezones_cache_json, mimetype="application/json")
+            return Response(get_timezones_cache_json(), mimetype="application/json")
 
         span.set_attribute("cache.hit", False)
 
@@ -90,7 +90,7 @@ def get_world_clocks():
         if _world_clocks_ready.wait(timeout=5.0):
             span.set_attribute("cache.hit", True)
             span.set_attribute("cache.type", "memory")
-            return Response(_world_clocks_cache_json, mimetype="application/json")
+            return Response(get_world_clocks_cache_json(), mimetype="application/json")
 
         span.set_attribute("cache.hit", False)
 

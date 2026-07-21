@@ -53,6 +53,14 @@ def _set_world_clocks_cache(cache_bytes: bytes) -> None:
     _world_clocks_cache_json = cache_bytes
 
 
+def get_timezones_cache_json() -> bytes | None:
+    return _timezones_cache_json
+
+
+def get_world_clocks_cache_json() -> bytes | None:
+    return _world_clocks_cache_json
+
+
 def _start_timezones_refresh() -> None:
     run_periodic_cache_refresh(
         cache_name="timezones",
