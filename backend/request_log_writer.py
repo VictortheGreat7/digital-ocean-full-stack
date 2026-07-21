@@ -8,7 +8,7 @@ import atexit
 import logging
 from queue import Empty, Full, Queue
 from threading import Thread
-from time import monotonic, sleep
+from time import monotonic
 
 from opentelemetry import context
 from opentelemetry.trace import SpanContext

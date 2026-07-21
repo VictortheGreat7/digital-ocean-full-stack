@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import atexit
 import logging
-from threading import Thread
 
 from psycopg2 import pool
 from psycogreen.gevent import patch_psycopg

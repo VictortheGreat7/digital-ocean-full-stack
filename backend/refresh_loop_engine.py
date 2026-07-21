@@ -44,7 +44,9 @@ def run_periodic_cache_refresh(
                 lock_ttl_seconds=lock_ttl_seconds,
             )
         except Exception as exc:
-            logger.error("Critical failure in background %s refresh: %s", cache_name, exc)
+            logger.error(
+                "Critical failure in background %s refresh: %s", cache_name, exc
+            )
 
         sleep(ttl_seconds)
 
@@ -64,7 +66,11 @@ def _run_refresh_cycle(
     if redis_cache.is_cache_ready():
         try:
             lock_key = redis_cache.build_cache_key(f"{cache_name}-lock")
-            is_leader = bool(redis_cache._client.set(lock_key, "locked", nx=True, ex=lock_ttl_seconds))
+            is_leader = bool(
+                redis_cache._client.set(
+                    lock_key, "locked", nx=True, ex=lock_ttl_seconds
+                )
+            )
             redis_healthy = True
         except Exception as exc:
             logger.warning("Redis lock timed out, forcing local compute: %s", exc)
@@ -73,18 +79,24 @@ def _run_refresh_cycle(
         is_leader = True
 
     if is_leader:
-        with tracer.start_as_current_span(f"background_refresh.{cache_name}.calculate") as span:
+        with tracer.start_as_current_span(
+            f"background_refresh.{cache_name}.calculate"
+        ) as span:
             try:
                 payload = payload_builder()
                 span.set_attribute("payload.count", payload.get("count", 0))
 
-                with tracer.start_as_current_span(f"background_refresh.{cache_name}.serialize"):
+                with tracer.start_as_current_span(
+                    f"background_refresh.{cache_name}.serialize"
+                ):
                     new_cache_bytes = json_dumps(payload)
 
                 if redis_healthy:
                     try:
                         data_key = redis_cache.build_cache_key(cache_name, "latest")
-                        redis_cache.set_raw_bytes(data_key, new_cache_bytes, ttl_seconds + 5)
+                        redis_cache.set_raw_bytes(
+                            data_key, new_cache_bytes, ttl_seconds + 5
+                        )
                     except Exception as exc:
                         logger.warning(
                             "Leader failed to write to Redis (falling back to memory only): %s",
@@ -100,7 +112,9 @@ def _run_refresh_cycle(
                 logger.error("Failed to calculate %s: %s", cache_name, exc)
 
     elif redis_healthy:
-        with tracer.start_as_current_span(f"background_refresh.{cache_name}.follower_sync") as span:
+        with tracer.start_as_current_span(
+            f"background_refresh.{cache_name}.follower_sync"
+        ) as span:
             try:
                 data_key = redis_cache.build_cache_key(cache_name, "latest")
                 leader_bytes = redis_cache.get_raw_bytes(data_key)
@@ -118,4 +132,6 @@ def _run_refresh_cycle(
             except Exception as exc:
                 span.set_attribute("error", True)
                 span.record_exception(exc)
-                logger.warning("Follower pod failed to read sync data from Redis: %s", exc)
+                logger.warning(
+                    "Follower pod failed to read sync data from Redis: %s", exc
+                )

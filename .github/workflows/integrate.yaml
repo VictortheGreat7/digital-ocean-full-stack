@@ -349,7 +349,7 @@ jobs:
             "cloudflare_zone_id": "${{ secrets.CLOUDFLARE_ZONE_ID }}",
             "datadog_api_key": "${{ secrets.DATADOG_API_KEY }}",
             "datadog_app_key": "${{ secrets.DATADOG_APP_KEY }}",
-            "postgres_pass": "${{ secrets.POSTGRES_PASS }}"
+            "postgres_pass": "${{ secrets.POSTGRES_PASS }}",
             "redis_pass": "${{ secrets.REDIS_PASS }}",
             "oci_credentials_json": "${{ secrets.OCI_CREDENTIALS }}"
           }

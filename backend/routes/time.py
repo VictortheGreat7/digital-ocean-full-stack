@@ -9,7 +9,6 @@ from datetime import datetime
 from zoneinfo import available_timezones
 from flask import Blueprint, jsonify, request, Response
 from helpers import format_time_response, validate_timezone
-from orjson import loads as json_loads
 from redis_cache import is_cache_ready, build_cache_key, get_raw_bytes
 from world_clocks import build_world_clocks_payload
 from refresh_loops import (
@@ -85,13 +84,13 @@ def get_world_clocks():
             if cached_bytes:
                 span.set_attribute("cache.hit", True)
                 span.set_attribute("cache.type", "redis")
-                return jsonify(json_loads(cached_bytes))
+                return Response(cached_bytes, mimetype="application/json")
 
         # 2. Fallback to Local Memory Path
         if _world_clocks_ready.wait(timeout=5.0):
             span.set_attribute("cache.hit", True)
             span.set_attribute("cache.type", "memory")
-            return jsonify(json_loads(_world_clocks_cache_json))
+            return Response(_world_clocks_cache_json, mimetype="application/json")
 
         span.set_attribute("cache.hit", False)
 

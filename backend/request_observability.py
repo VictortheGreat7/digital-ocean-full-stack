@@ -67,7 +67,9 @@ def publish_request_observation(observation: RequestObservation) -> None:
     )
 
 
-def enrich_active_span(span: Span | None, *, path: str, method: str, status: int) -> None:
+def enrich_active_span(
+    span: Span | None, *, path: str, method: str, status: int
+) -> None:
     if span and span.get_span_context().is_valid:
         span.set_attribute("http.route", path)
         span.set_attribute("http.method", method)

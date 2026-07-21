@@ -48,7 +48,9 @@ def _build_searched_city_records(
         city_name = timezone.split("/")[-1].replace("_", " ")
         try:
             tz_obj = validate_timezone(timezone)
-            cities_data.append(format_time_response(timezone, tz=tz_obj, city=city_name))
+            cities_data.append(
+                format_time_response(timezone, tz=tz_obj, city=city_name)
+            )
         except Exception:
             continue
 
