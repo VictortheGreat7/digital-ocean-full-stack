@@ -7,6 +7,7 @@ from __future__ import annotations
 from telemetry import tracer
 from datetime import datetime
 from zoneinfo import available_timezones
+from orjson import dumps as json_dumps
 from flask import Blueprint, jsonify, request, Response
 from helpers import format_time_response, validate_timezone
 from redis_cache import is_cache_ready, build_cache_key, get_raw_bytes
@@ -70,11 +71,13 @@ def get_world_clocks():
         with tracer.start_as_current_span("search.world_clocks") as span:
             normalized_search = search_query.strip().lower()
             span.set_attribute("search_query", normalized_search)
-            payload = build_world_clocks_payload(
-                normalized_search,
-                all_timezones=_sorted_tz or available_timezones(),
+            payload = json_dumps(
+                build_world_clocks_payload(
+                    normalized_search,
+                    all_timezones=_sorted_tz or available_timezones(),
+                )
             )
-            return jsonify(payload)
+            return Response(payload, mimetype="application/json")
 
     with tracer.start_as_current_span("cache.world_clocks") as span:
         # 1. Try Redis Fast Path
