@@ -7,7 +7,7 @@ from __future__ import annotations
 import logging
 from flask import Blueprint, jsonify
 from psycopg2 import OperationalError
-from db import get_connection, put_connection
+from db import get_health_connection, put_health_connection
 
 
 health_bp = Blueprint("health", __name__)
@@ -26,7 +26,7 @@ def ready():
     conn = None
     conn_healthy = True
     try:
-        conn = get_connection()
+        conn = get_health_connection()
         with conn.cursor() as cur:
             cur.execute("SELECT 1")
 
@@ -59,4 +59,4 @@ def ready():
 
     finally:
         if conn is not None:
-            put_connection(conn, close=not conn_healthy)
+            put_health_connection(conn, close=not conn_healthy)
