@@ -113,3 +113,18 @@ spec:
   persistentVolumeClaimRetentionPolicy:
     whenDeleted: Delete
     whenScaled: Delete
+---
+# pdb-postgres.yaml
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: kronos-postgres-pdb
+  namespace: kronos
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: kronos-app
+      component: db
+      environment: development
+

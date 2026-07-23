@@ -131,3 +131,18 @@ spec:
       protocol: TCP
       name: metrics
   type: ClusterIP
+---
+# pdb-pgbouncer.yaml
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: kronos-pgbouncer-pdb
+  namespace: kronos
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: kronos-app
+      component: pgbouncer
+      environment: development
+
