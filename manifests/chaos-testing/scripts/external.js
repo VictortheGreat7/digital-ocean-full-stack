@@ -97,8 +97,8 @@ const profiles = {
   // Soak Testing for long-term stability
   soak: {
     stages: [
-      { duration: '5m', target: 500 }, // Start with 500 users
-      { duration: '3h', target: 500 }, // Hold for 3 hours
+      { duration: '5m', target: 750 }, // Start with 750 users
+      { duration: '3h', target: 750 }, // Hold for 3 hours
       { duration: '5m', target: 0 }, // Ramp down to 0 users
     ],
     thresholds: {
