@@ -18,6 +18,13 @@ spec:
         component: db
         environment: development
     spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            component: db
       terminationGracePeriodSeconds: 300
       containers:
         - name: postgres

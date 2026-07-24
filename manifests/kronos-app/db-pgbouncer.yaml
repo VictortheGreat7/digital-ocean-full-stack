@@ -44,6 +44,13 @@ spec:
         component: pgbouncer
         environment: development
     spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            component: pgbouncer
       initContainers:
         - name: wait-for-postgres
           image: busybox:1.28
