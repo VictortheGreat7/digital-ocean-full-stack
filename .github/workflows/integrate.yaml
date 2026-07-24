@@ -1,9 +1,9 @@
 name: Subsequent Builds and Deployments
 
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
   workflow_dispatch:
 
 jobs:
@@ -223,8 +223,7 @@ jobs:
             "datadog_api_key": "${{ secrets.DATADOG_API_KEY }}",
             "datadog_app_key": "${{ secrets.DATADOG_APP_KEY }}",
             "postgres_pass": "${{ secrets.POSTGRES_PASS }}",
-            "redis_pass": "${{ secrets.REDIS_PASS }}",
-            "oci_credentials_json": "${{ secrets.OCI_CREDENTIALS }}"
+            "redis_pass": "${{ secrets.REDIS_PASS }}"
           }
           EOF
 
@@ -282,8 +281,7 @@ jobs:
             "datadog_api_key": "${{ secrets.DATADOG_API_KEY }}",
             "datadog_app_key": "${{ secrets.DATADOG_APP_KEY }}",
             "postgres_pass": "${{ secrets.POSTGRES_PASS }}",
-            "redis_pass": "${{ secrets.REDIS_PASS }}",
-            "oci_credentials_json": "${{ secrets.OCI_CREDENTIALS }}"
+            "redis_pass": "${{ secrets.REDIS_PASS }}"
           }
           EOF
 
@@ -350,8 +348,7 @@ jobs:
             "datadog_api_key": "${{ secrets.DATADOG_API_KEY }}",
             "datadog_app_key": "${{ secrets.DATADOG_APP_KEY }}",
             "postgres_pass": "${{ secrets.POSTGRES_PASS }}",
-            "redis_pass": "${{ secrets.REDIS_PASS }}",
-            "oci_credentials_json": "${{ secrets.OCI_CREDENTIALS }}"
+            "redis_pass": "${{ secrets.REDIS_PASS }}"
           }
           EOF
 

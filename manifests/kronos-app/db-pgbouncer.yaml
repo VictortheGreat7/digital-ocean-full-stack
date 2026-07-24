@@ -31,7 +31,7 @@ metadata:
     component: pgbouncer
     environment: development
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: kronos-app
@@ -139,7 +139,7 @@ metadata:
   name: kronos-pgbouncer-pdb
   namespace: kronos
 spec:
-  minAvailable: 3
+  minAvailable: 2
   selector:
     matchLabels:
       app: kronos-app

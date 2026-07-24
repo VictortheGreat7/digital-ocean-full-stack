@@ -4,7 +4,7 @@ metadata:
   name: kronos-loadtest
   namespace: default
 spec:
-  cleanup: post
+  # cleanup: post
   parallelism: 3
   runner:
     image: grafana/k6:latest
