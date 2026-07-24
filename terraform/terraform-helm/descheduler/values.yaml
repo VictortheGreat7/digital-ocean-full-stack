@@ -27,9 +27,9 @@ deschedulerPolicy:
             metricsUtilization:
               metricsServer: true
             thresholds:
-              cpu: 60
-            targetThresholds:
               cpu: 70
+            targetThresholds:
+              cpu: 80
       plugins:
         balance:
           enabled:
