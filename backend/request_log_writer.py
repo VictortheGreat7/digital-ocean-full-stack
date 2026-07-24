@@ -12,10 +12,11 @@ from time import monotonic
 
 from opentelemetry import context
 from opentelemetry.trace import SpanContext
-from psycopg2 import InterfaceError, OperationalError, connect
+from psycopg2 import InterfaceError, OperationalError
 from psycopg2.extras import execute_values
 
-from config import BATCH_FLUSH_SECONDS, BATCH_SIZE, DB_CONFIG
+from config import BATCH_FLUSH_SECONDS, BATCH_SIZE
+from db import get_writer_connection, put_writer_connection
 
 logger = logging.getLogger(__name__)
 
@@ -65,18 +66,9 @@ def enqueue_request_log(
             _last_drop_log_at = now
 
 
-def _create_writer_connection():
-    """Open a raw persistent connection for the log writer."""
-    return connect(**DB_CONFIG)
-
-
-def _flush_batch(rows: list[tuple], conn):
-    """
-    Insert a batch of request logs using a persistent connection.
-
-    Returns the (possibly replaced) connection so the caller can keep
-    a valid handle after a reconnect.
-    """
+def _flush_batch(rows: list[tuple]) -> None:
+    """Insert a batch of request logs using a dedicated writer-pool connection."""
+    conn = get_writer_connection()
     conn_healthy = True
     try:
         with conn.cursor() as cur:
@@ -93,21 +85,17 @@ def _flush_batch(rows: list[tuple], conn):
         conn.commit()
     except (OperationalError, InterfaceError) as exc:
         conn_healthy = False
-
+        logger.error("Database connection error: %s", exc)
         try:
             conn.rollback()
         except Exception:
             pass
 
-        # Attempt one reconnect + retry
+        # One retry with a fresh connection from the pool
         try:
-            logger.info("Writer reconnecting to database after %s", exc)
-            conn.close()
-        except Exception:
-            pass
-
-        try:
-            conn = _create_writer_connection()
+            put_writer_connection(conn, close=not conn_healthy)
+            conn = get_writer_connection()
+            conn_healthy = True
             with conn.cursor() as cur:
                 execute_values(
                     cur,
@@ -122,6 +110,7 @@ def _flush_batch(rows: list[tuple], conn):
             conn.commit()
             logger.info("Writer batch re-inserted after reconnect")
         except Exception as retry_exc:
+            conn_healthy = False
             logger.error("Writer retry failed: %s", retry_exc)
             try:
                 conn.rollback()
@@ -133,19 +122,12 @@ def _flush_batch(rows: list[tuple], conn):
             conn.rollback()
         except Exception:
             pass
-
-    return conn
+    finally:
+        put_writer_connection(conn, close=not conn_healthy)
 
 
 def _writer_loop() -> None:
     from telemetry import tracer  # deferred to avoid circular import
-
-    conn = None
-    try:
-        conn = _create_writer_connection()
-        logger.info("DB log writer persistent connection established")
-    except Exception as exc:
-        logger.error("Could not establish writer DB connection: %s", exc)
 
     while True:
         item = _log_queue.get()
@@ -162,32 +144,17 @@ def _writer_loop() -> None:
             try:
                 nxt = _log_queue.get(timeout=remaining)
                 if nxt is _SENTINEL:
-                    if conn is not None:
-                        conn = _flush_batch(batch, conn)
+                    _flush_batch(batch)
                     return
                 batch.append(nxt[0])
             except Empty:
                 break
 
-        if conn is None:
-            try:
-                conn = _create_writer_connection()
-                logger.info("DB log writer persistent connection re-established")
-            except Exception as exc:
-                logger.error("Writer still cannot connect: %s; dropping batch", exc)
-                continue
-
         with tracer.start_as_current_span("db.insert_request_log_batch") as span:
             span.set_attribute("db.operation", "insert")
             span.set_attribute("db.table", "requests")
             span.set_attribute("db.batch_size", len(batch))
-            conn = _flush_batch(batch, conn)
-
-    if conn is not None:
-        try:
-            conn.close()
-        except Exception:
-            pass
+            _flush_batch(batch)
 
 
 def shutdown_request_log_writer() -> None:
