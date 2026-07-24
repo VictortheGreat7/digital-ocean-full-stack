@@ -159,7 +159,7 @@ def _writer_loop() -> None:
 
 def shutdown_request_log_writer() -> None:
     """Drain the queue and stop the worker thread."""
-    global _shutdown_called, _writer_thread
+    global _shutdown_called
 
     if _shutdown_called:
         return

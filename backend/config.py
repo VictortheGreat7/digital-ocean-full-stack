@@ -69,13 +69,11 @@ CACHE_TTL_TIMEZONES: int = int(os.getenv("CACHE_TTL_TIMEZONES", "86400"))
 
 # --- Telemetry toggles ---
 RUNTIME_METRICS_ENABLED: bool = (
-    True
-    if str(os.getenv("DD_RUNTIME_METRICS_ENABLED", "false")) == "true"
+    str(os.getenv("DD_RUNTIME_METRICS_ENABLED", "false")) == "true"
     and str(os.getenv("DD_RUNTIME_METRICS_RUNTIME_ID_ENABLED", "false")) == "true"
-    else False
 )
 PROFILER_ENABLED: bool = (
-    True if str(os.getenv("DD_PROFILING_ENABLED", "false")) == "true" else False
+    str(os.getenv("DD_PROFILING_ENABLED", "false")) == "true"
 )
 
 BATCH_SIZE = 200

@@ -4,11 +4,14 @@ World clock assembly for the GET /world-clocks route.
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Iterable
 from zoneinfo import available_timezones
 
 from config import MAJOR_CITIES
 from helpers import format_time_response, validate_timezone
+
+logger = logging.getLogger(__name__)
 
 SEARCH_LIMIT = 15
 
@@ -52,6 +55,7 @@ def _build_searched_city_records(
                 format_time_response(timezone, tz=tz_obj, city=city_name)
             )
         except Exception:
+            logger.warning("Failed to load timezone data for %s", timezone)
             continue
 
     return cities_data

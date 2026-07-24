@@ -38,9 +38,9 @@ def ready():
             }
         ), 200
 
-    except OperationalError as exc:
+    except OperationalError:
         conn_healthy = False  # connection is likely unusable
-        logger.exception("Database connection failed: %s", exc)
+        logger.exception("Database connection failed")
 
         return jsonify(
             {
@@ -49,8 +49,8 @@ def ready():
             }
         ), 503
 
-    except Exception as exc:
-        logger.exception("Readiness check failed: %s", exc)
+    except Exception:
+        logger.exception("Readiness check failed")
         return jsonify(
             {
                 "status": "not_ready",

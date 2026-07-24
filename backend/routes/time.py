@@ -4,7 +4,7 @@ Time-related endpoints.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from zoneinfo import available_timezones
 
 from flask import Blueprint, Response, jsonify, request
@@ -105,5 +105,5 @@ def get_world_clocks():
 @time_bp.route("/legacy/time", methods=["GET"])
 def get_current_time():
     """Legacy endpoint — kept for backward compatibility."""
-    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    current_time = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
     return jsonify({"current_time": current_time})
