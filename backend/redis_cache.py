@@ -7,16 +7,17 @@ If Redis is unavailable, the API continues serving uncached responses.
 from __future__ import annotations
 
 import logging
+
 import redis
 
 from config import (
     CACHE_ENABLED,
     CACHE_KEY_PREFIX,
-    REDIS_SOCKET_TIMEOUT,
-    REDIS_SENTINELS_RAW,
+    REDIS_DB,
     REDIS_MASTER_SET,
     REDIS_PASSWORD,
-    REDIS_DB,
+    REDIS_SENTINELS_RAW,
+    REDIS_SOCKET_TIMEOUT,
 )
 
 logger = logging.getLogger(__name__)

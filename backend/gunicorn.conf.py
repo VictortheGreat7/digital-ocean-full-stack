@@ -36,7 +36,8 @@ def post_fork(server, worker):
 
     # 2. Re-initialize OpenTelemetry BatchSpanProcessor in the new worker process
     from opentelemetry.sdk.trace.export import BatchSpanProcessor
-    from telemetry import tracer_provider, _otlp_exporter
+
+    from telemetry import _otlp_exporter, tracer_provider
 
     tracer_provider.add_span_processor(
         BatchSpanProcessor(

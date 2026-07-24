@@ -4,21 +4,23 @@ Time-related endpoints.
 
 from __future__ import annotations
 
-from telemetry import tracer
 from datetime import datetime
 from zoneinfo import available_timezones
+
+from flask import Blueprint, Response, jsonify, request
 from orjson import dumps as json_dumps
-from flask import Blueprint, jsonify, request, Response
+
 from helpers import format_time_response, validate_timezone
-from redis_cache import is_cache_ready, build_cache_key, get_raw_bytes
-from world_clocks import build_world_clocks_payload
+from redis_cache import build_cache_key, get_raw_bytes, is_cache_ready
 from refresh_loops import (
-    _timezones_ready,
     _sorted_tz,
+    _timezones_ready,
     _world_clocks_ready,
     get_timezones_cache_json,
     get_world_clocks_cache_json,
 )
+from telemetry import tracer
+from world_clocks import build_world_clocks_payload
 
 time_bp = Blueprint("time", __name__)
 

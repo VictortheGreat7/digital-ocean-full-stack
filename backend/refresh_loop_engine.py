@@ -8,9 +8,9 @@ import logging
 from collections.abc import Callable
 from time import sleep
 
-import redis_cache
 from orjson import dumps as json_dumps
 
+import redis_cache
 from telemetry import tracer
 
 PayloadBuilder = Callable[[], dict[str, object]]

@@ -13,11 +13,10 @@ from flask_cors import CORS
 
 from db import init_db
 from metrics import init_metrics
+from redis_cache import init_cache
 from request_log_writer import init_request_log_writer
 from routes import register_routes
 from telemetry import init_telemetry
-
-from redis_cache import init_cache
 
 
 def create_app() -> Flask:

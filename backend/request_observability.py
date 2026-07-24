@@ -8,8 +8,7 @@ from dataclasses import dataclass
 
 from flask import Request
 from opentelemetry import trace
-from opentelemetry.trace import Span
-from opentelemetry.trace import format_trace_id
+from opentelemetry.trace import Span, format_trace_id
 
 from request_log_writer import enqueue_request_log
 

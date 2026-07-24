@@ -10,8 +10,8 @@ from __future__ import annotations
 import atexit
 import logging
 
-from psycopg2 import pool
 from psycogreen.gevent import patch_psycopg
+from psycopg2 import pool
 
 from config import DB_CONFIG
 

@@ -5,10 +5,11 @@ Health & readiness endpoints.
 from __future__ import annotations
 
 import logging
+
 from flask import Blueprint, jsonify
 from psycopg2 import OperationalError
-from db import get_health_connection, put_health_connection
 
+from db import get_health_connection, put_health_connection
 
 health_bp = Blueprint("health", __name__)
 logger = logging.getLogger(__name__)

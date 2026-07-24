@@ -12,10 +12,10 @@ from time import monotonic
 
 from opentelemetry import context
 from opentelemetry.trace import SpanContext
-
-from config import BATCH_FLUSH_SECONDS, BATCH_SIZE, DB_CONFIG
 from psycopg2 import InterfaceError, OperationalError, connect
 from psycopg2.extras import execute_values
+
+from config import BATCH_FLUSH_SECONDS, BATCH_SIZE, DB_CONFIG
 
 logger = logging.getLogger(__name__)
 
