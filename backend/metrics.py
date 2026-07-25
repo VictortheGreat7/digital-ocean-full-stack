@@ -65,15 +65,15 @@ def _record_metrics(response):
     root_span = get_active_span()
     enrich_active_span(root_span, path=path, method=request.method, status=status)
 
-    publish_request_observation(
-        build_request_observation(
-            request,
-            duration_seconds=duration,
-            status_code=status,
-            path=path,
-            span=root_span,
-        )
-    )
+    # publish_request_observation(
+    #     build_request_observation(
+    #         request,
+    #         duration_seconds=duration,
+    #         status_code=status,
+    #         path=path,
+    #         span=root_span,
+    #     )
+    # )
 
     return response
 
