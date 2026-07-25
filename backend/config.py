@@ -6,7 +6,7 @@ import os
 
 # --- Database ---
 DB_CONFIG: dict[str, str] = {
-    "host": os.getenv("DB_HOST", "kronos-postgres-svc.kronos.svc.cluster.local"),
+    "host": os.getenv("DB_HOST", "kronos-pgbouncer-svc.kronos.svc.cluster.local"),
     "port": os.getenv("DB_PORT", "5432"),
     "database": os.getenv("DB_NAME", "kronos"),
     "user": os.getenv("DB_USER", "app"),
