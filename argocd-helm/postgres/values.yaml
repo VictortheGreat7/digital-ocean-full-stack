@@ -133,6 +133,14 @@ metrics:
   # Translates the custom postgres-exporter sidecar container
   # Bitnami automatically wires the exporter to the database internally
   enabled: true
+
+  serviceMonitor:
+    # Tells Helm to generate the ServiceMonitor resource
+    enabled: true
+    
+    # Injects the specific label your Prometheus Operator is looking for
+    labels:
+      release: kube-prom-stack
   
   containerPorts:
     metrics: 9187
