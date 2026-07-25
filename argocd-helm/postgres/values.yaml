@@ -31,6 +31,12 @@ postgresqlSharedPreloadLibraries: "pg_stat_statements"
 ## Primary Node Configuration
 ## ------------------------------------------------------
 primary:
+  resources:
+    requests:
+      memory: 512Mi
+    limits:
+      memory: 1Gi
+
   # Translates the remaining `-c` arguments into the postgresql.conf
   extendedConfiguration: |-
     track_activity_query_size=4096
@@ -80,10 +86,9 @@ primary:
     create: true
     minAvailable: 1
   
-  primary:
-    extraEnvVars:
-      - name: POSTGRESQL_AUTH_METHOD
-        value: "scram-sha-256"
+  extraEnvVars:
+    - name: POSTGRESQL_AUTH_METHOD
+      value: "scram-sha-256"
 
 ## ------------------------------------------------------
 ## Read Replica Configuration
@@ -121,10 +126,9 @@ readReplicas:
     create: true
     minAvailable: 1
   
-  readReplicas:
-    extraEnvVars:
-      - name: POSTGRESQL_AUTH_METHOD
-        value: "scram-sha-256"
+  extraEnvVars:
+    - name: POSTGRESQL_AUTH_METHOD
+      value: "scram-sha-256"
 
 ## ------------------------------------------------------
 ## Metrics / Postgres Exporter
