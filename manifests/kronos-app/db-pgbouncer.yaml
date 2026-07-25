@@ -6,7 +6,7 @@ metadata:
 data:
   pgbouncer.ini: |
     [databases]
-    kronos = host=kronos-db-postgresql-primary.kronos.svc.cluster.local port=5432 dbname=kronos
+    kronos = host=postgres-postgresql-primary.kronos.svc.cluster.local port=5432 dbname=kronos
 
     [pgbouncer]
     listen_addr = 0.0.0.0
