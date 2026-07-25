@@ -574,7 +574,7 @@
             },
             "insertNulls": false,
             "lineInterpolation": "linear",
-            "lineWidth": 1,
+            "lineWidth": 2,
             "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
@@ -768,7 +768,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "short"
         },
         "overrides": []
       },
@@ -867,8 +868,8 @@
       "pluginVersion": "12.3.3",
       "targets": [
         {
-          "expr": "100 * sum(pg_stat_database_numbackends{datname=\"kronos\"}) / max(pg_settings_max_connections)",
-          "legendFormat": "session_util",
+          "expr": "100 * sum(pg_stat_database_numbackends{datname=\"kronos\"}) by (pod) / max(pg_settings_max_connections) by (pod)",
+          "legendFormat": "{{pod}}",
           "refId": "A"
         }
       ],
@@ -960,8 +961,8 @@
       "pluginVersion": "12.3.3",
       "targets": [
         {
-          "expr": "sum(pg_stat_database_numbackends{datname=\"kronos\"})",
-          "legendFormat": "numbackends",
+          "expr": "sum(pg_stat_database_numbackends{datname=\"kronos\"}) by (pod)",
+          "legendFormat": "{{pod}}",
           "refId": "A"
         }
       ],
@@ -1057,8 +1058,8 @@
       "pluginVersion": "12.3.3",
       "targets": [
         {
-          "expr": "100 * sum(rate(pg_stat_database_blks_hit{datname=\"kronos\"}[1m])) / (sum(rate(pg_stat_database_blks_hit{datname=\"kronos\"}[1m])) + sum(rate(pg_stat_database_blks_read{datname=\"kronos\"}[1m])))",
-          "legendFormat": "cache_hit_ratio",
+          "expr": "100 * sum(rate(pg_stat_database_blks_hit{datname=\"kronos\"}[1m])) by (pod) / (sum(rate(pg_stat_database_blks_hit{datname=\"kronos\"}[1m])) by (pod) + sum(rate(pg_stat_database_blks_read{datname=\"kronos\"}[1m])) by (pod))",
+          "legendFormat": "{{pod}}",
           "refId": "A"
         }
       ],
@@ -1243,8 +1244,8 @@
       "pluginVersion": "12.3.3",
       "targets": [
         {
-          "expr": "sum(rate(pg_stat_database_xact_commit{datname=\"kronos\"}[1m])) + sum(rate(pg_stat_database_xact_rollback{datname=\"kronos\"}[1m]))",
-          "legendFormat": "tps",
+          "expr": "sum(rate(pg_stat_database_xact_commit{datname=\"kronos\"}[1m])) by (pod) + sum(rate(pg_stat_database_xact_rollback{datname=\"kronos\"}[1m])) by (pod)",
+          "legendFormat": "{{pod}}",
           "refId": "A"
         }
       ],
