@@ -1,0 +1,127 @@
+## ------------------------------------------------------
+## Global & Common Configuration
+## ------------------------------------------------------
+commonLabels:
+  app: kronos-app
+  environment: development
+  component: db
+
+# Deploys 1 Primary and 1 Read Replica (Replacing replicas: 2 in StatefulSet)
+architecture: replication
+
+## ------------------------------------------------------
+## Authentication & Database Initialization
+## ------------------------------------------------------
+auth:
+  database: "kronos"
+  username: "app"
+  existingSecret: "postgres-secret"
+  secretKeys:
+    userPasswordKey: "password"
+    # Bitnami requires an admin password key if existingSecret is used.
+    # Pointing to the same key assuming the secret has only one, 
+    # or you can add a 'postgres-password' key to your K8s secret.
+    adminPasswordKey: "password" 
+
+# Translates the `-c shared_preload_libraries=pg_stat_statements` argument
+postgresqlSharedPreloadLibraries: "pg_stat_statements"
+
+## ------------------------------------------------------
+## Primary Node Configuration
+## ------------------------------------------------------
+primary:
+  # Translates the remaining `-c` arguments into the postgresql.conf
+  extendedConfiguration: |-
+    track_activity_query_size=4096
+    pg_stat_statements.track=ALL
+    track_io_timing=on
+
+  initdb:
+    # Translates the POSTGRES_INITDB_ARGS environment variable
+    args: "--data-checksums"
+    # Translates the init-script volumeMount and ConfigMap
+    scriptsConfigMap: "postgres-init"
+
+  terminationGracePeriodSeconds: 300
+
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: DoNotSchedule
+      labelSelector:
+        matchLabels:
+          # Note: Bitnami uses its own component labels for routing
+          app.kubernetes.io/component: primary
+
+  # Translates livenessProbe timings
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 15
+    timeoutSeconds: 10
+    failureThreshold: 5
+
+  # Translates volumeClaimTemplates
+  persistence:
+    enabled: true
+    storageClass: "do-block-storage"
+    size: 20Gi
+
+  # Translates persistentVolumeClaimRetentionPolicy
+  persistentVolumeClaimRetentionPolicy:
+    enabled: true
+    whenScaled: Delete
+    whenDeleted: Delete
+
+  # Translates PodDisruptionBudget 
+  # Adjusted to 1 because the Primary is a single pod in this architecture
+  pdb:
+    create: true
+    minAvailable: 1
+
+## ------------------------------------------------------
+## Read Replica Configuration
+## ------------------------------------------------------
+readReplicas:
+  replicaCount: 1
+  terminationGracePeriodSeconds: 300
+
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: DoNotSchedule
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/component: read
+
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 15
+    timeoutSeconds: 10
+    failureThreshold: 5
+
+  persistence:
+    enabled: true
+    storageClass: "do-block-storage"
+    size: 20Gi
+
+  persistentVolumeClaimRetentionPolicy:
+    enabled: true
+    whenScaled: Delete
+    whenDeleted: Delete
+
+  pdb:
+    create: true
+    minAvailable: 1
+
+## ------------------------------------------------------
+## Metrics / Postgres Exporter
+## ------------------------------------------------------
+metrics:
+  # Translates the custom postgres-exporter sidecar container
+  # Bitnami automatically wires the exporter to the database internally
+  enabled: true
+  
+  containerPorts:
+    metrics: 9187

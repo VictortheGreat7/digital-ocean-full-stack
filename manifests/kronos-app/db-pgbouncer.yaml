@@ -6,7 +6,7 @@ metadata:
 data:
   pgbouncer.ini: |
     [databases]
-    kronos = host=kronos-postgres-svc.kronos.svc.cluster.local port=5432 dbname=kronos
+    kronos = host=kronos-db-postgresql-primary.kronos.svc.cluster.local port=5432 dbname=kronos
 
     [pgbouncer]
     listen_addr = 0.0.0.0
@@ -59,7 +59,14 @@ spec:
           command: 
             - 'sh'
             - '-c'
-            - 'until nc -z kronos-postgres-svc.kronos.svc.cluster.local 5432; do echo waiting for postgres; sleep 2; done;'
+            - 'until nc -z kronos-db-postgresql-primary.kronos.svc.cluster.local 5432; do echo waiting for postgres; sleep 2; done;'
+      # initContainers:
+      #   - name: wait-for-postgres
+      #     image: busybox:1.28
+      #     command: 
+      #       - 'sh'
+      #       - '-c'
+      #       - 'until nc -z kronos-postgres-svc.kronos.svc.cluster.local 5432; do echo waiting for postgres; sleep 2; done;'
       containers:
         - name: pgbouncer
           image: edoburu/pgbouncer:latest

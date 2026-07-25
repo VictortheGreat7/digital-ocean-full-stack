@@ -24,47 +24,40 @@ def health():
 @health_bp.route("/ready", methods=["GET"])
 def ready():
     """Readiness probe — returns 200 only if critical dependencies are reachable."""
-    return jsonify(
-        {
-            "status": "ready",
-            "checks": {"database": "up"},
-        }
-    ), 200
+    conn = None
+    conn_healthy = True
+    try:
+        conn = get_health_connection()
+        with conn.cursor() as cur:
+            cur.execute("SELECT 1")
 
-    # conn = None
-    # conn_healthy = True
-    # try:
-    #     conn = get_health_connection()
-    #     with conn.cursor() as cur:
-    #         cur.execute("SELECT 1")
+        return jsonify(
+            {
+                "status": "ready",
+                "checks": {"database": "up"},
+            }
+        ), 200
 
-    #     return jsonify(
-    #         {
-    #             "status": "ready",
-    #             "checks": {"database": "up"},
-    #         }
-    #     ), 200
+    except OperationalError:
+        conn_healthy = False  # connection is likely unusable
+        logger.exception("Database connection failed")
 
-    # except OperationalError:
-    #     conn_healthy = False  # connection is likely unusable
-    #     logger.exception("Database connection failed")
+        return jsonify(
+            {
+                "status": "not_ready",
+                "checks": {"database": "not_reachable"},
+            }
+        ), 503
 
-    #     return jsonify(
-    #         {
-    #             "status": "not_ready",
-    #             "checks": {"database": "not_reachable"},
-    #         }
-    #     ), 503
+    except Exception:
+        logger.exception("Readiness check failed")
+        return jsonify(
+            {
+                "status": "not_ready",
+                "checks": {"database": "not_reachable"},
+            }
+        ), 503
 
-    # except Exception:
-    #     logger.exception("Readiness check failed")
-    #     return jsonify(
-    #         {
-    #             "status": "not_ready",
-    #             "checks": {"database": "not_reachable"},
-    #         }
-    #     ), 503
-
-    # finally:
-    #     if conn is not None:
-    #         put_health_connection(conn, close=not conn_healthy)
+    finally:
+        if conn is not None:
+            put_health_connection(conn, close=not conn_healthy)
