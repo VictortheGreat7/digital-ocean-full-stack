@@ -22,6 +22,7 @@ auth:
     # Pointing to the same key assuming the secret has only one, 
     # or you can add a 'postgres-password' key to your K8s secret.
     adminPasswordKey: "password" 
+    replicationPasswordKey: "password"
 
 # Translates the `-c shared_preload_libraries=pg_stat_statements` argument
 postgresqlSharedPreloadLibraries: "pg_stat_statements"
@@ -78,6 +79,11 @@ primary:
   pdb:
     create: true
     minAvailable: 1
+  
+  primary:
+    extraEnvVars:
+      - name: POSTGRESQL_AUTH_METHOD
+        value: "scram-sha-256"
 
 ## ------------------------------------------------------
 ## Read Replica Configuration
@@ -114,6 +120,11 @@ readReplicas:
   pdb:
     create: true
     minAvailable: 1
+  
+  readReplicas:
+    extraEnvVars:
+      - name: POSTGRESQL_AUTH_METHOD
+        value: "scram-sha-256"
 
 ## ------------------------------------------------------
 ## Metrics / Postgres Exporter
