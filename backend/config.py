@@ -76,8 +76,8 @@ PROFILER_ENABLED: bool = (
     str(os.getenv("DD_PROFILING_ENABLED", "false")) == "true"
 )
 
-BATCH_SIZE = 100
-BATCH_FLUSH_SECONDS = 1.0
+BATCH_SIZE = 200
+BATCH_FLUSH_SECONDS = 5.0
 
 SAMPLE_RATE_BASELINE: float = float(os.getenv("SAMPLE_RATE_BASELINE", "0.10"))
 LATENCY_THRESHOLD_MS: int = int(os.getenv("LATENCY_THRESHOLD_MS", "300"))
