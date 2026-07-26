@@ -39,9 +39,11 @@ primary:
 
   # Translates the remaining `-c` arguments into the postgresql.conf
   extendedConfiguration: |-
-    track_activity_query_size=4096
-    pg_stat_statements.track=ALL
+    max_wal_size = 2GB
     track_io_timing=on
+    pg_stat_statements.track=ALL
+    track_activity_query_size=4096
+    checkpoint_completion_target = 0.9
 
   initdb:
     # Translates the POSTGRES_INITDB_ARGS environment variable
