@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: pgbouncer-monitor
+  namespace: kronos
+  labels:
+    release: kube-prom-stack
+spec:
+  namespaceSelector:
+    matchNames:
+      - kronos
+  selector:
+    matchLabels:
+      app: kronos-app
+      component: pgbouncer
+      environment: development
+  endpoints:
+    - port: metrics
+      interval: 30s
+      path: /metrics

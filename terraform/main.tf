@@ -8,9 +8,9 @@ resource "digitalocean_kubernetes_cluster" "kronos" {
 
   node_pool {
     name       = "kronos-pool"
-    size       = "s-4vcpu-8gb"
+    size       = "s-4vcpu-8gb-intel"
     auto_scale = true
-    min_nodes  = 1
+    min_nodes  = 3
     max_nodes  = 3
     tags       = [digitalocean_tag.kronos.name]
   }

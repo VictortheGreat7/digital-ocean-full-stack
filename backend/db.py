@@ -86,7 +86,7 @@ def init_db(app=None) -> None:
         try:
             _health_pool = pool.ThreadedConnectionPool(
                 minconn=1,
-                maxconn=1,
+                maxconn=2,
                 **DB_CONFIG,
             )
             logger.info("Health connection pool created")

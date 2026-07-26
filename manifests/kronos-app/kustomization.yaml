@@ -9,11 +9,9 @@ resources:
   - backend-monitor.yaml
   - backend-service.yaml
   - db-configmap.yaml
-  - db-monitor.yaml
   - db-pgbouncer.yaml
-  - db-service.yaml
-  - db-statefulset.yaml
   - frontend-deployment.yaml
   - frontend-hpa.yaml
   - frontend-service.yaml
   - httproute-https.yaml
+  - pgbouncer-monitor.yaml

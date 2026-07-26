@@ -76,5 +76,5 @@ PROFILER_ENABLED: bool = (
     str(os.getenv("DD_PROFILING_ENABLED", "false")) == "true"
 )
 
-BATCH_SIZE = 1000
-BATCH_FLUSH_SECONDS = 2.0
+BATCH_SIZE = 100
+BATCH_FLUSH_SECONDS = 0.5
