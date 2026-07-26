@@ -1,0 +1,84 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init
+  namespace: kronos
+data:
+  init.sql: |
+    CREATE TABLE IF NOT EXISTS requests (
+      id SERIAL PRIMARY KEY,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      path VARCHAR(255),
+      method VARCHAR(10),
+      status INT,
+      latency_ms FLOAT,
+      timezone VARCHAR(100),
+      city VARCHAR(100),
+      trace_id VARCHAR(255)
+    );
+
+    CREATE INDEX idx_created_at ON requests(created_at DESC);
+    CREATE INDEX idx_status ON requests(status);
+    CREATE INDEX idx_path ON requests(path);
+
+    -- Global Datadog user setup (Roles are global across the cluster)
+    CREATE USER datadog WITH PASSWORD 'datadog';
+    ALTER ROLE datadog INHERIT;
+
+    -- 1. Setup DBM objects in the default DB (kronos)
+    CREATE SCHEMA datadog;
+    GRANT SELECT ON pg_stat_database TO datadog;
+    GRANT USAGE ON SCHEMA datadog TO datadog;
+    GRANT USAGE ON SCHEMA public TO datadog;
+    GRANT pg_monitor TO datadog;
+    CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+
+    CREATE OR REPLACE FUNCTION datadog.explain_statement(
+      l_query TEXT,
+      OUT explain JSON
+    )
+    RETURNS SETOF JSON AS
+    $$
+    DECLARE
+    curs REFCURSOR;
+    plan JSON;
+    BEGIN
+      SET TRANSACTION READ ONLY;
+      OPEN curs FOR EXECUTE pg_catalog.concat('EXPLAIN (FORMAT JSON) ', l_query);
+      FETCH curs INTO plan;
+      CLOSE curs;
+      RETURN QUERY SELECT plan;
+    END;
+    $$
+    LANGUAGE 'plpgsql'
+    RETURNS NULL ON NULL INPUT
+    SECURITY DEFINER;
+
+    -- 2. Switch to the 'postgres' database and setup DBM objects there
+    \c postgres
+
+    CREATE SCHEMA datadog;
+    GRANT USAGE ON SCHEMA datadog TO datadog;
+    GRANT USAGE ON SCHEMA public TO datadog;
+    CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+
+    CREATE OR REPLACE FUNCTION datadog.explain_statement(
+      l_query TEXT,
+      OUT explain JSON
+    )
+    RETURNS SETOF JSON AS
+    $$
+    DECLARE
+    curs REFCURSOR;
+    plan JSON;
+    BEGIN
+      SET TRANSACTION READ ONLY;
+      OPEN curs FOR EXECUTE pg_catalog.concat('EXPLAIN (FORMAT JSON) ', l_query);
+      FETCH curs INTO plan;
+      CLOSE curs;
+      RETURN QUERY SELECT plan;
+    END;
+    $$
+    LANGUAGE 'plpgsql'
+    RETURNS NULL ON NULL INPUT
+    SECURITY DEFINER;
