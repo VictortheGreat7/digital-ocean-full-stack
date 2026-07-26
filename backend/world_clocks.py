@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Iterable
-from zoneinfo import available_timezones
+from zoneinfo import ZoneInfoNotFoundError, available_timezones
 
 from config import MAJOR_CITIES
 from helpers import format_time_response, validate_timezone
@@ -54,7 +54,7 @@ def _build_searched_city_records(
             cities_data.append(
                 format_time_response(timezone, tz=tz_obj, city=city_name)
             )
-        except Exception:
+        except (ValueError, ZoneInfoNotFoundError, KeyError):
             logger.warning("Failed to load timezone data for %s", timezone)
             continue
 

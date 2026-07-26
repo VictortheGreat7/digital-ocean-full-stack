@@ -9,6 +9,7 @@ from collections.abc import Callable
 from time import sleep
 
 from orjson import dumps as json_dumps
+from redis import RedisError
 
 import redis_cache
 from telemetry import tracer
@@ -72,7 +73,7 @@ def _run_refresh_cycle(
                 )
             )
             redis_healthy = True
-        except Exception as exc:
+        except RedisError as exc:
             logger.warning("Redis lock timed out, forcing local compute: %s", exc)
             is_leader = True
     else:
@@ -97,7 +98,7 @@ def _run_refresh_cycle(
                         redis_cache.set_raw_bytes(
                             data_key, new_cache_bytes, ttl_seconds + 5
                         )
-                    except Exception as exc:
+                    except RedisError as exc:
                         logger.warning(
                             "Leader failed to write to Redis (falling back to memory only): %s",
                             exc,

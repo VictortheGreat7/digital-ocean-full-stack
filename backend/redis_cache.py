@@ -66,7 +66,7 @@ def init_cache(app=None) -> None:
         _client.ping()
         _ready = True
         logger.info("Redis cache connected")
-    except Exception as exc:
+    except redis.RedisError as exc:
         _client = None
         _ready = False
         logger.warning("Redis cache unavailable: %s", exc)
@@ -87,7 +87,7 @@ def get_raw_bytes(key: str) -> bytes | None:
         return None
     try:
         return _client.get(key)
-    except Exception as exc:
+    except redis.RedisError as exc:
         logger.warning("Redis GET failed for key=%s: %s", key, exc)
         return None
 
@@ -98,5 +98,5 @@ def set_raw_bytes(key: str, raw_bytes: bytes | str, ttl_seconds: int) -> None:
         return
     try:
         _client.setex(key, max(1, ttl_seconds), raw_bytes)
-    except Exception as exc:
+    except redis.RedisError as exc:
         logger.warning("Redis SETEX failed for key=%s: %s", key, exc)

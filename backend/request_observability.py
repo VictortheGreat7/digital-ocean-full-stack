@@ -9,13 +9,13 @@ from random import random
 
 from flask import Request
 from opentelemetry import trace
-from opentelemetry.trace import Span, format_trace_id
+from opentelemetry.trace import Span, SpanContext, format_trace_id
 
 from config import LATENCY_THRESHOLD_MS, SAMPLE_RATE_BASELINE
 from request_log_writer import enqueue_request_log
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class RequestObservation:
     path: str
     method: str
@@ -23,7 +23,7 @@ class RequestObservation:
     latency_ms: int
     timezone: str | None
     trace_id: str | None
-    span_context: object | None
+    span_context: SpanContext | None
 
 
 def should_observe_request(path: str, excluded_paths: set[str]) -> bool:
@@ -81,7 +81,7 @@ def publish_request_observation(observation: RequestObservation) -> None:
 def enrich_active_span(
     span: Span | None, *, path: str, method: str, status: int
 ) -> None:
-    if span and span.get_span_context().is_valid:
+    if span and span.is_recording():
         span.set_attribute("http.route", path)
         span.set_attribute("http.method", method)
         span.set_attribute("http.status_code", status)
