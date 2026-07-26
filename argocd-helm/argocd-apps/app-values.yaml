@@ -56,6 +56,9 @@ applications:
     sources:
       - repoURL: https://github.com/VictortheGreat7/digital-ocean-full-stack.git
         targetRevision: main
+        path: manifests/kronos-app/postgres
+      - repoURL: https://github.com/VictortheGreat7/digital-ocean-full-stack.git
+        targetRevision: main
         ref: values
       - repoURL: https://charts.bitnami.com/bitnami
         chart: postgresql
