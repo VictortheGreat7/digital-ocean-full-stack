@@ -8,7 +8,7 @@ resources:
   - backend-hpa.yaml
   - backend-monitor.yaml
   - backend-service.yaml
-  - db-configmap.yaml
+  # - db-configmap.yaml
   - db-pgbouncer.yaml
   - frontend-deployment.yaml
   - frontend-hpa.yaml
