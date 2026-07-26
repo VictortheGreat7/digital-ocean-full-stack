@@ -103,7 +103,7 @@ readReplicas:
       whenUnsatisfiable: DoNotSchedule
       labelSelector:
         matchLabels:
-          app.kubernetes.io/component: read
+          app.kubernetes.io/name: postgresql
 
   livenessProbe:
     enabled: true
