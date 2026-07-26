@@ -58,7 +58,7 @@ primary:
       labelSelector:
         matchLabels:
           # Note: Bitnami uses its own component labels for routing
-          app.kubernetes.io/component: primary
+          app.kubernetes.io/name: postgresql
 
   # Translates livenessProbe timings
   livenessProbe:
