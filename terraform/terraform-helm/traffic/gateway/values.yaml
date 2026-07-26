@@ -1,7 +1,7 @@
 gateway:
   className: "cilium"
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
+    cert-manager.io/cluster-issuer: letsencrypt-stag
   listeners:
     - name: http
       protocol: HTTP
