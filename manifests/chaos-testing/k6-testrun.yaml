@@ -51,3 +51,14 @@ spec:
     configMap:
       name: k6-test-script
       file: loadtest.js
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: kronos-loadtest-pdb
+  namespace: kronos
+spec:
+  minAvailable: 3
+  selector:
+    matchLabels:
+      k6_cr: kronos-loadtest
