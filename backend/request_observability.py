@@ -31,9 +31,7 @@ def should_observe_request(path: str, excluded_paths: set[str]) -> bool:
 
 
 def should_sample_request(status: int, latency_ms: int) -> bool:
-    if status >= 400:
-        return True
-    elif latency_ms > LATENCY_THRESHOLD_MS:
+    if status >= 400 or latency_ms > LATENCY_THRESHOLD_MS:
         return True
     else:
         return random() < SAMPLE_RATE_BASELINE
@@ -66,8 +64,8 @@ def build_request_observation(
 
 
 def publish_request_observation(observation: RequestObservation) -> None:
-    # if not should_sample_request(observation.status, observation.latency_ms):
-    #     return
+    if not should_sample_request(observation.status, observation.latency_ms):
+        return
     enqueue_request_log(
         path=observation.path,
         method=observation.method,
