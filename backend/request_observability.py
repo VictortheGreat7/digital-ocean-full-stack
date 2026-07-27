@@ -64,8 +64,8 @@ def build_request_observation(
 
 
 def publish_request_observation(observation: RequestObservation) -> None:
-    if not should_sample_request(observation.status, observation.latency_ms):
-        return
+    # if not should_sample_request(observation.status, observation.latency_ms):
+    #     return
     enqueue_request_log(
         path=observation.path,
         method=observation.method,
