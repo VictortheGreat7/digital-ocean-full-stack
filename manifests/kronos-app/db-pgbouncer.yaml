@@ -142,7 +142,6 @@ spec:
       name: metrics
   type: ClusterIP
 ---
-# pdb-pgbouncer.yaml
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
