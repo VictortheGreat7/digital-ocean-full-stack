@@ -93,7 +93,7 @@ grafana:
     size: 10Gi
   resources:
     limits:
-      cpu: "50m"
+      cpu: "100m"
       memory: "384Mi"
     requests:
       cpu: "20m"
@@ -101,7 +101,7 @@ grafana:
   sidecar:
     resources:
       limits:
-        cpu: "40m"
+        cpu: "100m"
         memory: "160Mi"
       requests:
         cpu: "5m"
