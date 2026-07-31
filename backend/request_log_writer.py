@@ -86,10 +86,6 @@ def _flush_batch(rows: list[tuple]) -> None:
     except (OperationalError, InterfaceError) as exc:
         conn_healthy = False
         logger.error("Database connection error: %s", exc)
-        # try:
-        #     conn.rollback()
-        # except Exception:
-        #     pass
 
         # One retry with a fresh connection from the pool
         try:
@@ -112,16 +108,9 @@ def _flush_batch(rows: list[tuple]) -> None:
         except Exception as retry_exc:
             conn_healthy = False
             logger.error("Writer retry failed: %s", retry_exc)
-            # try:
-            #     conn.rollback()
-            # except Exception:
-            #     pass
+
     except Exception as exc:
         logger.error("DB batch write error: %s", exc)
-        # try:
-        #     conn.rollback()
-        # except Exception:
-        #     pass
     finally:
         put_writer_connection(conn, close=not conn_healthy)
 
