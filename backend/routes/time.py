@@ -53,7 +53,7 @@ def get_timezones():
                 return Response(cached_bytes, mimetype="application/json")
 
         # 2. Fallback to Local Memory Path
-        if _timezones_ready.wait(timeout=5.0):
+        if _timezones_ready.is_set():
             span.set_attribute("cache.hit", True)
             span.set_attribute("cache.type", "memory")
             return Response(get_timezones_cache_json(), mimetype="application/json")
@@ -92,13 +92,13 @@ def get_world_clocks():
                 return Response(cached_bytes, mimetype="application/json")
 
         # 2. Fallback to Local Memory Path
-        if _world_clocks_ready.wait(timeout=5.0):
+        if _world_clocks_ready.is_set():
             span.set_attribute("cache.hit", True)
             span.set_attribute("cache.type", "memory")
             return Response(get_world_clocks_cache_json(), mimetype="application/json")
 
         span.set_attribute("cache.hit", False)
-
+        
     return jsonify({"error": "Service warming up or cache unavailable."}), 503
 
 
