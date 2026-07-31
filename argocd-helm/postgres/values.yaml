@@ -44,7 +44,6 @@ primary:
     pg_stat_statements.track=ALL
     track_activity_query_size=4096
     checkpoint_completion_target = 0.9
-    synchronous_commit = off
 
   initdb:
     # Translates the POSTGRES_INITDB_ARGS environment variable

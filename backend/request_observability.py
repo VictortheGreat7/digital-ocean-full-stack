@@ -11,7 +11,7 @@ from flask import Request
 from opentelemetry import trace
 from opentelemetry.trace import Span, SpanContext, format_trace_id
 
-from config import LATENCY_THRESHOLD_MS, SAMPLE_RATE_BASELINE
+# from config import LATENCY_THRESHOLD_MS, SAMPLE_RATE_BASELINE
 from request_log_writer import enqueue_request_log
 
 
@@ -30,11 +30,11 @@ def should_observe_request(path: str, excluded_paths: set[str]) -> bool:
     return path not in excluded_paths
 
 
-def should_sample_request(status: int, latency_ms: int) -> bool:
-    if status >= 400 or latency_ms > LATENCY_THRESHOLD_MS:
-        return True
-    else:
-        return random() < SAMPLE_RATE_BASELINE
+# def should_sample_request(status: int, latency_ms: int) -> bool:
+#     if status >= 400 or latency_ms > LATENCY_THRESHOLD_MS:
+#         return True
+#     else:
+#         return random() < SAMPLE_RATE_BASELINE
 
 
 def get_observed_path(request: Request) -> str:
