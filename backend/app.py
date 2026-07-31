@@ -32,10 +32,10 @@ def create_app() -> Flask:
     init_cache(app)
 
     # Database
-    # init_db(app)
+    init_db(app)
 
     # Request logs
-    # init_request_log_writer()
+    init_request_log_writer()
 
     # Route blueprints
     register_routes(app)
