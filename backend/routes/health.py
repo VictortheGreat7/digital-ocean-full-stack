@@ -30,6 +30,7 @@ def ready():
             "checks": {"database": "up"},
         }
     ), 200
+
     # conn = None
     # conn_healthy = True
     # try:
