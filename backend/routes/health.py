@@ -7,9 +7,6 @@ from __future__ import annotations
 import logging
 
 from flask import Blueprint, jsonify
-from psycopg2 import OperationalError
-
-from db import get_health_connection, put_health_connection
 from redis_cache import is_cache_ready
 from refresh_loops import (
     _timezones_ready,
@@ -43,41 +40,3 @@ def ready():
             "checks": {"cache": "not_set"},
         }
     ), 503
-
-    # conn = None
-    # conn_healthy = True
-    # try:
-    #     conn = get_health_connection()
-    #     with conn.cursor() as cur:
-    #         cur.execute("SELECT 1")
-
-    #     return jsonify(
-    #         {
-    #             "status": "ready",
-    #             "checks": {"database": "up"},
-    #         }
-    #     ), 200
-
-    # except OperationalError:
-    #     conn_healthy = False  # connection is likely unusable
-    #     logger.exception("Database connection failed")
-
-    #     return jsonify(
-    #         {
-    #             "status": "not_ready",
-    #             "checks": {"database": "not_reachable"},
-    #         }
-    #     ), 503
-
-    # except Exception:
-    #     logger.exception("Readiness check failed")
-    #     return jsonify(
-    #         {
-    #             "status": "not_ready",
-    #             "checks": {"database": "not_reachable"},
-    #         }
-    #     ), 503
-
-    # finally:
-    #     if conn is not None:
-    #         put_health_connection(conn, close=not conn_healthy)

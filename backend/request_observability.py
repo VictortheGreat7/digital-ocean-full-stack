@@ -5,13 +5,11 @@ Request observation helpers for metrics, tracing, and request logging.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from random import random
 
 from flask import Request
 from opentelemetry import trace
 from opentelemetry.trace import Span, SpanContext, format_trace_id
 
-# from config import LATENCY_THRESHOLD_MS, SAMPLE_RATE_BASELINE
 from request_log_writer import enqueue_request_log
 
 
@@ -28,13 +26,6 @@ class RequestObservation:
 
 def should_observe_request(path: str, excluded_paths: set[str]) -> bool:
     return path not in excluded_paths
-
-
-# def should_sample_request(status: int, latency_ms: int) -> bool:
-#     if status >= 400 or latency_ms > LATENCY_THRESHOLD_MS:
-#         return True
-#     else:
-#         return random() < SAMPLE_RATE_BASELINE
 
 
 def get_observed_path(request: Request) -> str:
@@ -64,8 +55,6 @@ def build_request_observation(
 
 
 def publish_request_observation(observation: RequestObservation) -> None:
-    # if not should_sample_request(observation.status, observation.latency_ms):
-    #     return
     enqueue_request_log(
         path=observation.path,
         method=observation.method,
