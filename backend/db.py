@@ -59,16 +59,17 @@ def put_writer_connection(conn, close=None) -> None:
 
 def shutdown_db() -> None:
     """Close the pools. Registered via ``atexit``."""
-    global _shutdown_called, _health_pool, _writer_pool
+    # global _shutdown_called, _health_pool, _writer_pool
+    global _shutdown_called, _writer_pool
 
     if _shutdown_called:
         return
     _shutdown_called = True
 
     # Close health pool
-    if _health_pool is not None:
-        _health_pool.closeall()
-        _health_pool = None
+    # if _health_pool is not None:
+    #     _health_pool.closeall()
+    #     _health_pool = None
 
     # Close writer pool
     if _writer_pool is not None:
@@ -80,19 +81,20 @@ def shutdown_db() -> None:
 
 def init_db(app=None) -> None:
     """Create the threaded connection pools."""
-    global _health_pool, _writer_pool, _shutdown_registered
+    # global _health_pool, _writer_pool, _shutdown_registered
+    global _writer_pool, _shutdown_registered
 
-    if _health_pool is None:
-        try:
-            _health_pool = pool.ThreadedConnectionPool(
-                minconn=1,
-                maxconn=2,
-                **DB_CONFIG,
-            )
-            logger.info("Health connection pool created")
-        except Exception as exc:
-            logger.error("Failed to create health DB pool: %s", exc)
-            raise
+    # if _health_pool is None:
+    #     try:
+    #         _health_pool = pool.ThreadedConnectionPool(
+    #             minconn=1,
+    #             maxconn=2,
+    #             **DB_CONFIG,
+    #         )
+    #         logger.info("Health connection pool created")
+    #     except Exception as exc:
+    #         logger.error("Failed to create health DB pool: %s", exc)
+    #         raise
 
     if _writer_pool is None:
         try:
