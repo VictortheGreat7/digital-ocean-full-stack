@@ -6,12 +6,9 @@ from __future__ import annotations
 
 import logging
 
+import redis_cache
+import refresh_loops
 from flask import Blueprint, jsonify
-from redis_cache import is_cache_ready
-from refresh_loops import (
-    _timezones_ready,
-    _world_clocks_ready,
-)
 
 health_bp = Blueprint("health", __name__)
 logger = logging.getLogger(__name__)
@@ -26,7 +23,10 @@ def health():
 @health_bp.route("/ready", methods=["GET"])
 def ready():
     """Readiness probe — returns 200 only if critical dependencies are reachable."""
-    if (_world_clocks_ready.is_set() and _timezones_ready.is_set()) or is_cache_ready():
+    if (
+        refresh_loops._world_clocks_ready.is_set()
+        and refresh_loops._timezones_ready.is_set()
+    ) or redis_cache.is_cache_ready():
         return jsonify(
             {
                 "status": "ready",

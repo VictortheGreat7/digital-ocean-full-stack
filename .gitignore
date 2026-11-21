@@ -1,5 +1,6 @@
 *.terraform
 *.txt
+!requirements*.txt
 *alerts.tf*
 *dashboard.tf*
 prev_attempts/
@@ -31,6 +32,8 @@ build/
 .env.production.local
 
 # Python
+.coverage
+htmlcov/
 __pycache__/
 *.py[cod]
 *$py.class

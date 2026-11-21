@@ -28,6 +28,19 @@ REDIS_SOCKET_TIMEOUT: float = float(os.getenv("REDIS_SOCKET_TIMEOUT", "0.1"))
 CACHE_ENABLED: bool = os.getenv("CACHE_ENABLED", "true").lower() == "true"
 CACHE_KEY_PREFIX: str = os.getenv("CACHE_KEY_PREFIX", "kronos:cache")
 
+# --- Feature toggles ---
+# These are read at import time so the application factory can decide which
+# subsystems to initialise. Tests can disable every external dependency.
+TELEMETRY_ENABLED: bool = os.getenv("TELEMETRY_ENABLED", "true").lower() == "true"
+METRICS_ENABLED: bool = os.getenv("METRICS_ENABLED", "true").lower() == "true"
+REFRESH_LOOPS_ENABLED: bool = (
+    os.getenv("REFRESH_LOOPS_ENABLED", "true").lower() == "true"
+)
+DB_ENABLED: bool = os.getenv("DB_ENABLED", "false").lower() == "true"
+REQUEST_LOG_WRITER_ENABLED: bool = (
+    os.getenv("REQUEST_LOG_WRITER_ENABLED", "false").lower() == "true"
+)
+
 # --- Telemetry ---
 OTEL_EXPORTER_OTLP_ENDPOINT: str = os.getenv(
     "OTEL_EXPORTER_OTLP_ENDPOINT",

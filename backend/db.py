@@ -10,15 +10,8 @@ from __future__ import annotations
 import atexit
 import logging
 
-from psycogreen.gevent import patch_psycopg
-from psycopg2 import pool
-
 from config import DB_CONFIG
-
-# patch_psycopg() should be called before any psycopg2 connections are created.
-# It monkey-patches psycopg2 to make it cooperative with gevent's green threads
-# to prevent blocking of the server during db operations.
-patch_psycopg()
+from psycopg2 import pool
 
 logger = logging.getLogger(__name__)
 
@@ -59,13 +52,25 @@ def shutdown_db() -> None:
     logger.info("DB pools closed")
 
 
-def init_db(app=None) -> None:
-    """Create the threaded connection pools."""
+def init_db(app=None, *, pool_factory=None) -> None:
+    """Create the threaded connection pools.
+
+    *pool_factory* can be supplied by tests to avoid opening real database
+    connections.
+    """
     global _writer_pool, _shutdown_registered
 
     if _writer_pool is None:
+        # patch_psycopg() must be called before any psycopg2 connections are
+        # created. It monkey-patches psycopg2 to make it cooperative with
+        # gevent's green threads and prevent blocking during db operations.
+        from psycogreen.gevent import patch_psycopg
+
+        patch_psycopg()
+
+        factory = pool_factory or pool.ThreadedConnectionPool
         try:
-            _writer_pool = pool.ThreadedConnectionPool(
+            _writer_pool = factory(
                 minconn=1,
                 maxconn=2,
                 **DB_CONFIG,

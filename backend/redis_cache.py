@@ -9,7 +9,6 @@ from __future__ import annotations
 import logging
 
 import redis
-
 from config import (
     CACHE_ENABLED,
     CACHE_KEY_PREFIX,
@@ -40,14 +39,34 @@ def _parse_sentinels(raw: str) -> list[tuple[str, int]]:
 REDIS_SENTINELS: list[tuple[str, int]] = _parse_sentinels(REDIS_SENTINELS_RAW)
 
 
-def init_cache(app=None) -> None:
-    """Initialize Redis client once at startup."""
+def init_cache(app=None, *, enabled: bool | None = None, client=None) -> None:
+    """Initialize Redis client once at startup.
+
+    *enabled* overrides the module-level ``CACHE_ENABLED`` setting (the
+    application factory passes the Flask config value). *client* lets tests
+    inject a fake Redis implementation without touching Sentinel.
+    """
     global _client, _ready
 
-    if not CACHE_ENABLED:
+    if enabled is None:
+        enabled = CACHE_ENABLED
+
+    if not enabled:
         logger.info("Cache disabled via CACHE_ENABLED=false")
         _client = None
         _ready = False
+        return
+
+    if client is not None:
+        _client = client
+        try:
+            _client.ping()
+            _ready = True
+            logger.info("Redis cache connected (injected client)")
+        except redis.RedisError as exc:
+            _client = None
+            _ready = False
+            logger.warning("Redis cache unavailable: %s", exc)
         return
 
     try:
@@ -90,6 +109,18 @@ def get_raw_bytes(key: str) -> bytes | None:
     except redis.RedisError as exc:
         logger.warning("Redis GET failed for key=%s: %s", key, exc)
         return None
+
+
+def try_acquire_lock(key: str, ttl_seconds: int) -> bool:
+    """Try to acquire a short-lived Redis lock.
+
+    Returns ``True`` when this process acquired the lock. Raises
+    ``redis.RedisError`` if Redis is unavailable; callers decide how to fall
+    back in that case.
+    """
+    if not is_cache_ready():
+        return False
+    return bool(_client.set(key, "locked", nx=True, ex=ttl_seconds))
 
 
 def set_raw_bytes(key: str, raw_bytes: bytes | str, ttl_seconds: int) -> None:
