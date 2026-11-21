@@ -14,8 +14,13 @@ def format_time_response(
     *,
     tz: ZoneInfo | None = None,
     city: str | None = None,
+    now: datetime | None = None,
 ) -> dict[str, Any]:
     """Return a consistent time-data dict for *timezone*.
+
+    *now* can be supplied for deterministic output (tests). It is converted to
+    *tz* when it carries a timezone, and assumed to already be in *tz*
+    otherwise.
 
     Raises ``ZoneInfoNotFoundError`` if the timezone is invalid.
     """
@@ -23,7 +28,13 @@ def format_time_response(
         tz = ZoneInfo(tz)
     elif tz is None:
         tz = ZoneInfo(timezone)
-    now = datetime.now(tz)
+
+    if now is None:
+        now = datetime.now(tz)
+    elif now.tzinfo is None:
+        now = now.replace(tzinfo=tz)
+    else:
+        now = now.astimezone(tz)
 
     hour = now.hour
     is_day = 6 <= hour < 18

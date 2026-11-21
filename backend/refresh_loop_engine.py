@@ -8,11 +8,12 @@ import logging
 from collections.abc import Callable
 from time import sleep
 
+import redis_cache
+from opentelemetry import trace
 from orjson import dumps as json_dumps
 from redis import RedisError
 
-import redis_cache
-from telemetry import tracer
+tracer = trace.get_tracer(__name__)
 
 PayloadBuilder = Callable[[], dict[str, object]]
 CacheWriter = Callable[[bytes], None]
@@ -67,10 +68,8 @@ def _run_refresh_cycle(
     if redis_cache.is_cache_ready():
         try:
             lock_key = redis_cache.build_cache_key(f"{cache_name}-lock")
-            is_leader = bool(
-                redis_cache._client.set(
-                    lock_key, "locked", nx=True, ex=lock_ttl_seconds
-                )
+            is_leader = redis_cache.try_acquire_lock(
+                lock_key, lock_ttl_seconds
             )
             redis_healthy = True
         except RedisError as exc:

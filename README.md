@@ -83,6 +83,17 @@ npm run dev
 Frontend: `http://localhost:5173` (or the port shown in terminal)
 API: `http://localhost:5000/world-clocks`
 
+### Running Backend Tests
+
+The backend test suite uses `pytest` and runs without Redis, PostgreSQL,
+OpenTelemetry, or network access:
+
+```bash
+cd backend
+pip install -r requirements-dev.txt
+pytest
+```
+
 ### Building and Testing Docker Image
 
 ```bash

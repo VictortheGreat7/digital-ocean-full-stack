@@ -8,11 +8,10 @@ from __future__ import annotations
 
 from time import monotonic
 
+from config import EXCLUDED_PATHS
 from flask import Flask, g, request
 from prometheus_client import Counter, Histogram
 from prometheus_flask_exporter import PrometheusMetrics
-
-from config import EXCLUDED_PATHS
 from request_observability import (
     build_request_observation,
     enrich_active_span,
@@ -48,8 +47,12 @@ def _record_metrics(response):
     if not should_observe_request(request.path, EXCLUDED_PATHS):
         return response
 
+    start_time = getattr(g, "start_time", None)
+    if start_time is None:
+        return response
+
     path = get_observed_path(request)
-    duration = monotonic() - g.start_time
+    duration = monotonic() - start_time
     status = response.status_code
 
     # Prometheus
@@ -79,11 +82,16 @@ def _record_metrics(response):
 
 
 def init_metrics(app: Flask) -> None:
-    """Initialize Prometheus metrics and Flask exporter."""
+    """Initialize Prometheus metrics and Flask exporter.
+
+    The exporter and its collectors are process-global, so they are created
+    only once. Request hooks are attached to every app instance.
+    """
     global _metrics
 
-    _metrics = PrometheusMetrics(app)
-    _metrics.info("app_info", "World Clock Backend Application", version="1.0.0")
+    if _metrics is None:
+        _metrics = PrometheusMetrics(app)
+        _metrics.info("app_info", "World Clock Backend Application", version="1.0.0")
 
     app.before_request(_start_timer)
     app.after_request(_record_metrics)

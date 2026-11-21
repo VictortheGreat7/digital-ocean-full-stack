@@ -5,7 +5,7 @@ Background Cache Loops
 from __future__ import annotations
 
 import logging
-from threading import Event, Thread
+from threading import Event, Lock, Thread
 from zoneinfo import available_timezones
 
 from config import CACHE_TTL_TIMEZONES, CACHE_TTL_WORLD_CLOCKS
@@ -23,6 +23,11 @@ _timezones_ready = Event()
 _world_clocks_ready = Event()
 
 _sorted_tz: list[str] | None = None
+
+# Guards against starting a second set of refresh threads when the application
+# factory is called more than once in the same process.
+_refresh_threads: list[Thread] = []
+_refresh_lock = Lock()
 
 
 def _build_timezones_payload() -> dict[str, object]:
@@ -81,8 +86,32 @@ def _start_world_clocks_refresh() -> None:
     )
 
 
-_timezone_refresh_thread = Thread(target=_start_timezones_refresh, daemon=True)
-_timezone_refresh_thread.start()
+def start_refresh_loops() -> None:
+    """Start the daemon cache-refresh threads once per process.
 
-_world_clocks_refresh_thread = Thread(target=_start_world_clocks_refresh, daemon=True)
-_world_clocks_refresh_thread.start()
+    Kept out of module import so tests (and tooling) can import this module
+    without spawning long-lived background threads.
+    """
+    global _refresh_threads
+
+    with _refresh_lock:
+        if any(thread.is_alive() for thread in _refresh_threads):
+            logger.debug("Background cache refresh loops already running")
+            return
+
+        _refresh_threads = [
+            Thread(
+                target=_start_timezones_refresh,
+                daemon=True,
+                name="timezones-refresh",
+            ),
+            Thread(
+                target=_start_world_clocks_refresh,
+                daemon=True,
+                name="world-clocks-refresh",
+            ),
+        ]
+        for thread in _refresh_threads:
+            thread.start()
+
+        logger.info("Background cache refresh loops started")

@@ -10,13 +10,12 @@ from queue import Empty, Full, Queue
 from threading import Thread
 from time import monotonic
 
+from config import BATCH_FLUSH_SECONDS, BATCH_SIZE
+from db import get_writer_connection, put_writer_connection
 from opentelemetry import context
 from opentelemetry.trace import SpanContext
 from psycopg2 import InterfaceError, OperationalError
 from psycopg2.extras import execute_values
-
-from config import BATCH_FLUSH_SECONDS, BATCH_SIZE
-from db import get_writer_connection, put_writer_connection
 
 logger = logging.getLogger(__name__)
 
@@ -25,9 +24,20 @@ _SENTINEL = object()
 _writer_thread: Thread | None = None
 _shutdown_registered = False
 _shutdown_called = False
+_enabled = False
 _DROP_LOG_EVERY_SECONDS = 5.0
 _dropped_since_last_log = 0
 _last_drop_log_at = 0.0
+
+
+def set_enabled(enabled: bool) -> None:
+    """Enable or disable request-log enqueueing (disabled by default)."""
+    global _enabled
+    _enabled = enabled
+
+
+def is_enabled() -> bool:
+    return _enabled
 
 
 def enqueue_request_log(
@@ -42,6 +52,9 @@ def enqueue_request_log(
 ) -> None:
     """Put a request-log record on the queue (non-blocking)."""
     global _dropped_since_last_log, _last_drop_log_at
+
+    if not _enabled:
+        return
 
     ctx = context.get_current()
     item = (
@@ -116,7 +129,9 @@ def _flush_batch(rows: list[tuple]) -> None:
 
 
 def _writer_loop() -> None:
-    from telemetry import tracer  # deferred to avoid circular import
+    from opentelemetry import trace  # deferred to keep module import light
+
+    tracer = trace.get_tracer(__name__)
 
     while True:
         item = _log_queue.get()
@@ -150,6 +165,8 @@ def shutdown_request_log_writer() -> None:
     """Drain the queue and stop the worker thread."""
     global _shutdown_called
 
+    set_enabled(False)
+
     if _shutdown_called:
         return
     _shutdown_called = True
@@ -162,6 +179,8 @@ def shutdown_request_log_writer() -> None:
 def init_request_log_writer() -> None:
     """Start the request-log writer thread once the database pool is ready."""
     global _writer_thread, _shutdown_registered
+
+    set_enabled(True)
 
     if _writer_thread is None or not _writer_thread.is_alive():
         _writer_thread = Thread(target=_writer_loop, daemon=True, name="db-log-writer")
